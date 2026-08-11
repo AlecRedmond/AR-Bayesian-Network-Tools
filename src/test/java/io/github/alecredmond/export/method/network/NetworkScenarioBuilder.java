@@ -207,7 +207,6 @@ public class NetworkScenarioBuilder {
             .addConstraint("OUTLOOK:REVOLUTIONARY", List.of("DISTRICT:FARM_TOWN"), 0.08)
             .addConstraint("OUTLOOK:REVOLUTIONARY", List.of("DISTRICT:MINING_OUTPOST"), 0.15)
             // OTHERS
-
             .addConstraint("VOTE:NONE", List.of("AGE:CHILD"), 1.0)
             .addConstraint("VOTE:NONE", List.of("OUTLOOK:APATHY"), 1.0)
             .addConstraint("OUTLOOK:APATHY", List.of("VOTE:NONE"), 0.85)
@@ -229,8 +228,8 @@ public class NetworkScenarioBuilder {
             .addConstraint("OUTLOOK:CONSERVATIVE", List.of("VOTE:UNF"), 0.35)
             .addConstraint("OUTLOOK:REACTIONARY", List.of("VOTE:UNF"), 0.50)
             .addConstraint("OUTLOOK:REACTIONARY", List.of("VOTE:CSD"), 0.44)
-            .addConstraint("VOTE:UNF", List.of("RACE:ANK"), 0.005)
-            .addConstraint("VOTE:UNF", List.of("RACE:DWARF"), 0.005)
+            .addConstraint("VOTE:UNF", List.of("RACE:ANK"), 0.02)
+            .addConstraint("VOTE:UNF", List.of("RACE:DWARF"), 0.02)
             .addConstraint("VOTE:UNF", List.of("RACE:GOBLIN"), 0.03)
             .addConstraint("VOTE:UNF", List.of("RACE:ORC"), 0.08)
             .addConstraint("RACE:ORC", List.of("VOTE:KNC"), 0.59)
