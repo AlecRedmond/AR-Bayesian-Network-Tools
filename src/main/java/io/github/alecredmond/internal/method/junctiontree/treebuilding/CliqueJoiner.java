@@ -1,5 +1,6 @@
 package io.github.alecredmond.internal.method.junctiontree.treebuilding;
 
+import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.internal.application.junctiontree.Clique;
 import io.github.alecredmond.internal.application.junctiontree.JunctionTreeData;
 import io.github.alecredmond.internal.application.junctiontree.Separator;
@@ -50,57 +51,77 @@ public class CliqueJoiner {
 
       if (rootOfB.equals(rootOfA)) continue;
 
-      List<Clique> shortestFirst = sortByBranchLengthAsc(branches, rootOfB, rootOfA);
-      mergeBranches(branches, branchRoots, shortestFirst.getFirst(), shortestFirst.getLast());
+      mergeAndRemoveShorterBranch(branches, branchRoots, rootOfA, rootOfB);
 
       finalSeparators.add(separatorFactory.buildSeparator(cliqueA, cliqueB));
     }
     jtd.setSeparators(finalSeparators.toArray(Separator[]::new));
   }
 
-  private static void initBranches(
+  private void initBranches(
       Clique[] cliques, Map<Clique, List<Clique>> branches, Map<Clique, Clique> branchRoots) {
-    Arrays.stream(cliques)
-        .forEach(
-            clique -> {
-              branches.put(clique, new ArrayList<>(List.of(clique)));
-              branchRoots.put(clique, clique);
-            });
+    for (Clique clique : cliques) {
+      branches.put(clique, new ArrayList<>(List.of(clique)));
+      branchRoots.put(clique, clique);
+    }
   }
 
   private List<CliqueEdge> orderCandidateEdges(Clique[] cliques) {
-    List<CliqueEdge> candidates = new ArrayList<>();
-    for (int i = 0; i < cliques.length; i++) {
-      for (int j = i + 1; j < cliques.length; j++) {
-        int weight = getCommonNodeCount(cliques[i], cliques[j]);
-        if (weight == 0) continue;
-        candidates.add(new CliqueEdge(cliques[i], cliques[j], weight));
-      }
-    }
-    candidates.sort(Comparator.comparingInt(CliqueEdge::weight).reversed());
-    return candidates;
-  }
-
-  private static List<Clique> sortByBranchLengthAsc(
-      Map<Clique, List<Clique>> branches, Clique rootOfB, Clique rootOfA) {
-    return Stream.of(rootOfA, rootOfB)
-        .sorted(Comparator.comparingInt(c -> branches.get(c).size()))
+    Set<Set<Clique>> visitedPairs = new HashSet<>();
+    return findCliquesBySharedNodes(cliques).stream()
+        .map(commonCliques -> buildEdgeCandidates(commonCliques, visitedPairs))
+        .flatMap(Collection::stream)
+        .sorted(Comparator.comparingInt(CliqueEdge::weight).reversed())
         .toList();
   }
 
-  private static void mergeBranches(
+  private void mergeAndRemoveShorterBranch(
       Map<Clique, List<Clique>> branches,
       Map<Clique, Clique> branchRoots,
-      Clique rootOfSmaller,
-      Clique rootOfLarger) {
-    List<Clique> largerBranch = branches.get(rootOfLarger);
+      Clique rootOfA,
+      Clique rootOfB) {
+    List<Clique> shorterFirst = sortByBranchLengthAsc(branches, rootOfA, rootOfB);
+    Clique rootOfSmaller = shorterFirst.getFirst();
+    Clique rootOfLarger = shorterFirst.getLast();
     List<Clique> smallerBranch = branches.get(rootOfSmaller);
+    List<Clique> largerBranch = branches.get(rootOfLarger);
     smallerBranch.forEach(
         clique -> {
           largerBranch.add(clique);
           branchRoots.put(clique, rootOfLarger);
         });
     branches.remove(rootOfSmaller);
+  }
+
+  private List<List<Clique>> findCliquesBySharedNodes(Clique[] cliqueArray) {
+    Map<Node, List<Clique>> sharedNodes = new HashMap<>();
+    for (Clique clique : cliqueArray) {
+      for (Node node : clique.getNodes()) {
+        sharedNodes.computeIfAbsent(node, n -> new ArrayList<>()).add(clique);
+      }
+    }
+    return sharedNodes.values().stream().filter(l -> l.size() > 1).toList();
+  }
+
+  private List<CliqueEdge> buildEdgeCandidates(
+      List<Clique> sharedCliques, Set<Set<Clique>> visitedPairs) {
+    List<CliqueEdge> candidates = new ArrayList<>();
+    for (int i = 0; i < sharedCliques.size(); i++) {
+      for (int j = i + 1; j < sharedCliques.size(); j++) {
+        Clique cliqueA = sharedCliques.get(i);
+        Clique cliqueB = sharedCliques.get(j);
+        if (!visitedPairs.add(Set.of(cliqueA, cliqueB))) continue;
+        candidates.add(new CliqueEdge(cliqueA, cliqueB, getCommonNodeCount(cliqueA, cliqueB)));
+      }
+    }
+    return candidates;
+  }
+
+  private List<Clique> sortByBranchLengthAsc(
+      Map<Clique, List<Clique>> branches, Clique rootOfA, Clique rootOfB) {
+    return Stream.of(rootOfA, rootOfB)
+        .sorted(Comparator.comparingInt(c -> branches.get(c).size()))
+        .toList();
   }
 
   private int getCommonNodeCount(Clique cliqueA, Clique cliqueB) {
