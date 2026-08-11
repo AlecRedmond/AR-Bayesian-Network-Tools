@@ -38,7 +38,7 @@ public class MessagePasser {
     queue.add(startClique);
     while (!queue.isEmpty()) {
       Clique clique = queue.poll();
-      visited.add(clique);
+      if(!visited.add(clique)) continue;
       clique
           .getSeparatorMap()
           .forEach(
