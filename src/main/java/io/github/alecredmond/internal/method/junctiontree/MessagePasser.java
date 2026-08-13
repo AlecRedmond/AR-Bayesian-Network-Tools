@@ -38,7 +38,7 @@ public class MessagePasser {
     queue.add(startClique);
     while (!queue.isEmpty()) {
       Clique clique = queue.poll();
-      visited.add(clique);
+      addToVisitedOrThrow(visited, clique);
       clique
           .getSeparatorMap()
           .forEach(
@@ -49,6 +49,15 @@ public class MessagePasser {
               });
     }
     return runs;
+  }
+
+  private void addToVisitedOrThrow(Set<Clique> visited, Clique clique) {
+    if (visited.add(clique)) return;
+    String errorString =
+        "Clique %s (network %s) visited itself twice when building message pass runs! "
+                .formatted(clique, data.getNetworkData().getNetworkName())
+            + "This implies an error occurred upstream in the Junction Tree building process.";
+    throw new IllegalStateException(errorString);
   }
 
   public void distributeMessages(Clique distributeFrom) {
