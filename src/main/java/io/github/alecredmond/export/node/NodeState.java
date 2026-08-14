@@ -26,7 +26,7 @@ import lombok.NonNull;
  * @author Alec Redmond
  * @see Node
  */
-@SuppressWarnings("LombokGetterMayBeUsed")
+@SuppressWarnings({"LombokGetterMayBeUsed", "LombokSetterMayBeUsed"})
 @Data
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class NodeState {
@@ -36,6 +36,8 @@ public class NodeState {
 
   /** The parent {@link Node} that exhibits this state. */
   private final Node node;
+
+  private int position;
 
   /**
    * Constructs a new {@code NodeState} with a unique identifier and its associated {@link Node}.
@@ -76,5 +78,15 @@ public class NodeState {
    */
   public Node getNode() {
     return this.node;
+  }
+
+  // TODO = JAVADOC
+  public int getPosition() {
+    return this.position;
+  }
+
+  // TODO = JAVADOC
+  public void setPosition(int position) {
+    this.position = position;
   }
 }

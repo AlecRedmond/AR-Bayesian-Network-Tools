@@ -3,6 +3,7 @@ package io.github.alecredmond.internal.method.probabilitytables;
 import static io.github.alecredmond.internal.method.node.NodeUtils.formatIDsToString;
 
 import io.github.alecredmond.exceptions.ProbabilityTableRequestException;
+import io.github.alecredmond.export.inference.NodeObservation;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
 import io.github.alecredmond.export.probabilitytables.ProbabilityTable;
@@ -117,5 +118,30 @@ public class TableUtils {
       sb.append(formatIDsToString(conditionIds));
     }
     return sb.append(")").toString();
+  }
+
+  public static String buildObservedTableName(
+      Node measured, Map<Node, NodeObservation> nodeObservationMap) {
+    StringBuilder sb = new StringBuilder("P(");
+    sb.append(measured.getId());
+    if (!nodeObservationMap.isEmpty()) {
+      sb.append("|");
+      appendAllObservations(sb, nodeObservationMap);
+    }
+    return sb.append(")").toString();
+  }
+
+  private static void appendAllObservations(
+      StringBuilder sb, Map<Node, NodeObservation> nodeObservationMap) {
+    Iterator<NodeObservation> iterator = nodeObservationMap.values().iterator();
+    while (iterator.hasNext()) {
+      NodeObservation observation = iterator.next();
+      switch (observation.status()) {
+        case NEGATED, OBSERVED, PARTIALLY_OBSERVED -> sb.append(observation);
+      }
+      if (iterator.hasNext()) {
+          sb.append(", ");
+      }
+    }
   }
 }

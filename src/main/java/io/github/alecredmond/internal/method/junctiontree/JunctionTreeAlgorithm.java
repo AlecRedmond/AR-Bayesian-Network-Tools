@@ -1,6 +1,7 @@
 package io.github.alecredmond.internal.method.junctiontree;
 
 import io.github.alecredmond.export.inference.InferenceAlgorithm;
+import io.github.alecredmond.export.inference.NodeObservation;
 import io.github.alecredmond.export.network.BayesianNetworkData;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
@@ -8,12 +9,15 @@ import io.github.alecredmond.internal.application.junctiontree.Clique;
 import io.github.alecredmond.internal.application.junctiontree.JunctionTreeData;
 import io.github.alecredmond.internal.application.junctiontree.Separator;
 import io.github.alecredmond.internal.application.solver.SolverConfigs;
+import io.github.alecredmond.internal.method.inference.NodeObservationFactory;
 import io.github.alecredmond.internal.method.node.NodeUtils;
 import io.github.alecredmond.internal.method.probabilitytables.JunctionTreeTable;
 import java.util.*;
+import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.Getter;
+import org.apache.commons.lang3.function.TriFunction;
 
 @Getter
 public class JunctionTreeAlgorithm {
@@ -45,11 +49,12 @@ public class JunctionTreeAlgorithm {
     networkWriter.initializeJunctionTreeFromNetwork();
   }
 
-  public void observeNetwork(Map<Node, NodeState> observed) {
+  public void observeNetwork(Collection<NodeState> observedStates) {
+    Map<Node, Set<NodeState>> observed = NodeUtils.generateMultiRequest(observedStates);
     resetObservations();
     if (observed.isEmpty()) passMessages(data.getCliques()[0]);
-    else applyObservations(observed);
-    data.setObservedEvidence(observed);
+    else applyObservationActions(observed, Clique::setObserved);
+    setObservedEvidence(observed);
     data.setJointProbability(getJointProbOfMeasured(new HashSet<>()));
     networkWriter.writeObservations();
   }
@@ -64,15 +69,21 @@ public class JunctionTreeAlgorithm {
     messagePasser.distributeMessages(clique);
   }
 
-  private void applyObservations(Map<Node, NodeState> observed) {
-    Set<Node> nodesRemaining = new HashSet<>(observed.keySet());
+  private void applyObservationActions(
+      Map<Node, Set<NodeState>> stateMap, BiConsumer<Clique, Set<NodeState>> function) {
+    Set<Node> nodesRemaining = new HashSet<>(stateMap.keySet());
     while (!nodesRemaining.isEmpty()) {
-      ObservationOverlap overlap = findLargestOverlap(nodesRemaining, observed);
+      ObservationOverlap overlap = findLargestOverlap(nodesRemaining, stateMap);
       nodesRemaining.removeAll(overlap.nodeOverlap);
       Clique clique = overlap.clique;
-      clique.setObserved(overlap.evidenceStates);
+      function.accept(clique, overlap.evidenceStates);
       passMessages(clique);
     }
+  }
+
+  private void setObservedEvidence(Map<Node, Set<NodeState>> observed) {
+    if (observed.isEmpty()) this.data.setObservedEvidence(data.getUnobservedBackup());
+    buildNewObservedMap(observed, NodeObservationFactory::buildFromObservedStates);
   }
 
   public double getJointProbOfMeasured(Collection<NodeState> newEvidence) {
@@ -83,12 +94,24 @@ public class JunctionTreeAlgorithm {
   }
 
   private ObservationOverlap findLargestOverlap(
-      Set<Node> nodesRemaining, Map<Node, NodeState> observed) {
+      Set<Node> nodesRemaining, Map<Node, Set<NodeState>> stateMap) {
     return Arrays.stream(data.getCliques())
-        .map(c -> buildObservationOverlap(c, nodesRemaining, observed))
+        .map(c -> buildObservationOverlap(c, nodesRemaining, stateMap))
         .filter(Objects::nonNull)
         .max(Comparator.comparingInt(c -> c.nodeOverlap.size()))
         .orElseThrow();
+  }
+
+  private void buildNewObservedMap(
+      Map<Node, Set<NodeState>> stateMap,
+      TriFunction<
+              NodeObservationFactory,
+              Map<Node, NodeObservation>,
+              Map<Node, Set<NodeState>>,
+              Map<Node, NodeObservation>>
+          factoryFunction) {
+    data.setObservedEvidence(
+        factoryFunction.apply(new NodeObservationFactory(), data.getObservedEvidence(), stateMap));
   }
 
   private <T> double productOfSums(
@@ -100,11 +123,24 @@ public class JunctionTreeAlgorithm {
   }
 
   private ObservationOverlap buildObservationOverlap(
-      Clique clique, Set<Node> nodesRemaining, Map<Node, NodeState> observed) {
-    Set<Node> overlap = NodeUtils.getOverlap(clique.getNodes(), nodesRemaining);
-    if (overlap.isEmpty()) return null;
-    Set<NodeState> states = overlap.stream().map(observed::get).collect(Collectors.toSet());
-    return new ObservationOverlap(clique, overlap, states);
+      Clique clique, Set<Node> nodesRemaining, Map<Node, Set<NodeState>> stateMap) {
+    Set<Node> nodeOverlap = NodeUtils.getOverlap(clique.getNodes(), nodesRemaining);
+    if (nodeOverlap.isEmpty()) return null;
+    Set<NodeState> states =
+        nodeOverlap.stream()
+            .map(stateMap::get)
+            .flatMap(Collection::stream)
+            .collect(Collectors.toSet());
+    return new ObservationOverlap(clique, nodeOverlap, states);
+  }
+
+  public void eliminateStates(Collection<NodeState> toEliminate) {
+    if (toEliminate.isEmpty()) return;
+    Map<Node, Set<NodeState>> eliminationMap = NodeUtils.generateMultiRequest(toEliminate);
+    applyObservationActions(eliminationMap, Clique::eliminateStates);
+    buildNewObservedMap(eliminationMap, NodeObservationFactory::buildFromEliminatedStates);
+    data.setJointProbability(getJointProbOfMeasured(new HashSet<>()));
+    networkWriter.writeObservations();
   }
 
   public void normalizeTables() {

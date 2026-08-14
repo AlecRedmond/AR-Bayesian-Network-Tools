@@ -1,5 +1,8 @@
 package io.github.alecredmond.internal.method.probabilitytables;
 
+import static io.github.alecredmond.internal.method.probabilitytables.TableUtils.buildObservedTableName;
+
+import io.github.alecredmond.export.inference.NodeObservation;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
 import io.github.alecredmond.export.probabilitytables.ObservedTable;
@@ -20,12 +23,22 @@ public class ObservedTableImpl extends ProbabilityTableBase<ObservedTableData>
   }
 
   @Override
+  public void normalizeTable() {
+    TableUtils.marginalizeJointTable(this);
+  }
+
+  @Override
+  protected PrinterMatrixGeneratorBase buildMatrixGenerator() {
+    return new UnconditionalMatrixGenerator(tableData);
+  }
+
+  @Override
   public Node getMeasuredNode() {
     return tableData.getMeasuredNode();
   }
 
   @Override
-  public Map<Node, NodeState> getObservations() {
+  public Map<Node, NodeObservation> getObservations() {
     return tableData.getObservations();
   }
 
@@ -49,17 +62,8 @@ public class ObservedTableImpl extends ProbabilityTableBase<ObservedTableData>
     return TableUtils.buildMarginalProbMap(tableData);
   }
 
-  public void setObservations(Map<Node, NodeState> observationMap) {
+  public void setObservations(Map<Node, NodeObservation> observationMap) {
     tableData.setObservations(observationMap);
-  }
-
-  @Override
-  public void normalizeTable() {
-    TableUtils.marginalizeJointTable(this);
-  }
-
-  @Override
-  protected PrinterMatrixGeneratorBase buildMatrixGenerator() {
-    return new UnconditionalMatrixGenerator(tableData);
+    tableData.setTableName(buildObservedTableName(getMeasuredNode(), observationMap));
   }
 }

@@ -1,7 +1,7 @@
 package io.github.alecredmond.internal.application.probabilitytables;
 
+import io.github.alecredmond.export.inference.NodeObservation;
 import io.github.alecredmond.export.node.Node;
-import io.github.alecredmond.export.node.NodeState;
 import io.github.alecredmond.internal.application.probabilitytables.base.SingleEventTableData;
 import io.github.alecredmond.internal.method.probabilitytables.tablebuilders.TableBuilderData;
 import java.util.LinkedHashMap;
@@ -12,7 +12,7 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 @Data
 public class ObservedTableData extends SingleEventTableData {
-  protected Map<Node, NodeState> observations = new LinkedHashMap<>();
+  protected Map<Node, NodeObservation> observations = new LinkedHashMap<>();
 
   public ObservedTableData(TableBuilderData tableBuilderData) {
     super(tableBuilderData);

@@ -40,10 +40,12 @@ public class ResetLogicUtils {
     return bArray;
   }
 
-  private static boolean checkIsEvidence(int[] stateIndexes, boolean[][] stateIsEvent) {
-    return IntStream.range(0, stateIsEvent.length)
-        .filter(x -> stateIsEvent[x].length != 0)
-        .allMatch(x -> stateIsEvent[x][stateIndexes[x]]);
+  public static boolean checkIsEvidence(int[] stateIndexes, boolean[][] stateIsEvent) {
+    for (int x = 0; x < stateIsEvent.length; x++) {
+      if (stateIsEvent[x].length == 0) continue;
+      if (!stateIsEvent[x][stateIndexes[x]]) return false;
+    }
+    return true;
   }
 
   public static Function<Node, NodeState> initializeToFirstNodeStates() {

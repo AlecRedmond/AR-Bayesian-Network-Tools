@@ -13,6 +13,8 @@ public interface JunctionTreeTable extends ProbabilityTable {
 
   void setObserved(Set<NodeState> evidenceInTable);
 
+  void eliminateStates(Set<NodeState> toEliminate);
+
   void resetObservations();
 
   ProbabilityVector getVector();

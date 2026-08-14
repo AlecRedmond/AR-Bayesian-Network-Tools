@@ -37,6 +37,20 @@ public class NodeUtils {
     }
   }
 
+  public static Map<Node, Set<NodeState>> generateOrderedMultiRequest(
+      Collection<NodeState> states, List<Node> nodes) {
+    Map<Node, Set<NodeState>> multiRequest = new LinkedHashMap<>();
+    nodes.forEach(node -> multiRequest.put(node, new HashSet<>()));
+    states.forEach(state -> multiRequest.get(state.getNode()).add(state));
+    multiRequest.entrySet().removeIf(entry -> entry.getValue().isEmpty());
+    return multiRequest;
+  }
+
+  public static Map<Node, Set<NodeState>> generateMultiRequest(Collection<NodeState> states) {
+    return states.stream()
+        .collect(Collectors.groupingBy(NodeState::getNode, HashMap::new, Collectors.toSet()));
+  }
+
   public static Set<NodeState> combineStates(
       Collection<NodeState> eventStates, Collection<NodeState> conditionStates) {
     return Stream.concat(eventStates.stream(), conditionStates.stream())
@@ -83,6 +97,18 @@ public class NodeUtils {
                           return newPerturbation;
                         }))
         .toList();
+  }
+
+  public static Set<NodeState> filterAbsentByNode(Node node, Collection<NodeState> absent) {
+    Set<NodeState> states = new LinkedHashSet<>(node.getNodeStates());
+    absent.stream().filter(state -> state.getNode().equals(node)).forEach(states::remove);
+    return states;
+  }
+
+  public static Set<NodeState> filterByNode(Node node, Collection<NodeState> states) {
+    return states.stream()
+        .filter(state -> state.getNode().equals(node))
+        .collect(Collectors.toCollection(LinkedHashSet::new));
   }
 
   public static Set<Node> getNodes(Collection<NodeState> states) {

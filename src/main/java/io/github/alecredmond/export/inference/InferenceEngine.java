@@ -2,10 +2,10 @@ package io.github.alecredmond.export.inference;
 
 import io.github.alecredmond.exceptions.NetworkPrinterException;
 import io.github.alecredmond.exceptions.NodeStateConflictException;
+import io.github.alecredmond.export.network.BayesianNetwork;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
 import io.github.alecredmond.export.probabilitytables.ObservedTable;
-import io.github.alecredmond.export.network.BayesianNetwork;
 import io.github.alecredmond.export.sampler.MonteCarloSampler;
 import io.github.alecredmond.export.solver.BayesSolver;
 import io.github.alecredmond.internal.method.inference.InferenceEngineFactory;
@@ -25,8 +25,8 @@ import java.util.Map;
  * persisted in the instance until new observations are given, or until the observations are cleared
  * using {@link #resetObservations()}.
  *
- * <p>Unlike Monte Carlo sampling (as used in {@link MonteCarloSampler}), which will give an approximate
- * solution, the results of direct inference are both exact and deterministic.
+ * <p>Unlike Monte Carlo sampling (as used in {@link MonteCarloSampler}), which will give an
+ * approximate solution, the results of direct inference are both exact and deterministic.
  *
  * <p>Instances of this interface are not thread-safe. External synchronization is required for
  * concurrent access.
@@ -40,8 +40,8 @@ public interface InferenceEngine {
   /**
    * Creates an {@code InferenceEngine} from the given {@link BayesianNetwork}, using the default
    * inference variant configured in {@code app.properties}. The active variant is controlled by
-   * {@code app.bayes.inference.defaultInferenceAlgorithm} (default: {@code JUNCTION_TREE_ALGORITHM}).
-   * This will automatically solve the network if it is unsolved.
+   * {@code app.bayes.inference.defaultInferenceAlgorithm} (default: {@code
+   * JUNCTION_TREE_ALGORITHM}). This will automatically solve the network if it is unsolved.
    *
    * @param network the network where inference is to be run.
    * @return a new {@code InferenceEngine} instance, or {@code null} if the given network was
@@ -126,12 +126,25 @@ public interface InferenceEngine {
   <T extends Serializable> InferenceEngine observeNetworkFromIds(Collection<T> observedStateIDs);
 
   /**
-   * Returns a map of each {@link Node} currently set as observed, and the specific {@link
-   * NodeState} it is locked to.
+   * Returns a map of each {@link Node} and its current {@link NodeObservation}. A {@link
+   * NodeObservation} records the current observed and unobserved {@link NodeState}s in the node,
+   * and its {@link ObservationStatus}.
    *
    * @return a map of the current observations on this instance.
    */
-  Map<Node, NodeState> getCurrentObservations();
+  Map<Node, NodeObservation> getCurrentObservations();
+
+  // TODO - JAVADOC
+  InferenceEngine eliminateStates(Collection<NodeState> toEliminate);
+
+  // TODO - JAVADOC
+  InferenceEngine eliminateStates(NodeState toEliminate);
+
+  // TODO - JAVADOC
+  <T extends Serializable> InferenceEngine eliminateStatesById(Collection<T> toEliminateIDs);
+
+  // TODO - JAVADOC
+  <T extends Serializable> InferenceEngine eliminateStatesById(T toEliminateIDs);
 
   /**
    * Returns an {@link ObservedTable} associated with a {@link Node}. This is a table containing
@@ -256,7 +269,8 @@ public interface InferenceEngine {
   /**
    * Prints the posterior probability values from the {@link ObservedTable} entries associated with
    * the given {@link Node}, either to a {@code .txt} file or to the console. Parameters for the
-   * printer can be defined within {@code app.properties} under the {@code app.bayes.printer} section.
+   * printer can be defined within {@code app.properties} under the {@code app.bayes.printer}
+   * section.
    *
    * @param nodeIds the identifiers of all {@link Node} values where the associated {@link
    *     ObservedTable} should be printed.
@@ -271,7 +285,8 @@ public interface InferenceEngine {
   /**
    * Prints the posterior probability values from the {@link ObservedTable} entries associated with
    * the given {@link Node}, either to a {@code .txt} file or to the console. Parameters for the
-   * printer can be defined within {@code app.properties} under the {@code app.bayes.printer} section.
+   * printer can be defined within {@code app.properties} under the {@code app.bayes.printer}
+   * section.
    *
    * @param nodeId the identifier of the {@link Node} where the associated {@link ObservedTable}
    *     should be printed.
@@ -286,7 +301,8 @@ public interface InferenceEngine {
   /**
    * Prints the posterior probability values from the {@link ObservedTable} entries associated with
    * the given {@link Node}, either to a {@code .txt} file or to the console. Parameters for the
-   * printer can be defined within {@code app.properties} under the {@code app.bayes.printer} section.
+   * printer can be defined within {@code app.properties} under the {@code app.bayes.printer}
+   * section.
    *
    * @param nodes all {@link Node} values where the associated {@link ObservedTable} should be
    *     printed.
@@ -299,7 +315,8 @@ public interface InferenceEngine {
   /**
    * Prints the posterior probability values from the {@link ObservedTable} entries associated with
    * the given {@link Node}, either to a {@code .txt} file or to the console. Parameters for the
-   * printer can be defined within {@code app.properties} under the {@code app.bayes.printer} section.
+   * printer can be defined within {@code app.properties} under the {@code app.bayes.printer}
+   * section.
    *
    * @param node a {@link Node} where the associated {@link ObservedTable} should be printed.
    * @return this instance for chaining.

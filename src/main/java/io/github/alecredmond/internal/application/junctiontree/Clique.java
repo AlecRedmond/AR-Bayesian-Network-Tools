@@ -40,6 +40,10 @@ public class Clique {
     table.setObserved(observedStates);
   }
 
+  public void eliminateStates(Set<NodeState> toEliminate) {
+    table.eliminateStates(toEliminate);
+  }
+
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder("Clique : ");
