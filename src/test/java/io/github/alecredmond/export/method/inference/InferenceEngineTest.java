@@ -38,7 +38,7 @@ class InferenceEngineTest {
     @Test
     void observeNetwork_shouldUpdateProbabilities() {
       assertEquals(0.2, test.getObservedTableById("RAIN").getProbabilityById("RAIN:TRUE"), 1E-6);
-      test.observeNetworkFromIds("WET_GRASS:TRUE");
+      test.setObservedById("WET_GRASS:TRUE");
       double pRainGivenWet = test.getObservedTableById("RAIN").getProbabilityById("RAIN:TRUE");
       assertTrue(pRainGivenWet > 0.2);
       // Exact value P(R|W) = P(W|R)P(R)/P(W)
@@ -51,14 +51,14 @@ class InferenceEngineTest {
 
     @Test
     void observeNetwork_withNonExistentState_shouldThrowException() {
-      assertThrows(Exception.class, () -> test.observeNetworkFromIds(List.of("ZOMBIE:TRUE")));
+      assertThrows(Exception.class, () -> test.setObservedById(List.of("ZOMBIE:TRUE")));
     }
 
     @Test
     void observeNetwork_withEmptyList_shouldBeSameAsObserveMarginals() {
       double pRainMarginal = test.getObservedTableById("RAIN").getProbabilityById("RAIN:TRUE");
 
-      test.observeNetwork(List.of());
+      test.setObserved(List.of());
       double pRainObservedEmpty = test.getObservedTableById("RAIN").getProbabilityById("RAIN:TRUE");
 
       assertEquals(pRainMarginal, pRainObservedEmpty);
@@ -93,7 +93,7 @@ class InferenceEngineTest {
 
     @Test
     void getObservedTable_shouldReturnTable() {
-      test.observeNetworkFromIds(List.of("WET_GRASS:TRUE"));
+      test.setObservedById(List.of("WET_GRASS:TRUE"));
       ObservedTable rainTable = test.getObservedTableById("RAIN");
       assertNotNull(rainTable);
       assertEquals(0.384852, rainTable.getProbabilityById("RAIN:TRUE"), 1E-6);
@@ -101,7 +101,7 @@ class InferenceEngineTest {
 
     @Test
     void getObservedTable_nonExistentNode_shouldReturnNull() {
-      test.observeNetworkFromIds(List.of("WET_GRASS:TRUE"));
+      test.setObservedById(List.of("WET_GRASS:TRUE"));
       assertNull(test.getObservedTableById("ZOMBIE"));
     }
 
@@ -137,7 +137,7 @@ class InferenceEngineTest {
       BayesianNetwork net = RAIN_NETWORK.get().solveNetwork();
       test = net.buildInferenceEngine();
       if (PRINT_TABLES) net.printNetwork();
-      test.observeNetworkFromIds(List.of("WET_GRASS:TRUE"));
+      test.setObservedById(List.of("WET_GRASS:TRUE"));
       if (PRINT_TABLES) test.printObserved();
       test.resetObservations();
 
@@ -146,7 +146,7 @@ class InferenceEngineTest {
 
       generateSamples(test, includedNode, testState);
 
-      test.observeNetworkFromIds(List.of("WET_GRASS:TRUE"));
+      test.setObservedById(List.of("WET_GRASS:TRUE"));
       System.out.println("\n--- Now testing P(RAIN:TRUE | WET_GRASS:TRUE) ---");
       generateSamples(test, includedNode, testState);
     }
@@ -160,7 +160,9 @@ class InferenceEngineTest {
       long upperBound = (long) (expected + expectedDelta);
 
       SampleCollection sampleCollection =
-          MonteCarloSampler.create(engine.getNetwork()).generateSamples(engine, NUMBER_OF_SAMPLES);
+          MonteCarloSampler.create(engine.getNetwork())
+              .setObserved(engine.getCurrentObservations())
+              .generateSamples(NUMBER_OF_SAMPLES);
       sampleCollection.setDisplayedNodesById(List.of(includedNode));
       int count = sampleCollection.countSamplesIncludingStateIds(List.of(testState));
 
@@ -209,11 +211,11 @@ class InferenceEngineTest {
       }
 
       if (PRINT_TABLES) test.printObserved();
-      test.observeNetworkFromIds(List.of("VOTE:CPK"));
+      test.setObservedById(List.of("VOTE:CPK"));
       if (PRINT_TABLES) test.printObserved();
-      test.observeNetworkFromIds(List.of("VOTE:UNF"));
+      test.setObservedById(List.of("VOTE:UNF"));
       if (PRINT_TABLES) test.printObserved();
-      test.observeNetworkFromIds(List.of("RACE:ANK", "AGE:YOUNG_ADULT"));
+      test.setObservedById(List.of("RACE:ANK", "AGE:YOUNG_ADULT"));
       if (PRINT_TABLES) {
         test.printObserved();
         net.printNetwork();

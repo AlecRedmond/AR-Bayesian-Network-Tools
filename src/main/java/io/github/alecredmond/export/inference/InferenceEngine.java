@@ -21,7 +21,7 @@ import java.util.Map;
  * the available variants.
  *
  * <p>Specific {@link NodeState} values can be set as observed (always true) using {@link
- * #observeNetwork(Collection)} or {@link #observeNetworkFromIds(Collection)}. These will be
+ * #setObserved(Collection)} or {@link #setObservedById(Collection)}. These will be
  * persisted in the instance until new observations are given, or until the observations are cleared
  * using {@link #resetObservations()}.
  *
@@ -35,8 +35,7 @@ import java.util.Map;
  * @see InferenceAlgorithm
  * @author Alec Redmond
  */
-public interface InferenceEngine {
-
+public interface InferenceEngine extends Observable {
   /**
    * Creates an {@code InferenceEngine} from the given {@link BayesianNetwork}, using the default
    * inference variant configured in {@code app.properties}. The active variant is controlled by
@@ -67,6 +66,15 @@ public interface InferenceEngine {
   }
 
   /**
+   * Returns a map of each {@link Node} and its current {@link NodeObservation}. A {@link
+   * NodeObservation} records the current observed and unobserved {@link NodeState}s in the node,
+   * and its {@link ObservationStatus}.
+   *
+   * @return a map of the current observations on this instance.
+   */
+  Map<Node, NodeObservation> getCurrentObservations();
+
+  /**
    * Removes any observed states from the inference network, returning it to its unobserved
    * configuration. All measured probability values in this configuration will become prior
    * (unconditional) probabilities.
@@ -74,6 +82,9 @@ public interface InferenceEngine {
    * @return this instance for chaining.
    */
   InferenceEngine resetObservations();
+
+  //TODO - JAVADOC
+  InferenceEngine setObserved(Map<Node, NodeObservation> observations);
 
   /**
    * Replaces the current observed states in the inference network with the given states. Each
@@ -86,7 +97,7 @@ public interface InferenceEngine {
    * @throws NodeStateConflictException if multiple {@link NodeState} values would map to the same
    *     {@link Node}.
    */
-  InferenceEngine observeNetwork(Collection<NodeState> observedStates);
+  InferenceEngine setObserved(Collection<NodeState> observedStates);
 
   /**
    * Replaces the current observed states in the inference network with the given {@link NodeState}.
@@ -96,7 +107,7 @@ public interface InferenceEngine {
    * @param observedState the single state to be observed.
    * @return this instance for chaining.
    */
-  InferenceEngine observeNetwork(NodeState observedState);
+  InferenceEngine setObserved(NodeState observedState);
 
   /**
    * Replaces the current observed states in the inference network with the given {@link NodeState},
@@ -108,7 +119,7 @@ public interface InferenceEngine {
    * @param <T> the type of the state identifier.
    * @return this instance for chaining.
    */
-  <T extends Serializable> InferenceEngine observeNetworkFromIds(T observedStateId);
+  <T extends Serializable> InferenceEngine setObservedById(T observedStateId);
 
   /**
    * Replaces the current observed states in the inference network with the given states, identified
@@ -123,16 +134,7 @@ public interface InferenceEngine {
    * @throws NodeStateConflictException if multiple {@link NodeState} values would map to the same
    *     {@link Node}.
    */
-  <T extends Serializable> InferenceEngine observeNetworkFromIds(Collection<T> observedStateIDs);
-
-  /**
-   * Returns a map of each {@link Node} and its current {@link NodeObservation}. A {@link
-   * NodeObservation} records the current observed and unobserved {@link NodeState}s in the node,
-   * and its {@link ObservationStatus}.
-   *
-   * @return a map of the current observations on this instance.
-   */
-  Map<Node, NodeObservation> getCurrentObservations();
+  <T extends Serializable> InferenceEngine setObservedById(Collection<T> observedStateIDs);
 
   // TODO - JAVADOC
   InferenceEngine eliminateStates(Collection<NodeState> toEliminate);

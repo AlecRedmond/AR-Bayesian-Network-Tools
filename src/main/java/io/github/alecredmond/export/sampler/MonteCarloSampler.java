@@ -1,11 +1,11 @@
 package io.github.alecredmond.export.sampler;
 
-import io.github.alecredmond.exceptions.NodeStateConflictException;
+import io.github.alecredmond.export.inference.InferenceEngine;
 import io.github.alecredmond.export.inference.NodeObservation;
+import io.github.alecredmond.export.inference.Observable;
+import io.github.alecredmond.export.network.BayesianNetwork;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
-import io.github.alecredmond.export.inference.InferenceEngine;
-import io.github.alecredmond.export.network.BayesianNetwork;
 import io.github.alecredmond.internal.method.sampler.LikelihoodWeightingSampler;
 import java.io.Serializable;
 import java.util.Collection;
@@ -33,7 +33,37 @@ import java.util.Random;
  * @see BayesianNetwork
  * @author Alec Redmond
  */
-public interface MonteCarloSampler {
+public interface MonteCarloSampler extends Observable {
+
+  @Override
+  MonteCarloSampler resetObservations();
+
+  @Override
+  MonteCarloSampler setObserved(Map<Node, NodeObservation> observations);
+
+  @Override
+  MonteCarloSampler setObserved(Collection<NodeState> observedStates);
+
+  @Override
+  MonteCarloSampler setObserved(NodeState observedState);
+
+  @Override
+  <T extends Serializable> MonteCarloSampler setObservedById(T observedStateId);
+
+  @Override
+  <T extends Serializable> MonteCarloSampler setObservedById(Collection<T> observedStateIDs);
+
+  @Override
+  MonteCarloSampler eliminateStates(Collection<NodeState> toEliminate);
+
+  @Override
+  MonteCarloSampler eliminateStates(NodeState toEliminate);
+
+  @Override
+  <T extends Serializable> MonteCarloSampler eliminateStatesById(Collection<T> toEliminateIDs);
+
+  @Override
+  <T extends Serializable> MonteCarloSampler eliminateStatesById(T toEliminateIDs);
 
   /**
    * Creates a new {@code MonteCarloSampler} for the given {@link BayesianNetwork}.
@@ -47,68 +77,15 @@ public interface MonteCarloSampler {
 
   /**
    * Runs the sampler for the given number of cycles and returns a {@link SampleCollection}
-   * containing the results. No observations are applied, so the resulting sample set will converge
-   * toward the prior distribution of the {@link BayesianNetwork} as {@code numberOfSamples}
-   * increases.
+   * containing the results. This will apply the current {@link NodeObservation} restrictions
+   * present in this sampler.
    *
-   * @param currentObservations
-   * @param numberOfSamples     the number of sampling cycles to run, which equals the total sample
-   *                            count in the returned {@link SampleCollection}.
-   * @return a new {@link SampleCollection} representing the prior distribution.
-   */
-  SampleCollection generateSamples(Map<Node, NodeObservation> currentObservations, int numberOfSamples);
-
-  /**
-   * Runs the sampler for the given number of cycles and returns a {@link SampleCollection}
-   * containing the results. The current observations from the given {@link InferenceEngine} are
-   * applied as conditions, so the resulting sample set will converge toward the posterior
-   * distribution of the {@link BayesianNetwork} conditional on those observations as {@code
-   * numberOfSamples} increases.
-   *
-   * <p>This is equivalent to calling {@link #generateSamples(Collection, int)} with {@code
-   * inferenceEngine.getCurrentObservations().values()} as the {@link NodeState} collection.
-   *
-   * @param engine an {@link InferenceEngine} whose current observations are used as conditions.
    * @param numberOfSamples the number of sampling cycles to run, which equals the total sample
    *     count in the returned {@link SampleCollection}.
-   * @return a new {@link SampleCollection} representing the posterior distribution.
+   * @return a new {@link SampleCollection} representing the posterior distribution, conditional on
+   *     the current observations.
    */
-  SampleCollection generateSamples(InferenceEngine engine, int numberOfSamples);
-
-  /**
-   * Runs the sampler for the given number of cycles and returns a {@link SampleCollection}
-   * containing the results. The given {@link NodeState} values are applied as observations, so the
-   * resulting sample set will converge toward the posterior distribution of the {@link
-   * BayesianNetwork} conditional on those states as {@code numberOfSamples} increases.
-   *
-   * @param observedStates the {@link NodeState} values to treat as observations; these will be
-   *     present in every generated {@link Sample}.
-   * @param numberOfSamples the number of sampling cycles to run, which equals the total sample
-   *     count in the returned {@link SampleCollection}.
-   * @return a new {@link SampleCollection} representing the posterior distribution.
-   * @throws NodeStateConflictException if two or more {@link NodeState}s in {@code observedStates}
-   *     belong to the same {@link Node}.
-   */
-  SampleCollection generateSamples(Collection<NodeState> observedStates, int numberOfSamples);
-
-  /**
-   * Runs the sampler for the given number of cycles and returns a {@link SampleCollection}
-   * containing the results. The {@link NodeState} values identified by the given identifiers are
-   * applied as observations, so the resulting sample set will converge toward the posterior
-   * distribution of the {@link BayesianNetwork} conditional on those states as {@code
-   * numberOfSamples} increases.
-   *
-   * @param observedStateIds the identifiers of the {@link NodeState} values to treat as
-   *     observations; the corresponding states will be present in every generated {@link Sample}.
-   * @param numberOfSamples the number of sampling cycles to run, which equals the total sample
-   *     count in the returned {@link SampleCollection}.
-   * @param <T> the type of the {@link NodeState} identifiers.
-   * @return a new {@link SampleCollection} representing the posterior distribution.
-   * @throws NodeStateConflictException if two or more resolved {@link NodeState}s belong to the
-   *     same {@link Node}.
-   */
-  <T extends Serializable> SampleCollection generateSamplesById(
-      Collection<T> observedStateIds, int numberOfSamples);
+  SampleCollection generateSamples(int numberOfSamples);
 
   /**
    * Returns the {@link BayesianNetwork} sampled by this {@code MonteCarloSampler}.

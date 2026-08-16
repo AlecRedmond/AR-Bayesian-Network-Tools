@@ -1,13 +1,12 @@
 package io.github.alecredmond.export.method.sampler;
 
-import io.github.alecredmond.export.node.Node;
-import io.github.alecredmond.export.node.NodeState;
 import io.github.alecredmond.export.inference.InferenceEngine;
 import io.github.alecredmond.export.network.BayesianNetwork;
-import java.util.Set;
-
+import io.github.alecredmond.export.node.Node;
+import io.github.alecredmond.export.node.NodeState;
 import io.github.alecredmond.export.sampler.MonteCarloSampler;
 import io.github.alecredmond.export.sampler.SampleCollection;
+import java.util.Set;
 import lombok.Data;
 
 @Data
@@ -33,8 +32,7 @@ public class SamplePackage {
       boolean printMarginals) {
     this.printMarginals = printMarginals;
     this.network = network;
-    this.engine = InferenceEngine.create(network).observeNetworkFromIds(observedStateIds);
-    this.test = MonteCarloSampler.create(network).generateSamples(engine, numberOfSamples);
+    this.engine = InferenceEngine.create(network).setObservedById(observedStateIds);
     this.numberOfSamples = numberOfSamples;
     this.observedStateIds = observedStateIds;
     this.observedStates = network.getNodeStates(observedStateIds);
@@ -42,5 +40,9 @@ public class SamplePackage {
     this.exportNodes = network.getNodes(exportNodeIds);
     this.measuredStateIds = measuredStateIds;
     this.measuredStates = network.getNodeStates(measuredStateIds);
+    this.test =
+        MonteCarloSampler.create(network)
+            .setObserved(engine.getCurrentObservations())
+            .generateSamples(numberOfSamples);
   }
 }

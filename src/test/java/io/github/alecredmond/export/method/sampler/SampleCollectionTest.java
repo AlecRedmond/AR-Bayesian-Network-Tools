@@ -196,8 +196,8 @@ class SampleCollectionTest {
               .addConstraint("X+", 0.25)
               .addConstraint("Y+", "X-", 0.0)
               .solveNetwork();
-      MonteCarloSampler sampler = MonteCarloSampler.create(net);
-      SampleCollection collection = sampler.generateSamplesById(List.of("X-", "Y+"), 100);
+      SampleCollection collection =
+          MonteCarloSampler.create(net).setObservedById(List.of("X-", "Y+")).generateSamples(100);
       assertEquals(0, collection.countSamples());
       assertTrue(collection.getSamples().isEmpty());
     }

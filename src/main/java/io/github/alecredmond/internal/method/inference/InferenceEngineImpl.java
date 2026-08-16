@@ -39,11 +39,16 @@ public class InferenceEngineImpl implements InferenceEngine {
 
   @Override
   public InferenceEngineImpl resetObservations() {
-    return observeNetwork(List.of());
+    return this.setObserved(List.of());
   }
 
   @Override
-  public InferenceEngineImpl observeNetwork(Collection<NodeState> observed) {
+  public InferenceEngine setObserved(Map<Node, NodeObservation> observations) {
+    return NetworkDataUtils.setObservations(this, network, observations);
+  }
+
+  @Override
+  public InferenceEngineImpl setObserved(Collection<NodeState> observed) {
     if (!ensureSolved()) {
       return this;
     }
@@ -67,25 +72,19 @@ public class InferenceEngineImpl implements InferenceEngine {
   }
 
   @Override
-  public InferenceEngine observeNetwork(NodeState observedState) {
-    return observeNetwork(List.of(observedState));
+  public InferenceEngine setObserved(NodeState observedState) {
+    return this.setObserved(List.of(observedState));
   }
 
   @Override
-  public <T extends Serializable> InferenceEngine observeNetworkFromIds(T observedStateId) {
-    return observeNetworkFromIds(List.of(observedStateId));
+  public <T extends Serializable> InferenceEngine setObservedById(T observedStateId) {
+    return setObservedById(List.of(observedStateId));
   }
 
   @Override
-  public <T extends Serializable> InferenceEngine observeNetworkFromIds(
-      Collection<T> observedStateIDs) {
-    return observeNetwork(
+  public <T extends Serializable> InferenceEngine setObservedById(Collection<T> observedStateIDs) {
+    return this.setObserved(
         NetworkDataUtils.getStatesByID(observedStateIDs, network.getNetworkData()));
-  }
-
-  @Override
-  public Map<Node, NodeObservation> getCurrentObservations() {
-    return ensureSolved() ? junctionTree.getData().getObservedEvidence() : new HashMap<>();
   }
 
   @Override
@@ -100,6 +99,11 @@ public class InferenceEngineImpl implements InferenceEngine {
   @Override
   public InferenceEngine eliminateStates(NodeState toEliminate) {
     return eliminateStates(List.of(toEliminate));
+  }
+
+  @Override
+  public Map<Node, NodeObservation> getCurrentObservations() {
+    return ensureSolved() ? junctionTree.getData().getObservedEvidence() : new HashMap<>();
   }
 
   @Override
