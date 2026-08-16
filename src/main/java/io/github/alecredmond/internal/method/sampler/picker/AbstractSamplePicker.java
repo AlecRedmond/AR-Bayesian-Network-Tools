@@ -1,12 +1,9 @@
 package io.github.alecredmond.internal.method.sampler.picker;
 
-import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
 import io.github.alecredmond.internal.application.sampler.SamplePickerFactoryData;
-import java.util.Arrays;
 
 public abstract class AbstractSamplePicker implements SamplePicker {
-  protected final Node node;
   protected final int[] conditionIndexesInSampleArray;
   protected final int eventNodeIndexInSampleArray;
   protected final int[] eventCptSteps;
@@ -16,7 +13,6 @@ public abstract class AbstractSamplePicker implements SamplePicker {
   protected final double[] sampleWeighting;
 
   protected AbstractSamplePicker(SamplePickerFactoryData factoryData) {
-    this.node = factoryData.getNode();
     this.conditionIndexesInSampleArray = factoryData.getConditionIndexesInSampleArray();
     this.eventCptSteps = factoryData.getEventCptSteps();
     this.eventStates = factoryData.getEventStates();
@@ -27,21 +23,21 @@ public abstract class AbstractSamplePicker implements SamplePicker {
   }
 
   @Override
-  public double pick(NodeState[] sampleArray, double currentWeight) {
+  public double pickAndReturnWeight(NodeState[] sampleArray, double currentWeight) {
     if (currentWeight == 0.0) return 0.0;
     return pickNextState(sampleArray, currentWeight);
   }
 
   protected abstract double pickNextState(NodeState[] sampleArray, double currentWeight);
 
-  protected static int randomIndex(double[] weights) {
-    double totalWeight = Arrays.stream(weights).sum();
+  protected int randomIndex(double[] weights, double totalWeight) {
     double randomValue = RANDOM.nextDouble() * totalWeight;
-    for (int i = 0; i < weights.length; i++) {
+    int i;
+    for (i = 0; i < weights.length; i++) {
       randomValue -= weights[i];
-      if (randomValue <= 0.0) return i;
+      if (randomValue <= 0.0) break;
     }
-    return -1;
+    return i;
   }
 
   protected int getInitialCptIndex(NodeState[] sampleArray) {
@@ -49,7 +45,7 @@ public abstract class AbstractSamplePicker implements SamplePicker {
     for (int i = 0; i < conditionIndexesInSampleArray.length; i++) {
       int conditionIndex = conditionIndexesInSampleArray[i];
       int statePosition = sampleArray[conditionIndex].getPosition();
-      cptPosition += i * statePosition;
+      cptPosition += strideLengths[i] * statePosition;
     }
     return cptPosition;
   }

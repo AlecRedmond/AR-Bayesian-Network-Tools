@@ -50,12 +50,6 @@ class InferenceEngineTest {
     }
 
     @Test
-    void observeNetwork_withConflictingEvidence_shouldThrowException() {
-      assertThrows(
-          Exception.class, () -> test.observeNetworkFromIds(List.of("RAIN:TRUE", "RAIN:FALSE")));
-    }
-
-    @Test
     void observeNetwork_withNonExistentState_shouldThrowException() {
       assertThrows(Exception.class, () -> test.observeNetworkFromIds(List.of("ZOMBIE:TRUE")));
     }

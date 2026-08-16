@@ -7,5 +7,5 @@ import java.util.Random;
 public interface SamplePicker {
     Random RANDOM = new Random();
 
-    double pick(NodeState[] sampleArray,double currentWeight);
+    double pickAndReturnWeight(NodeState[] sampleArray, double currentWeight);
 }

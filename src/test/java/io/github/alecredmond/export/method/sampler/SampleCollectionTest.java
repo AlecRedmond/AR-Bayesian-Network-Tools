@@ -4,10 +4,12 @@ import static io.github.alecredmond.TestConfigs.*;
 import static io.github.alecredmond.export.method.network.NetworkScenario.*;
 import static org.junit.jupiter.api.Assertions.*;
 
+import io.github.alecredmond.export.inference.InferenceEngine;
+import io.github.alecredmond.export.inference.NodeObservation;
+import io.github.alecredmond.export.inference.ObservationStatus;
+import io.github.alecredmond.export.network.BayesianNetwork;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
-import io.github.alecredmond.export.inference.InferenceEngine;
-import io.github.alecredmond.export.network.BayesianNetwork;
 import io.github.alecredmond.export.sampler.MonteCarloSampler;
 import io.github.alecredmond.export.sampler.Sample;
 import io.github.alecredmond.export.sampler.SampleCollection;
@@ -83,7 +85,19 @@ class SampleCollectionTest {
           samplePackage.getObservedStates().stream()
               .map(ns -> Map.entry(ns.getNode(), ns))
               .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-      assertEquals(observed, samplePackage.getTest().getObservations());
+
+      Map<Node, NodeObservation> observations = samplePackage.getTest().getObservations();
+
+      observations.forEach(
+          (node, observation) -> {
+            if (observed.containsKey(node)) {
+              assertEquals(ObservationStatus.OBSERVED, observation.status());
+              NodeState singleState = observation.observedStates().iterator().next();
+              assertEquals(singleState, observed.get(node));
+            } else {
+              assertEquals(ObservationStatus.UNOBSERVED, observation.status());
+            }
+          });
     }
 
     @ParameterizedTest
@@ -184,7 +198,7 @@ class SampleCollectionTest {
               .solveNetwork();
       MonteCarloSampler sampler = MonteCarloSampler.create(net);
       SampleCollection collection = sampler.generateSamplesById(List.of("X-", "Y+"), 100);
-      assertEquals(0,collection.countSamples());
+      assertEquals(0, collection.countSamples());
       assertTrue(collection.getSamples().isEmpty());
     }
   }

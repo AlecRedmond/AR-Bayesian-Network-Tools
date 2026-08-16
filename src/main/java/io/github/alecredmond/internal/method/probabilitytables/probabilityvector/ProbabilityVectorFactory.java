@@ -26,8 +26,7 @@ public class ProbabilityVectorFactory {
         numberOfStates,
         strideLengths,
         probabilities,
-        NodeUtils.buildNodeIndexMap(nodeArray),
-        NodeUtils.buildStateIndexMap(nodeArray));
+        NodeUtils.buildNodeIndexMap(nodeArray));
   }
 
   private void validateVectorLength(List<Node> nodes) {

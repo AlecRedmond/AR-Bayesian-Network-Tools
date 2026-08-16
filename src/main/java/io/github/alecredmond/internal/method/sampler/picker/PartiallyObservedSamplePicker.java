@@ -12,12 +12,15 @@ public class PartiallyObservedSamplePicker extends AbstractSamplePicker {
   @Override
   protected double pickNextState(NodeState[] sampleArray, double currentWeight) {
     int cptIndex = super.getInitialCptIndex(sampleArray);
-    int i = 0;
+    int statePosition = 0;
+    double totalWeight = 0.0;
     for (int delta : eventCptSteps) {
-      sampleWeighting[i++] = cptProbabilities[cptIndex + delta];
+      double weight = cptProbabilities[cptIndex + delta];
+      totalWeight += weight;
+      sampleWeighting[statePosition++] = weight;
     }
-    int eventStateIndex = randomIndex(sampleWeighting);
-    sampleArray[eventNodeIndexInSampleArray] = eventStates[eventStateIndex];
-    return sampleWeighting[eventStateIndex] == 0.0 ? 0.0 : currentWeight;
+    int pickedStatePosition = randomIndex(sampleWeighting, totalWeight);
+    sampleArray[eventNodeIndexInSampleArray] = eventStates[pickedStatePosition];
+    return sampleWeighting[pickedStatePosition] * currentWeight;
   }
 }

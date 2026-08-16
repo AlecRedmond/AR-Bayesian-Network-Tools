@@ -41,23 +41,22 @@ public abstract class CptConstraintSorter<P extends ProbabilityConstraint, T ext
 
   private List<P> radixSortConstraints(Collection<P> constraints) {
     ProbabilityVector vector = networkTable.getVector();
-    Map<NodeState, Integer> stateValueMap = vector.getStateValueMap();
     Comparator<P> comparator =
         Arrays.stream(vector.getNodeArray())
-            .map(node -> compareByStateIndexInNode(node, stateValueMap))
+            .map(this::compareByStateIndexInNode)
             .reduce(Comparator::thenComparing)
             .orElseThrow();
     return constraints.stream().distinct().sorted(comparator).toList();
   }
 
   private Comparator<P> compareByStateIndexInNode(
-      Node node, Map<NodeState, Integer> stateValueMap) {
+      Node node) {
     return Comparator.comparingInt(
         (P constraint) ->
             constraint.getAllStates().stream()
                 .filter(state -> state.getNode().equals(node))
                 .findAny()
-                .map(stateValueMap::get)
+                .map(NodeState::getPosition)
                 .orElseThrow());
   }
 }

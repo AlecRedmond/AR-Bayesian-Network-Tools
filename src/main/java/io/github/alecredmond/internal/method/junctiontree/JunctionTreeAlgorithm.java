@@ -9,15 +9,14 @@ import io.github.alecredmond.internal.application.junctiontree.Clique;
 import io.github.alecredmond.internal.application.junctiontree.JunctionTreeData;
 import io.github.alecredmond.internal.application.junctiontree.Separator;
 import io.github.alecredmond.internal.application.solver.SolverConfigs;
-import io.github.alecredmond.internal.method.inference.NodeObservationFactory;
 import io.github.alecredmond.internal.method.node.NodeUtils;
 import io.github.alecredmond.internal.method.probabilitytables.JunctionTreeTable;
 import java.util.*;
 import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.Getter;
-import org.apache.commons.lang3.function.TriFunction;
 
 @Getter
 public class JunctionTreeAlgorithm {
@@ -54,7 +53,7 @@ public class JunctionTreeAlgorithm {
     resetObservations();
     if (observed.isEmpty()) passMessages(data.getCliques()[0]);
     else applyObservationActions(observed, Clique::setObserved);
-    setObservedEvidence(observed);
+    setObservedEvidence(observedStates);
     data.setJointProbability(getJointProbOfMeasured(new HashSet<>()));
     networkWriter.writeObservations();
   }
@@ -81,9 +80,9 @@ public class JunctionTreeAlgorithm {
     }
   }
 
-  private void setObservedEvidence(Map<Node, Set<NodeState>> observed) {
+  private void setObservedEvidence(Collection<NodeState> observed) {
     if (observed.isEmpty()) this.data.setObservedEvidence(data.getUnobservedBackup());
-    buildNewObservedMap(observed, NodeObservationFactory::buildFromObservedStates);
+    buildNewObservedMap(observed, NodeObservation::observe);
   }
 
   public double getJointProbOfMeasured(Collection<NodeState> newEvidence) {
@@ -103,15 +102,10 @@ public class JunctionTreeAlgorithm {
   }
 
   private void buildNewObservedMap(
-      Map<Node, Set<NodeState>> stateMap,
-      TriFunction<
-              NodeObservationFactory,
-              Map<Node, NodeObservation>,
-              Map<Node, Set<NodeState>>,
-              Map<Node, NodeObservation>>
-          factoryFunction) {
-    data.setObservedEvidence(
-        factoryFunction.apply(new NodeObservationFactory(), data.getObservedEvidence(), stateMap));
+      Collection<NodeState> observedStates,
+      BiFunction<Map<Node, NodeObservation>, Collection<NodeState>, Map<Node, NodeObservation>>
+          observationFunction) {
+    data.setObservedEvidence(observationFunction.apply(data.getObservedEvidence(), observedStates));
   }
 
   private <T> double productOfSums(
@@ -138,7 +132,7 @@ public class JunctionTreeAlgorithm {
     if (toEliminate.isEmpty()) return;
     Map<Node, Set<NodeState>> eliminationMap = NodeUtils.generateMultiRequest(toEliminate);
     applyObservationActions(eliminationMap, Clique::eliminateStates);
-    buildNewObservedMap(eliminationMap, NodeObservationFactory::buildFromEliminatedStates);
+    buildNewObservedMap(toEliminate, NodeObservation::eliminate);
     data.setJointProbability(getJointProbOfMeasured(new HashSet<>()));
     networkWriter.writeObservations();
   }

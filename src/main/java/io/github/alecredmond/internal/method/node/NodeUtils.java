@@ -16,16 +16,6 @@ public class NodeUtils {
 
   private NodeUtils() {}
 
-  public static Map<Node, NodeState> generateOrderedRequest(
-      Collection<NodeState> states, List<Node> nodeOrder) {
-    Map<Node, NodeState> unordered = generateRequest(states);
-    Map<Node, NodeState> ordered = new LinkedHashMap<>();
-    nodeOrder.stream()
-        .filter(unordered::containsKey)
-        .forEach(node -> ordered.put(node, unordered.get(node)));
-    return ordered;
-  }
-
   public static Map<Node, NodeState> generateRequest(Collection<NodeState> states) {
     try {
       return states.stream()
@@ -35,15 +25,6 @@ public class NodeUtils {
       throw new NodeStateConflictException(
           "Error generating request : Multiple values of NodeState shared the same Node", e);
     }
-  }
-
-  public static Map<Node, Set<NodeState>> generateOrderedMultiRequest(
-      Collection<NodeState> states, List<Node> nodes) {
-    Map<Node, Set<NodeState>> multiRequest = new LinkedHashMap<>();
-    nodes.forEach(node -> multiRequest.put(node, new HashSet<>()));
-    states.forEach(state -> multiRequest.get(state.getNode()).add(state));
-    multiRequest.entrySet().removeIf(entry -> entry.getValue().isEmpty());
-    return multiRequest;
   }
 
   public static Map<Node, Set<NodeState>> generateMultiRequest(Collection<NodeState> states) {
@@ -99,18 +80,6 @@ public class NodeUtils {
         .toList();
   }
 
-  public static Set<NodeState> filterAbsentByNode(Node node, Collection<NodeState> absent) {
-    Set<NodeState> states = new LinkedHashSet<>(node.getNodeStates());
-    absent.stream().filter(state -> state.getNode().equals(node)).forEach(states::remove);
-    return states;
-  }
-
-  public static Set<NodeState> filterByNode(Node node, Collection<NodeState> states) {
-    return states.stream()
-        .filter(state -> state.getNode().equals(node))
-        .collect(Collectors.toCollection(LinkedHashSet::new));
-  }
-
   public static Set<Node> getNodes(Collection<NodeState> states) {
     return states.stream().map(NodeState::getNode).collect(Collectors.toSet());
   }
@@ -121,17 +90,6 @@ public class NodeUtils {
         .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
   }
 
-  public static Map<NodeState, Integer> buildStateIndexMap(Node[] nodes) {
-    Map<NodeState, Integer> statePositions = new HashMap<>();
-    Arrays.stream(nodes)
-        .map(Node::getNodeStates)
-        .forEach(
-            states ->
-                IntStream.range(0, states.size())
-                    .forEach(i -> statePositions.put(states.get(i), i)));
-    return statePositions;
-  }
-
   public static String formatStatesToString(Collection<NodeState> stateCollection) {
     return formatCollectionToString(stateCollection);
   }
@@ -139,9 +97,10 @@ public class NodeUtils {
   private static <T> String formatCollectionToString(Collection<T> collection) {
     if (collection.isEmpty()) return "";
     StringBuilder sb = new StringBuilder();
-    collection.forEach(c -> sb.append(c.toString()).append(", "));
-    if (sb.length() >= 2) {
-      sb.setLength(sb.length() - 2);
+    Iterator<T> iterator = collection.iterator();
+    while (iterator.hasNext()) {
+      sb.append(iterator.next().toString());
+      if (iterator.hasNext()) sb.append(", ");
     }
     return sb.toString();
   }

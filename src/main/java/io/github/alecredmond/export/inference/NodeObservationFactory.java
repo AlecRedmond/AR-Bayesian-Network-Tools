@@ -1,20 +1,18 @@
-package io.github.alecredmond.internal.method.inference;
+package io.github.alecredmond.export.inference;
 
-import io.github.alecredmond.export.inference.NodeObservation;
-import io.github.alecredmond.export.inference.ObservationStatus;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
 import io.github.alecredmond.internal.method.node.NodeUtils;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class NodeObservationFactory {
+class NodeObservationFactory {
   public Map<Node, NodeObservation> buildFromObservedStates(
       Map<Node, NodeObservation> existingObservations, Map<Node, Set<NodeState>> observedStateMap) {
-    Map<Node, NodeObservation> map = new LinkedHashMap<>(existingObservations);
+    Map<Node, NodeObservation> newObservations = new LinkedHashMap<>(existingObservations);
     observedStateMap.forEach(
-        (node, observed) -> map.put(node, buildNodeObservation(node, observed)));
-    return Collections.unmodifiableMap(map);
+        (node, observed) -> newObservations.put(node, buildNodeObservation(node, observed)));
+    return Collections.unmodifiableMap(newObservations);
   }
 
   private NodeObservation buildNodeObservation(Node node, Set<NodeState> observed) {

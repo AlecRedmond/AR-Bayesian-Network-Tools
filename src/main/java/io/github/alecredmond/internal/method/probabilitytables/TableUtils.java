@@ -1,5 +1,6 @@
 package io.github.alecredmond.internal.method.probabilitytables;
 
+import static io.github.alecredmond.export.inference.ObservationStatus.*;
 import static io.github.alecredmond.internal.method.node.NodeUtils.formatIDsToString;
 
 import io.github.alecredmond.exceptions.ProbabilityTableRequestException;
@@ -33,9 +34,9 @@ public class TableUtils {
     int[] strideLengths = vector.getStrideLengths();
     int index = 0;
     for (NodeState state : states) {
-      int stateValue = vector.getStateValueMap().getOrDefault(state, 0);
+      int statePosition = state.getPosition();
       int nodeIndex = vector.getNodeIndexMap().getOrDefault(state.getNode(), 0);
-      index += strideLengths[nodeIndex] * stateValue;
+      index += strideLengths[nodeIndex] * statePosition;
     }
     return index;
   }
@@ -122,26 +123,17 @@ public class TableUtils {
 
   public static String buildObservedTableName(
       Node measured, Map<Node, NodeObservation> nodeObservationMap) {
-    StringBuilder sb = new StringBuilder("P(");
-    sb.append(measured.getId());
-    if (!nodeObservationMap.isEmpty()) {
-      sb.append("|");
-      appendAllObservations(sb, nodeObservationMap);
-    }
-    return sb.append(")").toString();
+    return "P(" + measured.getId() + observationStrings(nodeObservationMap) + ")";
   }
 
-  private static void appendAllObservations(
-      StringBuilder sb, Map<Node, NodeObservation> nodeObservationMap) {
-    Iterator<NodeObservation> iterator = nodeObservationMap.values().iterator();
-    while (iterator.hasNext()) {
-      NodeObservation observation = iterator.next();
-      switch (observation.status()) {
-        case NEGATED, OBSERVED, PARTIALLY_OBSERVED -> sb.append(observation);
-      }
-      if (iterator.hasNext()) {
-          sb.append(", ");
-      }
+  private static String observationStrings(Map<Node, NodeObservation> nodeObservationMap) {
+    StringBuilder sb = new StringBuilder();
+    for (NodeObservation observation : nodeObservationMap.values()) {
+      if (observation.status().equals(UNOBSERVED)) continue;
+      if (sb.isEmpty()) sb.append("|");
+      else sb.append(", ");
+      sb.append(observation);
     }
+    return sb.toString();
   }
 }

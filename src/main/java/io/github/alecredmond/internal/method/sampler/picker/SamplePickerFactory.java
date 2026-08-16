@@ -4,8 +4,9 @@ import io.github.alecredmond.export.inference.NodeObservation;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
 import io.github.alecredmond.export.probabilitytables.NetworkTable;
+import io.github.alecredmond.internal.application.sampler.LikelihoodWeightingSamplerData;
 import io.github.alecredmond.internal.application.sampler.SamplePickerFactoryData;
-
+import io.github.alecredmond.internal.method.node.NodeUtils;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
@@ -13,6 +14,16 @@ import java.util.Map;
 import java.util.stream.IntStream;
 
 public class SamplePickerFactory {
+
+  public SamplePicker[] create(LikelihoodWeightingSamplerData samplerData) {
+    NetworkTable[] tables = samplerData.getTables();
+    Node[] nodes = samplerData.getNodes();
+    Map<Node, NodeObservation> observationMap = samplerData.getObservations();
+    Map<Node, Integer> nodeIndexMap = NodeUtils.buildNodeIndexMap(nodes);
+    return IntStream.range(0, tables.length)
+        .mapToObj(i -> create(observationMap.get(nodes[i]), tables[i], nodeIndexMap))
+        .toArray(SamplePicker[]::new);
+  }
 
   public SamplePicker create(
       NodeObservation nodeObservation,
@@ -50,16 +61,17 @@ public class SamplePickerFactory {
             .toArray(NodeState[]::new);
     factoryData.setEventStates(partiallyObserved);
 
-    int[] eventCptSteps = Arrays.stream(partiallyObserved).mapToInt(NodeState::getPosition).toArray();
+    int[] eventCptSteps =
+        Arrays.stream(partiallyObserved).mapToInt(NodeState::getPosition).toArray();
     factoryData.setEventCptSteps(eventCptSteps);
 
     double[] sampleWeighting = new double[partiallyObserved.length];
     factoryData.setSampleWeighting(sampleWeighting);
 
-    return null;
+    return new PartiallyObservedSamplePicker(factoryData);
   }
 
   private SamplePicker buildNegatedSamplePicker(Node node) {
-      return new NegatedSamplePicker(node);
+    return new NegatedSamplePicker(node);
   }
 }

@@ -1,6 +1,7 @@
 package io.github.alecredmond.export.sampler;
 
 import io.github.alecredmond.exceptions.NodeStateConflictException;
+import io.github.alecredmond.export.inference.NodeObservation;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
 import io.github.alecredmond.export.inference.InferenceEngine;
@@ -8,6 +9,7 @@ import io.github.alecredmond.export.network.BayesianNetwork;
 import io.github.alecredmond.internal.method.sampler.LikelihoodWeightingSampler;
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.Map;
 import java.util.Random;
 
 /**
@@ -49,11 +51,12 @@ public interface MonteCarloSampler {
    * toward the prior distribution of the {@link BayesianNetwork} as {@code numberOfSamples}
    * increases.
    *
-   * @param numberOfSamples the number of sampling cycles to run, which equals the total sample
-   *     count in the returned {@link SampleCollection}.
+   * @param currentObservations
+   * @param numberOfSamples     the number of sampling cycles to run, which equals the total sample
+   *                            count in the returned {@link SampleCollection}.
    * @return a new {@link SampleCollection} representing the prior distribution.
    */
-  SampleCollection generateSamples(int numberOfSamples);
+  SampleCollection generateSamples(Map<Node, NodeObservation> currentObservations, int numberOfSamples);
 
   /**
    * Runs the sampler for the given number of cycles and returns a {@link SampleCollection}

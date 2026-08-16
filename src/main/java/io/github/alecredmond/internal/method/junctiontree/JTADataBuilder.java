@@ -12,7 +12,6 @@ import io.github.alecredmond.internal.application.junctiontree.JunctionTreeData;
 import io.github.alecredmond.internal.application.solver.SolverConfigs;
 import io.github.alecredmond.internal.method.constraints.ConstraintRegistry;
 import io.github.alecredmond.internal.method.constraints.strategy.ConstraintSolver;
-import io.github.alecredmond.internal.method.inference.NodeObservationFactory;
 import io.github.alecredmond.internal.method.junctiontree.treebuilding.CliqueBuilder;
 import io.github.alecredmond.internal.method.probabilitytables.JunctionTreeTable;
 import io.github.alecredmond.internal.method.probabilitytables.tablebuilders.ObservedTableBuilder;
@@ -144,9 +143,7 @@ public class JTADataBuilder {
             .map(node -> Map.entry(node, builder.buildTable(node)))
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
 
-    NodeObservationFactory observationFactory = new NodeObservationFactory();
-    Map<Node, NodeObservation> defaultObservations =
-        observationFactory.buildUnobservedNetwork(bnd.getNodes());
+    Map<Node, NodeObservation> defaultObservations = NodeObservation.createMap(bnd);
     jtd.setObservedEvidence(defaultObservations);
     jtd.setUnobservedBackup(defaultObservations);
   }
