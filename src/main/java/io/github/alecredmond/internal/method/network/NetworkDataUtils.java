@@ -17,19 +17,16 @@ import lombok.extern.slf4j.Slf4j;
 public class NetworkDataUtils {
   private NetworkDataUtils() {}
 
-  @SuppressWarnings("unchecked")
-  public static <T extends Observable> T setObservations(
+  public static <T extends Observable> List<NodeState> convertToEliminations(
       T observable, BayesianNetwork network, Map<Node, NodeObservation> newObservations) {
     observable.resetObservations();
     Set<Node> networkNodes = network.getNodes();
-    List<NodeState> toEliminate =
-        newObservations.entrySet().stream()
-            .filter(e -> networkNodes.contains(e.getKey()))
-            .map(Map.Entry::getValue)
-            .map(NodeObservation::eliminatedStates)
-            .flatMap(Collection::stream)
-            .toList();
-    return (T) observable.eliminateStates(toEliminate);
+    return newObservations.entrySet().stream()
+        .filter(e -> networkNodes.contains(e.getKey()))
+        .map(Map.Entry::getValue)
+        .map(NodeObservation::eliminatedStates)
+        .flatMap(Collection::stream)
+        .toList();
   }
 
   public static <E extends Serializable> Set<Node> getNodesByID(

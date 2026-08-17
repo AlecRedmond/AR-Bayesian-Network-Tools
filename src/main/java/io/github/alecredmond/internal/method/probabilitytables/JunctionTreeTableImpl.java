@@ -57,13 +57,7 @@ public class JunctionTreeTableImpl extends ProbabilityTableBase<JunctionTreeTabl
 
   @Override
   public void setObserved(Set<NodeState> evidenceInTable) {
-    if (!evidenceInTable.isEmpty()) {
-      copier.observeStates(evidenceInTable);
-      return;
-    }
-    double[] backup = tableData.getBackupVector().getProbabilities();
-    double[] observed = tableData.getVector().getProbabilities();
-    System.arraycopy(backup, 0, observed, 0, backup.length);
+    copier.observeStates(evidenceInTable);
   }
 
   @Override

@@ -34,7 +34,14 @@ public class ObservationCopier implements OdometerResetDefault, OdometerUpdateBl
   public void observeStates(Collection<NodeState> observedStates) {
     this.requestStates = new HashSet<>(observedStates);
     this.requestNodes = new HashSet<>(NodeUtils.getNodes(requestStates));
-    resetAndRunIterator();
+    if (observedStates.isEmpty()) writeFromBackupVector();
+    else resetAndRunIterator();
+  }
+
+  private void writeFromBackupVector() {
+    double[] backup = backupVector.getProbabilities();
+    double[] observed = mainVector.getProbabilities();
+    System.arraycopy(backup, 0, observed, 0, backup.length);
   }
 
   private void resetAndRunIterator() {
@@ -55,12 +62,13 @@ public class ObservationCopier implements OdometerResetDefault, OdometerUpdateBl
   }
 
   public void eliminateStates(Collection<NodeState> toEliminate) {
-    toEliminate.forEach(
-        nodeState -> {
-          Node node = nodeState.getNode();
-          if (requestNodes.add(node)) requestStates.addAll(node.getNodeStates());
-          requestStates.remove(nodeState);
-        });
+    for (NodeState nodeState : toEliminate) {
+      Node node = nodeState.getNode();
+      if (requestNodes.add(node)) {
+        requestStates.addAll(node.getNodeStates());
+      }
+      requestStates.remove(nodeState);
+    }
     resetAndRunIterator();
   }
 
@@ -71,7 +79,7 @@ public class ObservationCopier implements OdometerResetDefault, OdometerUpdateBl
             ? node.getNodeStates().stream()
                 .filter(requestStates::contains)
                 .findFirst()
-                .orElseThrow()
+                .orElse(node.getNodeStates().getFirst())
             : node.getNodeStates().getFirst();
   }
 

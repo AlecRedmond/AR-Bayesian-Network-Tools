@@ -44,7 +44,21 @@ public class InferenceEngineImpl implements InferenceEngine {
 
   @Override
   public InferenceEngine setObserved(Map<Node, NodeObservation> observations) {
-    return NetworkDataUtils.setObservations(this, network, observations);
+    return eliminateStates(NetworkDataUtils.convertToEliminations(this, network, observations));
+  }
+
+  @Override
+  public InferenceEngine eliminateStates(Collection<NodeState> toEliminate) {
+    if (!ensureSolved()) {
+      return this;
+    }
+    junctionTree.eliminateStates(toEliminate);
+    return this;
+  }
+
+  @Override
+  public InferenceEngine eliminateStates(NodeState toEliminate) {
+    return eliminateStates(List.of(toEliminate));
   }
 
   @Override
@@ -70,36 +84,23 @@ public class InferenceEngineImpl implements InferenceEngine {
     log.error("Could not solve network {}!", network.getNetworkData().getNetworkName());
     return false;
   }
-
-  @Override
+@Override
   public InferenceEngine setObserved(NodeState observedState) {
     return this.setObserved(List.of(observedState));
-  }
-
-  @Override
+  }@Override
   public <T extends Serializable> InferenceEngine setObservedById(T observedStateId) {
     return setObservedById(List.of(observedStateId));
   }
 
-  @Override
+    @Override
   public <T extends Serializable> InferenceEngine setObservedById(Collection<T> observedStateIDs) {
     return this.setObserved(
         NetworkDataUtils.getStatesByID(observedStateIDs, network.getNetworkData()));
   }
 
-  @Override
-  public InferenceEngine eliminateStates(Collection<NodeState> toEliminate) {
-    if (!ensureSolved()) {
-      return this;
-    }
-    junctionTree.eliminateStates(toEliminate);
-    return this;
-  }
 
-  @Override
-  public InferenceEngine eliminateStates(NodeState toEliminate) {
-    return eliminateStates(List.of(toEliminate));
-  }
+
+
 
   @Override
   public Map<Node, NodeObservation> getCurrentObservations() {

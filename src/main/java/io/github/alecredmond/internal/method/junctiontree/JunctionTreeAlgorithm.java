@@ -13,7 +13,6 @@ import io.github.alecredmond.internal.method.node.NodeUtils;
 import io.github.alecredmond.internal.method.probabilitytables.JunctionTreeTable;
 import java.util.*;
 import java.util.function.BiConsumer;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.Getter;
@@ -82,7 +81,7 @@ public class JunctionTreeAlgorithm {
 
   private void setObservedEvidence(Collection<NodeState> observed) {
     if (observed.isEmpty()) this.data.setObservedEvidence(data.getUnobservedBackup());
-    buildNewObservedMap(observed, NodeObservation::observe);
+    data.setObservedEvidence(NodeObservation.observe(data.getObservedEvidence(), observed));
   }
 
   public double getJointProbOfMeasured(Collection<NodeState> newEvidence) {
@@ -99,13 +98,6 @@ public class JunctionTreeAlgorithm {
         .filter(Objects::nonNull)
         .max(Comparator.comparingInt(c -> c.nodeOverlap.size()))
         .orElseThrow();
-  }
-
-  private void buildNewObservedMap(
-      Collection<NodeState> observedStates,
-      BiFunction<Map<Node, NodeObservation>, Collection<NodeState>, Map<Node, NodeObservation>>
-          observationFunction) {
-    data.setObservedEvidence(observationFunction.apply(data.getObservedEvidence(), observedStates));
   }
 
   private <T> double productOfSums(
@@ -132,7 +124,7 @@ public class JunctionTreeAlgorithm {
     if (toEliminate.isEmpty()) return;
     Map<Node, Set<NodeState>> eliminationMap = NodeUtils.generateMultiRequest(toEliminate);
     applyObservationActions(eliminationMap, Clique::eliminateStates);
-    buildNewObservedMap(toEliminate, NodeObservation::eliminate);
+    data.setObservedEvidence(NodeObservation.eliminate(data.getObservedEvidence(), toEliminate));
     data.setJointProbability(getJointProbOfMeasured(new HashSet<>()));
     networkWriter.writeObservations();
   }

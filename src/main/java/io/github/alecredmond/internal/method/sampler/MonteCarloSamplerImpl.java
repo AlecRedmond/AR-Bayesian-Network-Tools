@@ -31,7 +31,18 @@ public abstract class MonteCarloSamplerImpl implements MonteCarloSampler {
 
   @Override
   public MonteCarloSampler setObserved(Map<Node, NodeObservation> observations) {
-    return NetworkDataUtils.setObservations(this, network, observations);
+    return eliminateStates(NetworkDataUtils.convertToEliminations(this, network, observations));
+  }
+
+  @Override
+  public MonteCarloSampler eliminateStates(Collection<NodeState> toEliminate) {
+    this.observations = NodeObservation.eliminate(observations, toEliminate);
+    return this;
+  }
+
+  @Override
+  public MonteCarloSampler eliminateStates(NodeState toEliminate) {
+    return Optional.ofNullable(toEliminate).map(List::of).map(this::eliminateStates).orElse(this);
   }
 
   @Override
@@ -51,17 +62,6 @@ public abstract class MonteCarloSamplerImpl implements MonteCarloSampler {
 
   protected abstract SampleCollectionImpl generateSamplesInternal(
       Map<Node, NodeObservation> observations, int numberOfSamples);
-
-  @Override
-  public MonteCarloSampler eliminateStates(Collection<NodeState> toEliminate) {
-    this.observations = NodeObservation.eliminate(observations, toEliminate);
-    return this;
-  }
-
-  @Override
-  public MonteCarloSampler eliminateStates(NodeState toEliminate) {
-    return Optional.ofNullable(toEliminate).map(List::of).map(this::eliminateStates).orElse(this);
-  }
 
   @Override
   public <T extends Serializable> MonteCarloSampler eliminateStatesById(
