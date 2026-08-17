@@ -143,7 +143,7 @@ public class JTADataBuilder {
             .map(node -> Map.entry(node, builder.buildTable(node)))
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
 
-    Map<Node, NodeObservation> defaultObservations = NodeObservation.createMap(bnd);
+    Map<Node, NodeObservation> defaultObservations = NodeObservation.createUnobservedMap(bnd);
     jtd.setObservedEvidence(defaultObservations);
     jtd.setUnobservedBackup(defaultObservations);
   }

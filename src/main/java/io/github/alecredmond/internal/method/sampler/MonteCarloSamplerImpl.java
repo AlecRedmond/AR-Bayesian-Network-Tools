@@ -25,7 +25,7 @@ public abstract class MonteCarloSamplerImpl implements MonteCarloSampler {
 
   @Override
   public MonteCarloSampler resetObservations() {
-    this.observations = NodeObservation.createMap(network);
+    this.observations = NodeObservation.createUnobservedMap(network);
     return this;
   }
 

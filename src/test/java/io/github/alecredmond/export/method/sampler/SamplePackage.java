@@ -31,7 +31,7 @@ public class SamplePackage {
       Set<String> measuredStateIds,
       boolean printMarginals) {
     this.printMarginals = printMarginals;
-    this.network = network;
+    this.network = network.solveNetwork();
     this.engine = InferenceEngine.create(network).setObservedById(observedStateIds);
     this.numberOfSamples = numberOfSamples;
     this.observedStateIds = observedStateIds;

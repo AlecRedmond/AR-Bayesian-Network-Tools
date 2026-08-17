@@ -6,8 +6,9 @@ import io.github.alecredmond.internal.method.node.NodeUtils;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/** Package-private helper class for the static factory methods in {@link NodeObservation}. */
 class NodeObservationFactory {
-  public Map<Node, NodeObservation> buildFromObservedStates(
+  Map<Node, NodeObservation> buildFromObservedStates(
       Map<Node, NodeObservation> existingObservations, Map<Node, Set<NodeState>> observedStateMap) {
     Map<Node, NodeObservation> newObservations = new LinkedHashMap<>(existingObservations);
     observedStateMap.forEach(
@@ -49,13 +50,13 @@ class NodeObservationFactory {
             .formatted(observed.size(), node, NodeUtils.formatStatesToString(observed)));
   }
 
-  public Map<Node, NodeObservation> buildUnobservedNetwork(List<Node> orderedNodes) {
+  Map<Node, NodeObservation> buildUnobservedNetwork(List<Node> orderedNodes) {
     Map<Node, NodeObservation> map = new LinkedHashMap<>();
     orderedNodes.forEach(node -> map.put(node, buildNodeObservation(node, Set.of())));
     return Collections.unmodifiableMap(map);
   }
 
-  public Map<Node, NodeObservation> buildFromEliminatedStates(
+  Map<Node, NodeObservation> buildFromEliminatedStates(
       Map<Node, NodeObservation> existingObservations,
       Map<Node, Set<NodeState>> eliminatedStateMap) {
     if (eliminatedStateMap.isEmpty()) return existingObservations;
