@@ -1,5 +1,6 @@
 package io.github.alecredmond.internal.method.network.changehandlers;
 
+import io.github.alecredmond.exceptions.BayesNetIDException;
 import io.github.alecredmond.export.network.BayesianNetworkData;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
@@ -30,11 +31,10 @@ public class NodeStateChangeHandler implements NetworkChangeHandler {
 
   private void rebuildIdMaps(
       BayesianNetworkData networkData, CollectionChangeAnalyzer<NodeState> analyzer) {
-    new NetworkIdValidator().validateNewStates(analyzer,networkData);
+    new NetworkIdValidator().validateNewStates(analyzer, networkData);
     Map<Serializable, NodeState> map = networkData.getNodeStateIDsMap();
     analyzer.getRemoved().forEach(r -> map.remove(r.getId()));
-    //TODO - ENSURE THIS DOESN'T OVERWRITE OTHER NODE STATES
-    analyzer.getAdded().forEach(a -> map.put(a.getId(), a));
+    analyzer.getAdded().forEach(added -> addUnlessOverwrites(added, map, networkData));
   }
 
   private void removeInvalidConstraints(
@@ -45,5 +45,14 @@ public class NodeStateChangeHandler implements NetworkChangeHandler {
             state ->
                 NetworkConstraintHandler.removeConstraints(
                     constraint -> constraint.getAllStates().contains(state), networkData));
+  }
+
+  private void addUnlessOverwrites(
+      NodeState added, Map<Serializable, NodeState> map, BayesianNetworkData networkData) {
+    Serializable id = added.getId();
+    if (map.computeIfAbsent(id, s -> added).equals(added)) return;
+    throw new BayesNetIDException(
+        "Adding NodeState %s would overwrite existing NodeState %s in Network %s"
+            .formatted(added, map.get(id), networkData.getNetworkName()));
   }
 }

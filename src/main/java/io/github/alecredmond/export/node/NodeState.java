@@ -26,7 +26,7 @@ import lombok.NonNull;
  * @author Alec Redmond
  * @see Node
  */
-@SuppressWarnings({"LombokGetterMayBeUsed", "LombokSetterMayBeUsed"})
+@SuppressWarnings({"LombokGetterMayBeUsed"})
 @Data
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class NodeState {
@@ -80,13 +80,22 @@ public class NodeState {
     return this.node;
   }
 
-  // TODO = JAVADOC
+  /**
+   * Returns the index of this {@code NodeState} in its parent {@link Node}'s state list.
+   *
+   * @return the position of this {@code NodeState}
+   */
   public int getPosition() {
     return this.position;
   }
 
-  // TODO = JAVADOC
-  public void setPosition(int position) {
+  /**
+   * Package-private setter for the index position of this {@code NodeState} in its parent {@link
+   * Node}'s state list.
+   *
+   * @param position the index of this state.
+   */
+  void setPosition(int position) {
     this.position = position;
   }
 }

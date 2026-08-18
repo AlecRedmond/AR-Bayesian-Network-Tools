@@ -3,6 +3,7 @@ package io.github.alecredmond.export.inference;
 import static io.github.alecredmond.TestConfigs.DOUBLE_EQUALITY;
 import static io.github.alecredmond.TestConfigs.SOLVE_LONG_TESTS;
 import static io.github.alecredmond.export.inference.ObservationStatus.NEGATED;
+import static io.github.alecredmond.export.inference.ObservationStatus.UNOBSERVED;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import io.github.alecredmond.export.method.network.NetworkScenario;
@@ -11,6 +12,7 @@ import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
 import io.github.alecredmond.export.probabilitytables.ObservedTable;
 import java.util.*;
+import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -53,6 +55,49 @@ class ObservableTest {
   @ParameterizedTest
   @MethodSource("supplyNetworks")
   void testSetObservations(BayesianNetwork network) {
+    testCommon(network, InferenceEngine::setObserved);
+  }
+
+  @ParameterizedTest
+  @MethodSource("supplyNetworks")
+  void testObserveIndividualStates(BayesianNetwork network) {
+    testCommon(
+        network,
+        (engine, obsMap) -> {
+          if (observationsNegated(obsMap)) {
+            engine.setObserved(obsMap);
+            return;
+          }
+          List<NodeState> toObserve =
+              obsMap.values().stream()
+                  .filter(o -> !o.status().equals(UNOBSERVED))
+                  .map(NodeObservation::observedStates)
+                  .flatMap(Collection::stream)
+                  .toList();
+
+          engine.setObserved(toObserve);
+        });
+  }
+
+  @ParameterizedTest
+  @MethodSource("supplyNetworks")
+  void testEliminateStates(BayesianNetwork network) {
+    testCommon(
+        network,
+        (engine, obsMap) -> {
+          List<NodeState> toEliminate =
+              obsMap.values().stream()
+                  .map(NodeObservation::eliminatedStates)
+                  .flatMap(Collection::stream)
+                  .toList();
+
+          engine.eliminateStates(toEliminate);
+        });
+  }
+
+  private void testCommon(
+      BayesianNetwork network,
+      BiConsumer<InferenceEngine, Map<Node, NodeObservation>> applyObservations) {
     InferenceEngine observedEngine = network.buildInferenceEngine();
     InferenceEngine unobservedEngine = network.buildInferenceEngine();
     Map<Node, NodeObservation> defaultObsMap = NodeObservation.createUnobservedMap(network);
@@ -67,7 +112,8 @@ class ObservableTest {
         0,
         nodes.size(),
         recordMap,
-        new Combinations());
+        new Combinations(),
+        applyObservations);
   }
 
   private void recursivelyCheckElimination(
@@ -78,14 +124,11 @@ class ObservableTest {
       int depth,
       int nodeSize,
       Map<Node, List<ObservationRecord>> recordMap,
-      Combinations combinations) {
+      Combinations combinations,
+      BiConsumer<InferenceEngine, Map<Node, NodeObservation>> applyObservations) {
     if (depth == nodeSize) {
-      if (!combinations.depthReached) {
-        combinations.setCombosAndInit();
-      } else {
-        combinations.decrementAndPrint();
-      }
-      performEndCheck(observedEngine, unobservedEngine, obsMap);
+      combinations.performInternalLogic();
+      performEndCheck(observedEngine, unobservedEngine, obsMap, applyObservations);
       return;
     }
     List<ObservationRecord> records = recordMap.get(nodes.get(depth));
@@ -99,13 +142,17 @@ class ObservableTest {
           depth + 1,
           nodeSize,
           recordMap,
-          combinations);
+          combinations,
+          applyObservations);
     }
   }
 
   private void performEndCheck(
-      InferenceEngine engine, InferenceEngine unobservedEngine, Map<Node, NodeObservation> obsMap) {
-    engine.setObserved(obsMap);
+      InferenceEngine engine,
+      InferenceEngine unobservedEngine,
+      Map<Node, NodeObservation> obsMap,
+      BiConsumer<InferenceEngine, Map<Node, NodeObservation>> applyObservations) {
+    applyObservations.accept(engine, obsMap);
     if (observationsNegated(obsMap)) {
       double totalProb =
           engine.getObservedTables().values().stream()
@@ -220,14 +267,9 @@ class ObservableTest {
       this.depthReached = false;
     }
 
-    void setCombosAndInit() {
-      totalCombos = combos;
-      depthReached = true;
-      segmentSize = (double) combos / completionSegs;
-      nextPrint = completionSegs > 0 ? combos - segmentSize : segmentSize;
-      if (nextPrint > 0) {
-        System.out.println("NUMBER OF COMBOS TO COVER = " + combos);
-      }
+    void performInternalLogic() {
+      if (depthReached) decrementAndPrint();
+      else setCombosAndInit();
     }
 
     void decrementAndPrint() {
@@ -236,6 +278,16 @@ class ObservableTest {
       double completionPerc = 100 * ((double) (totalCombos - combos) / totalCombos);
       System.out.printf("%2.2f%% COMPLETE, REMAINING == %d%n", completionPerc, combos);
       nextPrint -= segmentSize;
+    }
+
+    void setCombosAndInit() {
+      totalCombos = combos;
+      depthReached = true;
+      segmentSize = (double) combos / completionSegs;
+      nextPrint = completionSegs > 0 ? combos - segmentSize : segmentSize;
+      if (nextPrint > 0) {
+        System.out.println("NUMBER OF COMBOS TO COVER = " + combos);
+      }
     }
   }
 }

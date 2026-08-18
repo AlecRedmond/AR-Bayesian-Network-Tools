@@ -53,6 +53,7 @@ public interface Observable {
    * {@code Observable}. Other pairs will be discarded and undeclared {@link Node}s will be set as
    * {@link ObservationStatus#UNOBSERVED}.
    *
+   * @param observations the observation map to set.
    * @return this instance for chaining.
    */
   Observable setObserved(Map<Node, NodeObservation> observations);
