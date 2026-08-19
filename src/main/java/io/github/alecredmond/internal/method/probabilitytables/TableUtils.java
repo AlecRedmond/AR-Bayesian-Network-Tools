@@ -32,13 +32,19 @@ public class TableUtils {
       Collection<NodeState> states, T tableData) {
     ProbabilityVector vector = tableData.getVector();
     int[] strideLengths = vector.getStrideLengths();
+    Map<Node, Integer> indexMap = vector.getNodeIndexMap();
     int index = 0;
     for (NodeState state : states) {
-      int statePosition = state.getPosition();
-      int nodeIndex = vector.getNodeIndexMap().getOrDefault(state.getNode(), 0);
-      index += strideLengths[nodeIndex] * statePosition;
+      index += getPartialIndexForState(state, indexMap, strideLengths);
     }
     return index;
+  }
+
+  private static int getPartialIndexForState(
+      NodeState state, Map<Node, Integer> indexMap, int[] strideLengths) {
+    return Optional.ofNullable(indexMap.get(state.getNode()))
+        .map(nodeIndex -> state.getPosition() * strideLengths[nodeIndex])
+        .orElse(0);
   }
 
   public static <S extends Serializable, T extends ProbabilityTableData>
@@ -50,7 +56,12 @@ public class TableUtils {
   public static Collection<NodeState> assertAllNodesPresent(
       Collection<NodeState> states, Set<Node> allNodes) {
     Map<Node, NodeState> request = NodeUtils.generateRequest(states);
-    if (request.keySet().containsAll(allNodes)) return states;
+    if (request.keySet().equals(allNodes)) {
+      return states;
+    }
+    if (request.keySet().containsAll(allNodes)) {
+      return allNodes.stream().map(request::get).toList();
+    }
     throw new ProbabilityTableRequestException(
         "request %s does not contain all nodes requested %s"
             .formatted(

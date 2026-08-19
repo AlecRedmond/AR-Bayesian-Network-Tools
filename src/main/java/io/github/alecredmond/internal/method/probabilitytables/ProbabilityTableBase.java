@@ -64,8 +64,9 @@ public abstract class ProbabilityTableBase<D extends ProbabilityTableData> {
 
   public Double getProbability(Collection<NodeState> states) {
     try {
-      if (safeMode) TableUtils.assertAllNodesPresent(states, tableData.getNodes());
-      return TableUtils.getProbability(states, tableData);
+      Collection<NodeState> verified =
+          safeMode ? TableUtils.assertAllNodesPresent(states, tableData.getNodes()) : states;
+      return TableUtils.getProbability(verified, tableData);
     } catch (NodeStateConflictException | ProbabilityTableRequestException e) {
       log.error(e.getMessage());
       return null;
@@ -89,9 +90,7 @@ public abstract class ProbabilityTableBase<D extends ProbabilityTableData> {
   }
 
   public PrinterStringMatrix generatePrinterMatrix(PrinterPropertyConfigs configs) {
-    return Optional.ofNullable(buildMatrixGenerator())
-            .map(g -> g.generate(configs))
-            .orElse(null);
+    return Optional.ofNullable(buildMatrixGenerator()).map(g -> g.generate(configs)).orElse(null);
   }
 
   protected abstract PrinterMatrixGeneratorBase buildMatrixGenerator();
