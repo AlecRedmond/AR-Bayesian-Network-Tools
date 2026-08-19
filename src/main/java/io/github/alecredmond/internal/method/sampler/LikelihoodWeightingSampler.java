@@ -78,25 +78,19 @@ public class LikelihoodWeightingSampler extends MonteCarloSamplerImpl {
   }
 
   private void generateWeightedStateSets() {
-    NodeState[] defaultSample = new NodeState[samplerData.getNodes().length];
+    NodeState[] selectedStateArray = new NodeState[samplerData.getNodes().length];
     SamplePicker[] samplePickers = samplerData.getSamplePickers();
     Map<Set<NodeState>, Double> weightedStateSets = samplerData.getWeightedStateSets();
-
-    for (int s = 0; s < samplerData.getNumberOfSamples(); s++) {
-      double weight = 1.0;
-      for (int i = 0; i < samplePickers.length && weight > 0.0; i++) {
-        weight *= samplePickers[i].pickAndReturnWeight(defaultSample, weight);
-      }
-      addWeightedSet(weightedStateSets, defaultSample, weight);
+    int numberOfSamples = samplerData.getNumberOfSamples();
+    for (int s = 0; s < numberOfSamples; s++) {
+      performWeightedRandomWalk(samplePickers, selectedStateArray, weightedStateSets);
     }
   }
 
   private void convertSetsToSamples() {
     Map<SampleImpl, Double> weightedSamples = samplerData.getWeightedSamples();
     Map<Set<NodeState>, Double> weightedStateSets = samplerData.getWeightedStateSets();
-    weightedStateSets.forEach(
-        (set, weight) ->
-            weightedSamples.put(new SampleImpl(set.toArray(NodeState[]::new)), weight));
+    weightedStateSets.forEach((set, weight) -> weightedSamples.put(new SampleImpl(set), weight));
   }
 
   private void distributeSamples() {
@@ -105,10 +99,16 @@ public class LikelihoodWeightingSampler extends MonteCarloSamplerImpl {
             samplerData.getWeightedSamples(), samplerData.getNumberOfSamples()));
   }
 
-  private void addWeightedSet(
-      Map<Set<NodeState>, Double> weightedStateSets, NodeState[] sample, double weight) {
-    if (weight <= 0.0) return;
-    Set<NodeState> set = new LinkedHashSet<>(Arrays.asList(sample));
-    weightedStateSets.compute(set, (s, oldVal) -> oldVal == null ? weight : oldVal + weight);
+  private void performWeightedRandomWalk(
+      SamplePicker[] samplePickers,
+      NodeState[] selectedStateArray,
+      Map<Set<NodeState>, Double> weightedStateSets) {
+    double weight = 1.0;
+    for (SamplePicker samplePicker : samplePickers) {
+      weight *= samplePicker.selectStateAndReturnWeight(selectedStateArray, weight);
+      if (weight <= 0) return;
+    }
+    Set<NodeState> selectedStates = new LinkedHashSet<>(Arrays.asList(selectedStateArray));
+    weightedStateSets.merge(selectedStates, weight, Double::sum);
   }
 }

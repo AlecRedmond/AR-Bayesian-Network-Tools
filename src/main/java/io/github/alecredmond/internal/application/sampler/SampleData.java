@@ -1,9 +1,8 @@
 package io.github.alecredmond.internal.application.sampler;
 
 import io.github.alecredmond.export.node.NodeState;
-import io.github.alecredmond.internal.method.sampler.SampleUtils;
 import java.util.Arrays;
-import java.util.LinkedHashSet;
+import java.util.Collections;
 import java.util.Set;
 import lombok.Data;
 
@@ -14,10 +13,10 @@ public class SampleData {
   private NodeState[] exportStateArray;
   private int count;
 
-  public SampleData(NodeState[] rawStateArray) {
-    this.rawStateArray = rawStateArray;
+  public SampleData(Set<NodeState> states) {
+    this.rawStateArray = states.toArray(NodeState[]::new);
+    this.rawStateSet = Collections.unmodifiableSet(states);
     this.exportStateArray = Arrays.copyOf(rawStateArray, rawStateArray.length);
-    this.rawStateSet = SampleUtils.stateArrayToCollection(rawStateArray, LinkedHashSet::new);
     this.count = 0;
   }
 }

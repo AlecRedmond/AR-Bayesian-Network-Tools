@@ -30,8 +30,7 @@ public class WeightedAllocator {
   }
 
   private static <T> void allocateShortFall(Map<T, Integer> fraction, int shortfall) {
-    List<T> toAdd = fraction.keySet().stream().limit(shortfall).toList();
-    toAdd.forEach(t -> fraction.put(t, fraction.get(t) + 1));
+    fraction.keySet().stream().limit(shortfall).forEach(t -> fraction.merge(t, 1, Integer::sum));
   }
 
   private static <T> Comparator<Map.Entry<T, Double>> sortByRemainderSizeReversed() {

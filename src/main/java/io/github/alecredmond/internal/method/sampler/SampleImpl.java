@@ -1,14 +1,12 @@
 package io.github.alecredmond.internal.method.sampler;
 
+import io.github.alecredmond.exceptions.SampleValidationException;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
 import io.github.alecredmond.export.sampler.Sample;
 import io.github.alecredmond.internal.application.sampler.SampleData;
 import io.github.alecredmond.internal.method.node.NodeUtils;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Supplier;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -18,8 +16,12 @@ import lombok.extern.slf4j.Slf4j;
 public class SampleImpl implements Sample {
   private final SampleData sampleData;
 
-  public SampleImpl(NodeState[] rawArray) {
-    this.sampleData = new SampleData(rawArray);
+  public SampleImpl(Set<NodeState> states) {
+    if (states instanceof LinkedHashSet<NodeState> ordered) {
+      this.sampleData = new SampleData(ordered);
+    } else {
+      throw new SampleValidationException("Attempted to create a sample from an unordered set!");
+    }
   }
 
   public int count() {

@@ -12,7 +12,7 @@ public class NegatedSamplePicker implements SamplePicker {
   }
 
   @Override
-  public double pickAndReturnWeight(NodeState[] sampleArray, double currentWeight) {
+  public double selectStateAndReturnWeight(NodeState[] sampleArray, double currentWeight) {
     throw new SampleValidationException(
         "Attempted to sample a network with negated node : %s!".formatted(node));
   }

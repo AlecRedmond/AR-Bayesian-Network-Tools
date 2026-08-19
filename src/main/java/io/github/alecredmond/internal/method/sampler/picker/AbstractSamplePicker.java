@@ -23,7 +23,7 @@ public abstract class AbstractSamplePicker implements SamplePicker {
   }
 
   @Override
-  public double pickAndReturnWeight(NodeState[] sampleArray, double currentWeight) {
+  public double selectStateAndReturnWeight(NodeState[] sampleArray, double currentWeight) {
     if (currentWeight == 0.0) return 0.0;
     return pickNextState(sampleArray, currentWeight);
   }
