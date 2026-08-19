@@ -36,7 +36,7 @@ Add the latest release as a dependency in your pom.xml:
     <dependency>
         <groupId>io.github.alecredmond</groupId>
         <artifactId>ar-bayes-solver</artifactId>
-        <version>1.0.1</version>
+        <version>1.1.0</version>
     </dependency>
 </dependencies>
 ```
@@ -102,17 +102,17 @@ Constraints are built using the node state identifiers. **Constraints do not hav
 network structure**; for example, a marginal constraint can be defined on a node with parents, or an ancestor node's
 state can be conditional on a descendant node's state. 
 
-For this demo, we will define CPT entries within the graph, but we will provide only *some* of the CPT entries from 
-Fig.1. The complementary constraints (e.g., `P(RAIN:FALSE) = 0.8`) are inferred automatically and do not need to be 
-defined.
+For this demo, we will define CPT entries within the graph, but we will provide only the CPT entries from Fig.1. where 
+the node's measured state is `true`. The complementary constraints (e.g., `P(RAIN:FALSE) = 0.8`) are inferred 
+automatically and do not need to be defined.
 
 ```Java
 wetGrassNetwork
         // Non-conditional probability P(event) = p
         .addConstraint("RAIN:TRUE", 0.2)
         // Conditional Probabilities P(event|conditions) = p
-        .addConstraint("SPRINKLER:TRUE", List.of("RAIN:TRUE"), 0.01)
-        .addConstraint("SPRINKLER:TRUE", List.of("RAIN:FALSE"), 0.4)
+        .addConstraint("SPRINKLER:TRUE", "RAIN:TRUE", 0.01)
+        .addConstraint("SPRINKLER:TRUE", "RAIN:FALSE", 0.4)
         .addConstraint("WET_GRASS:TRUE", List.of("RAIN:TRUE", "SPRINKLER:TRUE"), 0.99)
         .addConstraint("WET_GRASS:TRUE", List.of("RAIN:TRUE", "SPRINKLER:FALSE"), 0.9)
         .addConstraint("WET_GRASS:TRUE", List.of("RAIN:FALSE", "SPRINKLER:TRUE"), 0.9)
@@ -125,20 +125,26 @@ Networks can be solved from the instance, or we can create a BayesSolver for mor
 control:
 
 ```java
+// Version 1.
 // Uses default configurations found in app.properties under app.bayes.solver
 wetGrassNetwork.solveNetwork(); 
 
+// Version 2.
+// Manually create a BayesSolver
 BayesSolver solver = BayesSolver.create(wetGrassNetwork);
 
+// 2.a
 // If every CPT entry can be inferred from the constraints, write them directly.
 boolean directWriteSuccess = solver.writeCPTsFromConstraints();
 
+// 2.b
 // If we can't write them directly, run IPFP
 if (!directWriteSuccess) {
     solver.solve(SolverAlgorithm.JUNCTION_TREE_IPFP);
 }
 
-// Equivalent to running the previous lines
+// 2.c
+// Equivalent to running 1. or 2.a & 2.b
 solver.solve();
 ```
 
@@ -157,7 +163,7 @@ This can be used to query for specific posterior or prior probabilities.
 For example, let's set the engine to observe `WET_GRASS:TRUE`. 
 
 ```Java 
-engine.observeNetworkFromIds("WET_GRASS:TRUE");
+engine.setObservedById("WET_GRASS:TRUE");
 ```
 
 Further queries will measure the posterior probability, conditional on `WET_GRASS:TRUE`. In other words, all 
@@ -240,8 +246,13 @@ You can apply the observations from the inference engine to generate samples wit
 
 ```java
 int numberOfSamples = 1000;
-SampleCollection sampleCollection = sampler.generateSamples(engine, numberOfSamples);
+
+SampleCollection sampleCollection = sampler
+        .setObserved(engine.getCurrentObservations())
+        .generateSamples(numberOfSamples);
+
 int samplesWithWetGrassTrue = sampleCollection.countSamplesIncludingStateIds("WET_GRASS:TRUE");
+
 System.out.println(samplesWithWetGrassTrue);
 
 >> 1000
@@ -256,8 +267,10 @@ System.out.println(firstSample);
 
 >> RAIN:TRUE, SPRINKLER:TRUE, WET_GRASS:TRUE : 4
 
+// Let's compare that to the true probability via direct inference.
 List<NodeState> sampledStates = firstSample.getDisplayedStates(ArrayList::new);
 double directInferenceProb = engine.getPosteriorProbability(sampledStates);
+// We should expect a probability of ~4 in 1000, similar to our sample count.
 System.out.printf("%.2f", directInferenceProb * numberOfSamples);
 
 // P(RAIN:TRUE,SPRINKLER:TRUE|WET_GRASS:TRUE) * 1000
@@ -278,7 +291,7 @@ System.out.printf("%.2f",cptRequestProb);
 // P(WET_GRASS:TRUE|RAIN:TRUE, SPRINKLER:FALSE)
 >> 0.90
 
-// Extract and query a posterior table from the InferenceEngine.
+// Extract and query an Observed table from the InferenceEngine.
 ObservedTable rainObservedTable = engine.getObservedTableById("RAIN");
 double rainFalsePosterior = rainObservedTable.getProbabilityById("RAIN:FALSE");
 System.out.printf("%.2f", rainFalsePosterior);
