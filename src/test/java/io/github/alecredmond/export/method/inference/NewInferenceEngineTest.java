@@ -64,7 +64,7 @@ public class NewInferenceEngineTest {
           .getConstraints()
           .forEach(
               constraint -> {
-                test.observeNetwork(constraint.getConditionStates());
+                test.setObserved(constraint.getConditionStates());
                 double expected = constraint.getProbability();
                 double actual = test.getPosteriorProbability(constraint.getEventStates());
                 if (results != null) {
@@ -106,7 +106,7 @@ public class NewInferenceEngineTest {
     void standardInference_shouldSucceed(ArgumentProvider provider) {
       test = InferenceEngine.create(provider.supplier.get());
       assertDoesNotThrow(() -> test.getCurrentObservations());
-      assertDoesNotThrow(() -> test.observeNetworkFromIds(provider.evidenceAlwaysSucceeds));
+      assertDoesNotThrow(() -> test.setObservedById(provider.evidenceAlwaysSucceeds));
       assertNotNull(test.getObservedTableById(provider.controlNodeId));
       assertNotNull(test.copyObservedTableById(provider.controlNodeId));
       assertEquals(1.0, test.getPosteriorProbabilityById(provider.evidenceAlwaysSucceeds));
@@ -119,10 +119,10 @@ public class NewInferenceEngineTest {
       BayesianNetwork network = provider.supplier.get();
       test = InferenceEngine.create(network);
       assertDoesNotThrow(() -> test.getCurrentObservations());
-      assertDoesNotThrow(() -> test.observeNetworkFromIds(provider.evidenceAlwaysSucceeds));
+      assertDoesNotThrow(() -> test.setObservedById(provider.evidenceAlwaysSucceeds));
       network.removeNodeByID(provider.removedNodeId);
       assertDoesNotThrow(() -> test.getCurrentObservations());
-      assertDoesNotThrow(() -> test.observeNetworkFromIds(provider.evidenceAlwaysSucceeds));
+      assertDoesNotThrow(() -> test.setObservedById(provider.evidenceAlwaysSucceeds));
       assertEquals(1.0, test.getPosteriorProbabilityById(provider.evidenceAlwaysSucceeds));
       assertNull(test.getObservedTableById(provider.removedNodeId));
     }
@@ -133,7 +133,7 @@ public class NewInferenceEngineTest {
       BayesianNetwork network = provider.supplier.get();
       test = InferenceEngine.create(network);
       assertDoesNotThrow(() -> test.getCurrentObservations());
-      assertDoesNotThrow(() -> test.observeNetworkFromIds(provider.evidenceAlwaysSucceeds));
+      assertDoesNotThrow(() -> test.setObservedById(provider.evidenceAlwaysSucceeds));
       provider.addedNodesMap.forEach(
           (nodeId, stateIds) -> {
             network.addNewNode(nodeId, stateIds);
@@ -142,7 +142,7 @@ public class NewInferenceEngineTest {
       provider.addedNodeConstraints.forEach(
           added -> network.addConstraint(added.eventId, added.conditionIds, added.prob));
       assertDoesNotThrow(() -> test.getCurrentObservations());
-      assertDoesNotThrow(() -> test.observeNetworkFromIds(provider.evidenceWithNewNodes));
+      assertDoesNotThrow(() -> test.setObservedById(provider.evidenceWithNewNodes));
       assertEquals(1.0, test.getPosteriorProbabilityById(provider.evidenceWithNewNodes));
       assertNotNull(test.getObservedTableById(provider.addedNodeId));
     }

@@ -1,12 +1,12 @@
 package io.github.alecredmond.internal.method.sampler;
 
 import io.github.alecredmond.exceptions.NodeStateConflictException;
+import io.github.alecredmond.export.inference.NodeObservation;
+import io.github.alecredmond.export.network.BayesianNetwork;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
-import io.github.alecredmond.export.inference.InferenceEngine;
-import io.github.alecredmond.export.network.BayesianNetwork;
 import io.github.alecredmond.export.sampler.MonteCarloSampler;
-import io.github.alecredmond.internal.method.node.NodeUtils;
+import io.github.alecredmond.internal.method.network.NetworkDataUtils;
 import java.io.Serializable;
 import java.util.*;
 import lombok.Getter;
@@ -15,56 +15,93 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Getter
 public abstract class MonteCarloSamplerImpl implements MonteCarloSampler {
-  protected static final Random RANDOM = new Random();
   protected final BayesianNetwork network;
+  protected Map<Node, NodeObservation> observations;
 
   protected MonteCarloSamplerImpl(BayesianNetwork network) {
     this.network = network;
+    resetObservations();
+  }
+
+  @Override
+  public MonteCarloSampler resetObservations() {
+    this.observations = NodeObservation.createUnobservedMap(network);
+    return this;
+  }
+
+  @Override
+  public MonteCarloSampler setObserved(Map<Node, NodeObservation> observations) {
+    return eliminateStates(NetworkDataUtils.convertToEliminations(this, network, observations));
+  }
+
+  @Override
+  public MonteCarloSampler eliminateStates(Collection<NodeState> toEliminate) {
+    this.observations = NodeObservation.eliminate(observations, toEliminate);
+    return this;
+  }
+
+  @Override
+  public MonteCarloSampler eliminateStates(NodeState toEliminate) {
+    return Optional.ofNullable(toEliminate).map(List::of).map(this::eliminateStates).orElse(this);
+  }
+
+  @Override
+  public Map<Node, NodeObservation> getCurrentObservations() {
+    return observations;
   }
 
   @Override
   public SampleCollectionImpl generateSamples(int numberOfSamples) {
-    return generateSamples(new HashMap<>(), numberOfSamples);
-  }
-
-  protected abstract SampleCollectionImpl generateSamples(
-      Map<Node, NodeState> observations, int numberOfSamples);
-
-  public SampleCollectionImpl generateSamples(InferenceEngine engine, int numberOfSamples) {
-    return generateSamples(engine.getCurrentObservations(), numberOfSamples);
-  }
-
-  protected <R, E extends Number> R nextRandom(Map<R, E> weights) {
-    if (weights.isEmpty()) {
-      return null;
-    }
-
-    double totalWeight = weights.values().stream().mapToDouble(Number::doubleValue).sum();
-    double randomValue = RANDOM.nextDouble() * totalWeight;
-
-    for (Map.Entry<R, E> entry : weights.entrySet()) {
-      randomValue -= entry.getValue().doubleValue();
-      if (randomValue <= 0.0) return entry.getKey();
-    }
-    return null;
-  }
-
-  @Override
-  public SampleCollectionImpl generateSamples(
-      Collection<NodeState> observedStates, int numberOfSamples) {
     try {
-      return generateSamples(
-          NodeUtils.generateOrderedRequest(observedStates, network.getNetworkData().getNodes()),
-          numberOfSamples);
+      return generateSamplesInternal(observations, numberOfSamples);
     } catch (NodeStateConflictException e) {
       log.error(e.getMessage());
       return null;
     }
   }
 
+  protected abstract SampleCollectionImpl generateSamplesInternal(
+      Map<Node, NodeObservation> observations, int numberOfSamples);
+
   @Override
-  public <T extends Serializable> SampleCollectionImpl generateSamplesById(
-      Collection<T> observedStateIds, int numberOfSamples) {
-    return generateSamples(network.getNodeStates(observedStateIds), numberOfSamples);
+  public <T extends Serializable> MonteCarloSampler eliminateStatesById(
+      Collection<T> toEliminateIDs) {
+    return eliminateStates(network.getNodeStates(toEliminateIDs));
+  }
+
+  @Override
+  public <T extends Serializable> MonteCarloSampler eliminateStatesById(T toEliminateId) {
+    return Optional.ofNullable(toEliminateId)
+        .map(List::of)
+        .map(this::eliminateStatesById)
+        .orElse(this);
+  }
+
+  @Override
+  public MonteCarloSampler setObserved(Collection<NodeState> observedStates) {
+    resetObservations();
+    if (!observedStates.isEmpty()) {
+      this.observations = NodeObservation.observe(this.observations, observedStates);
+    }
+    return this;
+  }
+
+  @Override
+  public MonteCarloSampler setObserved(NodeState observedState) {
+    return Optional.ofNullable(observedState).map(List::of).map(this::setObserved).orElse(this);
+  }
+
+  @Override
+  public <T extends Serializable> MonteCarloSampler setObservedById(T observedStateId) {
+    return Optional.ofNullable(observedStateId)
+        .map(List::of)
+        .map(this::setObservedById)
+        .orElse(this);
+  }
+
+  @Override
+  public <T extends Serializable> MonteCarloSampler setObservedById(
+      Collection<T> observedStateIDs) {
+    return this.setObserved(network.getNodeStates(observedStateIDs));
   }
 }

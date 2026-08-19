@@ -2,9 +2,9 @@ package io.github.alecredmond.internal.method.vectoriterator.misciterators;
 
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
-import io.github.alecredmond.internal.method.probabilitytables.JunctionTreeTable;
 import io.github.alecredmond.internal.application.vectoriterator.VectorOdometer;
 import io.github.alecredmond.internal.method.node.NodeUtils;
+import io.github.alecredmond.internal.method.probabilitytables.JunctionTreeTable;
 import io.github.alecredmond.internal.method.vectoriterator.VectorIterator;
 import io.github.alecredmond.internal.method.vectoriterator.iteratorutils.resetlogictypes.OdometerResetDefault;
 import io.github.alecredmond.internal.method.vectoriterator.iteratorutils.resetlogictypes.ResetLogicUtils;
@@ -12,7 +12,6 @@ import io.github.alecredmond.internal.method.vectoriterator.iteratorutils.update
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.stream.IntStream;
 
 public class JunctionTableSummer implements OdometerResetDefault, OdometerUpdateBlank {
   private final VectorIterator<VectorOdometer> iterator;
@@ -49,9 +48,7 @@ public class JunctionTableSummer implements OdometerResetDefault, OdometerUpdate
   }
 
   protected boolean checkIsEvidence(int[] stateIndexes, boolean[][] stateIsEvent) {
-    return IntStream.range(0, stateIsEvent.length)
-        .filter(x -> stateIsEvent[x].length != 0)
-        .allMatch(x -> stateIsEvent[x][stateIndexes[x]]);
+    return ResetLogicUtils.checkIsEvidence(stateIndexes, stateIsEvent);
   }
 
   @Override

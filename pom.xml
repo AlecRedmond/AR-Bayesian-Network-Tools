@@ -6,7 +6,7 @@
 
     <groupId>io.github.alecredmond</groupId>
     <artifactId>ar-bayes-solver</artifactId>
-    <version>1.0.1</version>
+    <version>1.1.0</version>
     <name>AR Bayesian Network Tools</name>
     <description>A library providing a high-level, easy-use toolset for Bayesian Network construction, proportional
         fitting, sampling, and inference.

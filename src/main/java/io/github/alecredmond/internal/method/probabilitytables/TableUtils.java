@@ -1,8 +1,10 @@
 package io.github.alecredmond.internal.method.probabilitytables;
 
+import static io.github.alecredmond.export.inference.ObservationStatus.*;
 import static io.github.alecredmond.internal.method.node.NodeUtils.formatIDsToString;
 
 import io.github.alecredmond.exceptions.ProbabilityTableRequestException;
+import io.github.alecredmond.export.inference.NodeObservation;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
 import io.github.alecredmond.export.probabilitytables.ProbabilityTable;
@@ -32,9 +34,9 @@ public class TableUtils {
     int[] strideLengths = vector.getStrideLengths();
     int index = 0;
     for (NodeState state : states) {
-      int stateValue = vector.getStateValueMap().getOrDefault(state, 0);
+      int statePosition = state.getPosition();
       int nodeIndex = vector.getNodeIndexMap().getOrDefault(state.getNode(), 0);
-      index += strideLengths[nodeIndex] * stateValue;
+      index += strideLengths[nodeIndex] * statePosition;
     }
     return index;
   }
@@ -117,5 +119,21 @@ public class TableUtils {
       sb.append(formatIDsToString(conditionIds));
     }
     return sb.append(")").toString();
+  }
+
+  public static String buildObservedTableName(
+      Node measured, Map<Node, NodeObservation> nodeObservationMap) {
+    return "P(" + measured.getId() + observationStrings(nodeObservationMap) + ")";
+  }
+
+  private static String observationStrings(Map<Node, NodeObservation> nodeObservationMap) {
+    StringBuilder sb = new StringBuilder();
+    for (NodeObservation observation : nodeObservationMap.values()) {
+      if (observation.status().equals(UNOBSERVED)) continue;
+      if (sb.isEmpty()) sb.append("|");
+      else sb.append(", ");
+      sb.append(observation);
+    }
+    return sb.toString();
   }
 }

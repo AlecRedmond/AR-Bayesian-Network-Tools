@@ -1,6 +1,7 @@
 package io.github.alecredmond.export.probabilitytables;
 
 import io.github.alecredmond.export.inference.InferenceEngine;
+import io.github.alecredmond.export.inference.NodeObservation;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
 import java.io.Serializable;
@@ -36,10 +37,10 @@ public interface ObservedTable extends ProbabilityTable {
    * Returns the observations currently active on the underlying {@link InferenceEngine}. The
    * posterior probabilities in this table are explicitly conditioned on these observations.
    *
-   * @return an unmodifiable {@link LinkedHashMap} mapping each observed node to its active state,
+   * @return an unmodifiable {@link LinkedHashMap} mapping each observed node to its active states,
    *     or an empty map if no observations are present.
    */
-  Map<Node, NodeState> getObservations();
+  Map<Node, NodeObservation> getObservations();
 
   /**
    * Builds a copy of this {@code ObservedTable}. This deep-copies everything except the {@link

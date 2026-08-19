@@ -16,16 +16,6 @@ public class NodeUtils {
 
   private NodeUtils() {}
 
-  public static Map<Node, NodeState> generateOrderedRequest(
-      Collection<NodeState> states, List<Node> nodeOrder) {
-    Map<Node, NodeState> unordered = generateRequest(states);
-    Map<Node, NodeState> ordered = new LinkedHashMap<>();
-    nodeOrder.stream()
-        .filter(unordered::containsKey)
-        .forEach(node -> ordered.put(node, unordered.get(node)));
-    return ordered;
-  }
-
   public static Map<Node, NodeState> generateRequest(Collection<NodeState> states) {
     try {
       return states.stream()
@@ -35,6 +25,11 @@ public class NodeUtils {
       throw new NodeStateConflictException(
           "Error generating request : Multiple values of NodeState shared the same Node", e);
     }
+  }
+
+  public static Map<Node, Set<NodeState>> generateMultiRequest(Collection<NodeState> states) {
+    return states.stream()
+        .collect(Collectors.groupingBy(NodeState::getNode, HashMap::new, Collectors.toSet()));
   }
 
   public static Set<NodeState> combineStates(
@@ -95,17 +90,6 @@ public class NodeUtils {
         .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
   }
 
-  public static Map<NodeState, Integer> buildStateIndexMap(Node[] nodes) {
-    Map<NodeState, Integer> statePositions = new HashMap<>();
-    Arrays.stream(nodes)
-        .map(Node::getNodeStates)
-        .forEach(
-            states ->
-                IntStream.range(0, states.size())
-                    .forEach(i -> statePositions.put(states.get(i), i)));
-    return statePositions;
-  }
-
   public static String formatStatesToString(Collection<NodeState> stateCollection) {
     return formatCollectionToString(stateCollection);
   }
@@ -113,9 +97,10 @@ public class NodeUtils {
   private static <T> String formatCollectionToString(Collection<T> collection) {
     if (collection.isEmpty()) return "";
     StringBuilder sb = new StringBuilder();
-    collection.forEach(c -> sb.append(c.toString()).append(", "));
-    if (sb.length() >= 2) {
-      sb.setLength(sb.length() - 2);
+    Iterator<T> iterator = collection.iterator();
+    while (iterator.hasNext()) {
+      sb.append(iterator.next().toString());
+      if (iterator.hasNext()) sb.append(", ");
     }
     return sb.toString();
   }

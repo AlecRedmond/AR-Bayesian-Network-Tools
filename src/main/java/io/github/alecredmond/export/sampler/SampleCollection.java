@@ -1,5 +1,6 @@
 package io.github.alecredmond.export.sampler;
 
+import io.github.alecredmond.export.inference.NodeObservation;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
 import io.github.alecredmond.export.network.BayesianNetwork;
@@ -23,12 +24,11 @@ import java.util.Map;
  */
 public interface SampleCollection {
   /**
-   * Returns a map of each {@link Node} set as observed during the sampling run, and the specific
-   * {@link NodeState} it was locked to.
+   * Returns a map of each {@link Node} to its {@link NodeObservation} record.
    *
    * @return an unmodifiable map of the observations used in this {@code SampleCollection}.
    */
-  Map<Node, NodeState> getObservations();
+  Map<Node, NodeObservation> getObservations();
 
   /**
    * Returns an array of all {@link Node}s in the {@link BayesianNetwork} that this {@code

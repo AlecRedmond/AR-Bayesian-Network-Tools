@@ -1,69 +1,42 @@
-package io.github.alecredmond.export.sampler;
+package io.github.alecredmond.export.inference;
 
-import io.github.alecredmond.export.inference.InferenceEngine;
-import io.github.alecredmond.export.inference.NodeObservation;
-import io.github.alecredmond.export.inference.Observable;
-import io.github.alecredmond.export.inference.ObservationStatus;
 import io.github.alecredmond.export.network.BayesianNetwork;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
-import io.github.alecredmond.internal.method.sampler.LikelihoodWeightingSampler;
+import io.github.alecredmond.export.sampler.MonteCarloSampler;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Map;
-import java.util.Random;
 
 /**
- * A Monte Carlo sampler for a {@link BayesianNetwork} which generates random samples from the
- * network's conditional probability tables (CPTs). A {@code MonteCarloSampler} run returns a {@link
- * SampleCollection} of {@link Sample} objects. Each {@link Sample} contains a unique combination of
- * {@link NodeState} values and the frequency of its occurrence.
- *
- * <p>The only sampling algorithm currently available is <i>Likelihood Weighting Sampling (LWS)</i>.
- * LWS performs a random walk down each CPT in the {@link BayesianNetwork}, selecting each new
- * {@link NodeState} according to its weighted probability. When the algorithm reaches a {@link
- * Node} constrained to a specific {@link NodeState}, the weight of the sample is multiplied by the
- * conditional probability of that state given the sample's current configuration. At the end of the
- * run, the weighted samples are normalized and proportionally correct frequencies are assigned.
- *
- * <p>Monte Carlo sampling is a form of indirect inference. It relies on Java's built-in {@link
- * Random} functionality and does not produce exact or deterministic results. The margin of error is
- * proportional to {@code 1 / sqrt(n)}, where {@code n} is the number of samples generated.
+ * The root interface for a Bayesian inference type where the observed state can be modified. An
+ * {@code Observable} type allows {@link NodeState} values to either be set as observed (resetting
+ * the previous observations) or added to a pool of eliminated states (maintaining the other
+ * previous observations). All probability functions will be conditional on only the non-eliminated
+ * {@link NodeState} values currently active.
  *
  * @see InferenceEngine
- * @see BayesianNetwork
+ * @see MonteCarloSampler
+ * @see NodeObservation
  * @author Alec Redmond
  */
-public interface MonteCarloSampler extends Observable {
+public interface Observable {
 
   /**
-   * Creates a new {@code MonteCarloSampler} for the given {@link BayesianNetwork}.
+   * Returns the {@link BayesianNetwork} measured by this {@code Observable}.
    *
-   * @param network the {@link BayesianNetwork} to sample.
-   * @return a new {@code MonteCarloSampler} for the given network.
-   */
-  static MonteCarloSampler create(BayesianNetwork network) {
-    return new LikelihoodWeightingSampler(network);
-  }
-
-  /**
-   * Runs the sampler for the given number of cycles and returns a {@link SampleCollection}
-   * containing the results. This will apply the current {@link NodeObservation} restrictions
-   * present in this sampler.
-   *
-   * @param numberOfSamples the number of sampling cycles to run, which equals the total sample
-   *     count in the returned {@link SampleCollection}.
-   * @return a new {@link SampleCollection} representing the posterior distribution, conditional on
-   *     the current observations.
-   */
-  SampleCollection generateSamples(int numberOfSamples);
-
-  /**
-   * Returns the {@link BayesianNetwork} sampled by this {@code MonteCarloSampler}.
-   *
-   * @return the {@link BayesianNetwork} used by this {@code MonteCarloSampler}.
+   * @return the {@link BayesianNetwork} associated with this {@code Observable}.
    */
   BayesianNetwork getNetwork();
+
+  /**
+   * Returns a map of each {@link Node} and its current {@link NodeObservation}. A {@link
+   * NodeObservation} records the current observed and unobserved {@link NodeState}s in the node,
+   * and its {@link ObservationStatus}.
+   *
+   * @return a map of the current observations on this instance.
+   */
+  Map<Node, NodeObservation> getCurrentObservations();
 
   /**
    * Removes any observed states from the inference network, returning it to its unobserved
@@ -72,8 +45,7 @@ public interface MonteCarloSampler extends Observable {
    *
    * @return this instance for chaining.
    */
-  @Override
-  MonteCarloSampler resetObservations();
+  Observable resetObservations();
 
   /**
    * Sets the observed state to match the given input. This method will only apply key-value pairs
@@ -81,10 +53,10 @@ public interface MonteCarloSampler extends Observable {
    * {@code Observable}. Other pairs will be discarded and undeclared {@link Node}s will be set as
    * {@link ObservationStatus#UNOBSERVED}.
    *
+   * @param observations the observation map to set.
    * @return this instance for chaining.
    */
-  @Override
-  MonteCarloSampler setObserved(Map<Node, NodeObservation> observations);
+  Observable setObserved(Map<Node, NodeObservation> observations);
 
   /**
    * Replaces the current observed states in the inference network with the given states. Each
@@ -98,8 +70,7 @@ public interface MonteCarloSampler extends Observable {
    * @param observedStates the collection of states to be observed.
    * @return this instance for chaining.
    */
-  @Override
-  MonteCarloSampler setObserved(Collection<NodeState> observedStates);
+  Observable setObserved(Collection<NodeState> observedStates);
 
   /**
    * Replaces the current observed states in the inference network with the given {@link NodeState}.
@@ -112,8 +83,7 @@ public interface MonteCarloSampler extends Observable {
    * @param observedState the single state to be observed.
    * @return this instance for chaining.
    */
-  @Override
-  MonteCarloSampler setObserved(NodeState observedState);
+  Observable setObserved(NodeState observedState);
 
   /**
    * Replaces the current observed states in the inference network with the given states. Each
@@ -129,8 +99,7 @@ public interface MonteCarloSampler extends Observable {
    * @param <T> the type of the state identifiers.
    * @return this instance for chaining.
    */
-  @Override
-  <T extends Serializable> MonteCarloSampler setObservedById(Collection<T> observedStateIDs);
+  <T extends Serializable> Observable setObservedById(Collection<T> observedStateIDs);
 
   /**
    * Replaces the current observed states in the inference network with the given {@link NodeState},
@@ -145,8 +114,7 @@ public interface MonteCarloSampler extends Observable {
    * @param <T> the type of the state identifier.
    * @return this instance for chaining.
    */
-  @Override
-  <T extends Serializable> MonteCarloSampler setObservedById(T observedStateId);
+  <T extends Serializable> Observable setObservedById(T observedStateId);
 
   /**
    * Subtracts the input {@link NodeState} values from the observable pool. This will remove these
@@ -157,8 +125,7 @@ public interface MonteCarloSampler extends Observable {
    * @param toEliminate a collection of {@link NodeState}s to eliminate.
    * @return this instance for chaining.
    */
-  @Override
-  MonteCarloSampler eliminateStates(Collection<NodeState> toEliminate);
+  Observable eliminateStates(Collection<NodeState> toEliminate);
 
   /**
    * Subtracts the input {@link NodeState} value from the observable pool. This will remove this
@@ -169,8 +136,7 @@ public interface MonteCarloSampler extends Observable {
    * @param toEliminate a single {@link NodeState} to eliminate.
    * @return this instance for chaining.
    */
-  @Override
-  MonteCarloSampler eliminateStates(NodeState toEliminate);
+  Observable eliminateStates(NodeState toEliminate);
 
   /**
    * Subtracts the input {@link NodeState} values from the observable pool. This will remove these
@@ -182,8 +148,7 @@ public interface MonteCarloSampler extends Observable {
    * @param <T> the type of the state identifiers.
    * @return this instance for chaining.
    */
-  @Override
-  <T extends Serializable> MonteCarloSampler eliminateStatesById(Collection<T> toEliminateIDs);
+  <T extends Serializable> Observable eliminateStatesById(Collection<T> toEliminateIDs);
 
   /**
    * Subtracts the input {@link NodeState} value from the observable pool. This will remove this
@@ -195,6 +160,5 @@ public interface MonteCarloSampler extends Observable {
    * @param <T> the type of the state identifier.
    * @return this instance for chaining.
    */
-  @Override
-  <T extends Serializable> MonteCarloSampler eliminateStatesById(T toEliminateId);
+  <T extends Serializable> Observable eliminateStatesById(T toEliminateId);
 }

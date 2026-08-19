@@ -1,11 +1,17 @@
 package io.github.alecredmond.internal.method.sampler;
 
+import io.github.alecredmond.export.inference.NodeObservation;
+import io.github.alecredmond.export.inference.ObservationStatus;
 import io.github.alecredmond.export.network.BayesianNetwork;
 import io.github.alecredmond.export.network.BayesianNetworkData;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
 import io.github.alecredmond.export.probabilitytables.NetworkTable;
 import io.github.alecredmond.internal.application.sampler.LikelihoodWeightingSamplerData;
+import io.github.alecredmond.internal.method.node.NodeUtils;
+import io.github.alecredmond.internal.method.sampler.picker.SamplePicker;
+import io.github.alecredmond.internal.method.sampler.picker.SamplePickerFactory;
+import io.github.alecredmond.internal.method.utils.WeightedAllocator;
 import java.util.*;
 import java.util.stream.IntStream;
 import lombok.extern.slf4j.Slf4j;
@@ -29,16 +35,17 @@ public class LikelihoodWeightingSampler extends MonteCarloSamplerImpl {
   }
 
   @Override
-  public SampleCollectionImpl generateSamples(
-      Map<Node, NodeState> observations, int numberOfSamples) {
+  public SampleCollectionImpl generateSamplesInternal(
+      Map<Node, NodeObservation> observations, int numberOfSamples) {
     if (numberOfSamples < 0) {
       log.error("Attempted to generate less than zero samples!");
       return null;
     }
+    if (anyNegatedObservations(observations)) {
+      return null;
+    }
     initSamplerData(observations, numberOfSamples);
-    setHelperSafeMode(false);
     generateWeightedStateSets();
-    setHelperSafeMode(true);
     convertSetsToSamples();
     distributeSamples();
     return new SampleBuilder()
@@ -50,100 +57,58 @@ public class LikelihoodWeightingSampler extends MonteCarloSamplerImpl {
             network.getNetworkData());
   }
 
-  private void initSamplerData(Map<Node, NodeState> observations, int numberOfSamples) {
+  private boolean anyNegatedObservations(Map<Node, NodeObservation> observations) {
+    List<Node> negated =
+        observations.values().stream()
+            .filter(obs -> obs.status().equals(ObservationStatus.NEGATED))
+            .map(NodeObservation::node)
+            .toList();
+    if (negated.isEmpty()) return false;
+    log.warn("Cannot run sampler, Nodes were negated: {}", NodeUtils.formatNodesToString(negated));
+    return true;
+  }
+
+  private void initSamplerData(Map<Node, NodeObservation> observations, int numberOfSamples) {
     samplerData.setObservations(observations);
     samplerData.setNumberOfSamples(numberOfSamples);
-    samplerData.setDefaultSample(buildDefaultSample(observations, samplerData.getNodes()));
+    samplerData.setSamplePickers(new SamplePickerFactory().create(samplerData));
     samplerData.setWeightedStateSets(new HashMap<>());
     samplerData.setWeightedSamples(new HashMap<>());
     samplerData.setDistributedSamples(new HashMap<>());
   }
 
-  private void setHelperSafeMode(boolean safeMode) {
-    Arrays.stream(samplerData.getTables()).forEach(t -> t.setSafeMode(safeMode));
-  }
-
   private void generateWeightedStateSets() {
-    NodeState[] defaultSample = samplerData.getDefaultSample();
-    Node[] nodes = samplerData.getNodes();
-    NetworkTable[] tables = samplerData.getTables();
+    NodeState[] selectedStateArray = new NodeState[samplerData.getNodes().length];
+    SamplePicker[] samplePickers = samplerData.getSamplePickers();
     Map<Set<NodeState>, Double> weightedStateSets = samplerData.getWeightedStateSets();
-
-    for (int s = 0; s < samplerData.getNumberOfSamples(); s++) {
-      Set<NodeState> newSet = new LinkedHashSet<>();
-      double weight = 1.0;
-      for (int i = 0; i < nodes.length; i++) {
-        weight *= selectNextState(newSet, defaultSample[i], tables[i]);
-      }
-      weightedStateSets.putIfAbsent(newSet, 0.0);
-      weightedStateSets.put(newSet, weightedStateSets.get(newSet) + weight);
+    int numberOfSamples = samplerData.getNumberOfSamples();
+    for (int s = 0; s < numberOfSamples; s++) {
+      performWeightedRandomWalk(samplePickers, selectedStateArray, weightedStateSets);
     }
   }
 
   private void convertSetsToSamples() {
     Map<SampleImpl, Double> weightedSamples = samplerData.getWeightedSamples();
     Map<Set<NodeState>, Double> weightedStateSets = samplerData.getWeightedStateSets();
-    weightedStateSets.forEach(
-        (set, weight) -> {
-          if (weight <= 0.0) return;
-          weightedSamples.put(new SampleImpl(set.toArray(NodeState[]::new)), weight);
-        });
+    weightedStateSets.forEach((set, weight) -> weightedSamples.put(new SampleImpl(set), weight));
   }
 
   private void distributeSamples() {
-    Map<SampleImpl, Double> weightedSamples = samplerData.getWeightedSamples();
-    if (weightedSamples.isEmpty()) {
-      samplerData.setDistributedSamples(new HashMap<>());
-      return;
+    samplerData.setDistributedSamples(
+        WeightedAllocator.allocate(
+            samplerData.getWeightedSamples(), samplerData.getNumberOfSamples()));
+  }
+
+  private void performWeightedRandomWalk(
+      SamplePicker[] samplePickers,
+      NodeState[] selectedStateArray,
+      Map<Set<NodeState>, Double> weightedStateSets) {
+    double weight = 1.0;
+    for (SamplePicker samplePicker : samplePickers) {
+      weight *= samplePicker.selectStateAndReturnWeight(selectedStateArray, weight);
+      if (weight <= 0) return;
     }
-    int numberOfSamples = samplerData.getNumberOfSamples();
-    Map<SampleImpl, Integer> distributedSamples = samplerData.getDistributedSamples();
-    Map<SampleImpl, Double> remainderSamples = new HashMap<>();
-    double ratio = getRatio(weightedSamples, numberOfSamples);
-    int[] tally = {0};
-
-    weightedSamples.forEach(
-        (sample, weight) -> {
-          double adjusted = weight * ratio;
-          int distributed = (int) adjusted;
-          tally[0] += distributed;
-          distributedSamples.put(sample, distributed);
-          remainderSamples.put(sample, adjusted - distributed);
-        });
-
-    allocateRemainders(remainderSamples, numberOfSamples - tally[0], distributedSamples);
-  }
-
-  private NodeState[] buildDefaultSample(Map<Node, NodeState> observations, Node[] nodes) {
-    return Arrays.stream(nodes)
-        .map(node -> observations.getOrDefault(node, null))
-        .toArray(NodeState[]::new);
-  }
-
-  private double selectNextState(
-      Set<NodeState> newSample, NodeState observedNextState, NetworkTable table) {
-    if (observedNextState != null) {
-      newSample.add(observedNextState);
-      return table.getProbability(newSample);
-    }
-    Map<NodeState, Double> probabilityMap = table.getConditionalProb(newSample);
-    newSample.add(nextRandom(probabilityMap));
-    return 1.0;
-  }
-
-  private double getRatio(Map<SampleImpl, Double> weightedSamples, int numberOfSamples) {
-    double sum = weightedSamples.values().stream().mapToDouble(Double::doubleValue).sum();
-    return sum != 0.0 ? numberOfSamples / sum : 0.0;
-  }
-
-  private void allocateRemainders(
-      Map<SampleImpl, Double> remainderWeights,
-      int unallocated,
-      Map<SampleImpl, Integer> distributedWeights) {
-    remainderWeights.entrySet().stream()
-        .sorted(Comparator.comparingDouble(Map.Entry<SampleImpl, Double>::getValue).reversed())
-        .map(Map.Entry::getKey)
-        .limit(unallocated)
-        .forEach(key -> distributedWeights.put(key, distributedWeights.get(key) + 1));
+    Set<NodeState> selectedStates = new LinkedHashSet<>(Arrays.asList(selectedStateArray));
+    weightedStateSets.merge(selectedStates, weight, Double::sum);
   }
 }

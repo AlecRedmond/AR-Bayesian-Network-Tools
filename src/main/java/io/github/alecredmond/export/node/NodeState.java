@@ -26,7 +26,7 @@ import lombok.NonNull;
  * @author Alec Redmond
  * @see Node
  */
-@SuppressWarnings("LombokGetterMayBeUsed")
+@SuppressWarnings({"LombokGetterMayBeUsed"})
 @Data
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class NodeState {
@@ -36,6 +36,8 @@ public class NodeState {
 
   /** The parent {@link Node} that exhibits this state. */
   private final Node node;
+
+  private int position;
 
   /**
    * Constructs a new {@code NodeState} with a unique identifier and its associated {@link Node}.
@@ -76,5 +78,24 @@ public class NodeState {
    */
   public Node getNode() {
     return this.node;
+  }
+
+  /**
+   * Returns the index of this {@code NodeState} in its parent {@link Node}'s state list.
+   *
+   * @return the position of this {@code NodeState}
+   */
+  public int getPosition() {
+    return this.position;
+  }
+
+  /**
+   * Package-private setter for the index position of this {@code NodeState} in its parent {@link
+   * Node}'s state list.
+   *
+   * @param position the index of this state.
+   */
+  void setPosition(int position) {
+    this.position = position;
   }
 }

@@ -1,18 +1,19 @@
 package io.github.alecredmond.internal.method.junctiontree;
 
 import io.github.alecredmond.export.constraints.ProbabilityConstraint;
+import io.github.alecredmond.export.inference.InferenceAlgorithm;
+import io.github.alecredmond.export.inference.NodeObservation;
 import io.github.alecredmond.export.network.BayesianNetworkData;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.probabilitytables.NetworkTable;
 import io.github.alecredmond.export.probabilitytables.ObservedTable;
-import io.github.alecredmond.export.inference.InferenceAlgorithm;
-import io.github.alecredmond.internal.application.solver.SolverConfigs;
 import io.github.alecredmond.internal.application.junctiontree.Clique;
 import io.github.alecredmond.internal.application.junctiontree.JunctionTreeData;
-import io.github.alecredmond.internal.method.probabilitytables.JunctionTreeTable;
+import io.github.alecredmond.internal.application.solver.SolverConfigs;
 import io.github.alecredmond.internal.method.constraints.ConstraintRegistry;
 import io.github.alecredmond.internal.method.constraints.strategy.ConstraintSolver;
 import io.github.alecredmond.internal.method.junctiontree.treebuilding.CliqueBuilder;
+import io.github.alecredmond.internal.method.probabilitytables.JunctionTreeTable;
 import io.github.alecredmond.internal.method.probabilitytables.tablebuilders.ObservedTableBuilder;
 import io.github.alecredmond.internal.method.probabilitytables.tabletransfer.factory.TransferIteratorFactory;
 import java.util.*;
@@ -137,10 +138,13 @@ public class JTADataBuilder {
 
   private void buildObserved(JunctionTreeData jtd, BayesianNetworkData bnd) {
     ObservedTableBuilder builder = new ObservedTableBuilder();
-    jtd.setObservedEvidence(new HashMap<>());
     jtd.setObservedTablesMap(
         bnd.getNodes().stream()
             .map(node -> Map.entry(node, builder.buildTable(node)))
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+
+    Map<Node, NodeObservation> defaultObservations = NodeObservation.createUnobservedMap(bnd);
+    jtd.setObservedEvidence(defaultObservations);
+    jtd.setUnobservedBackup(defaultObservations);
   }
 }

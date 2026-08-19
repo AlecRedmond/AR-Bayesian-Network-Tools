@@ -1,6 +1,9 @@
 package io.github.alecredmond.internal.method.network;
 
 import io.github.alecredmond.exceptions.BayesNetIDException;
+import io.github.alecredmond.export.inference.NodeObservation;
+import io.github.alecredmond.export.inference.Observable;
+import io.github.alecredmond.export.network.BayesianNetwork;
 import io.github.alecredmond.export.network.BayesianNetworkData;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
@@ -13,6 +16,18 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class NetworkDataUtils {
   private NetworkDataUtils() {}
+
+  public static <T extends Observable> List<NodeState> convertToEliminations(
+      T observable, BayesianNetwork network, Map<Node, NodeObservation> newObservations) {
+    observable.resetObservations();
+    Set<Node> networkNodes = network.getNodes();
+    return newObservations.entrySet().stream()
+        .filter(e -> networkNodes.contains(e.getKey()))
+        .map(Map.Entry::getValue)
+        .map(NodeObservation::eliminatedStates)
+        .flatMap(Collection::stream)
+        .toList();
+  }
 
   public static <E extends Serializable> Set<Node> getNodesByID(
       Collection<E> nodeIDs, BayesianNetworkData networkData) {

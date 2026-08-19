@@ -79,6 +79,18 @@ public class Node {
     this.parents = List.of();
     this.children = List.of();
     this.nodeStates = stateIDs.stream().map(stateId -> new NodeState(stateId, this)).toList();
+    writeStatePositions();
+  }
+
+  /**
+   * Sets the position in each {@link NodeState} to equal its index in {@link #getNodeStates()}.
+   * This method runs internally whenever {@link #nodeStates} is updated.
+   */
+  void writeStatePositions() {
+    int position = 0;
+    for (NodeState state : nodeStates) {
+      state.setPosition(position++);
+    }
   }
 
   /**
@@ -171,6 +183,7 @@ public class Node {
     this.nodeStates = Collections.unmodifiableList(nodeStates);
     try {
       support.firePropertyChange(NODE_STATES_UPDATED.name(), oldStates, nodeStates);
+      writeStatePositions();
       return true;
     } catch (BayesNetIDException e) {
       log.error("Error setting states, '{}' reverting...", e.getMessage());

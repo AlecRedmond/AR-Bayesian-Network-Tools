@@ -1,5 +1,6 @@
 package io.github.alecredmond.internal.method.sampler;
 
+import io.github.alecredmond.export.inference.NodeObservation;
 import io.github.alecredmond.export.network.BayesianNetworkData;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
@@ -26,7 +27,7 @@ public class SampleCollectionImpl implements SampleCollection {
     this.networkData = networkData;
   }
 
-  public Map<Node, NodeState> getObservations() {
+  public Map<Node, NodeObservation> getObservations() {
     return collectionData.getNetworkObservations();
   }
 

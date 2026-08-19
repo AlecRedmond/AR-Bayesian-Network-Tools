@@ -720,7 +720,7 @@ class NewBayesianNetworkTest {
       test.addConstraint(events, conditions, probability);
       InferenceEngine engine = InferenceEngine.create(test);
       assertNotNull(engine);
-      engine.observeNetworkFromIds(conditions);
+      engine.setObservedById(conditions);
       assertTrue(test.isSolved());
       assertEquals(probability, engine.getPosteriorProbabilityById(events), 1e-6);
     }

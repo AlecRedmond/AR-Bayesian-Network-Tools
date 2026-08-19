@@ -4,7 +4,6 @@ import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
 import io.github.alecredmond.internal.application.vectoriterator.VectorOdometer;
 import io.github.alecredmond.internal.method.vectoriterator.iteratorutils.OdometerResetLogic;
-import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -17,7 +16,6 @@ public interface OdometerResetBase extends OdometerResetLogic<VectorOdometer> {
     boolean[] outerIteratorLocks = vectorOdometer.getOuterIteratorLocks();
     boolean[] innerIteratorLocks = vectorOdometer.getInnerIteratorLocks();
     boolean[][] isEvidenceArray = vectorOdometer.getNodeStateEvidenceArray();
-    Map<NodeState, Integer> stateIndexMap = vectorOdometer.getStateValueMap();
 
     Function<Node, NodeState> initialStateMapper = initialStatePositionSetter();
     Function<Node, boolean[]> evidenceMapper = buildEvidenceMaps();
@@ -28,7 +26,7 @@ public interface OdometerResetBase extends OdometerResetLogic<VectorOdometer> {
       Node node = nodeArray[x];
       NodeState state = initialStateMapper.apply(node);
       states[x] = state;
-      stateIndexes[x] = stateIndexMap.get(state);
+      stateIndexes[x] = state.getPosition();
       outerIteratorLocks[x] = outerFn.test(node);
       innerIteratorLocks[x] = innerFn.test(node);
       isEvidenceArray[x] = evidenceMapper.apply(node);

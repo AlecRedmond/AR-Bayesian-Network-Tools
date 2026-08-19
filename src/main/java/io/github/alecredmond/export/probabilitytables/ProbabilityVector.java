@@ -64,9 +64,6 @@ public class ProbabilityVector {
   /** Maps each {@link Node} in this vector to its index position in {@link #nodeArray}. */
   private final Map<Node, Integer> nodeIndexMap;
 
-  /** Maps each {@link NodeState} to its index position within its node's state array. */
-  private final Map<NodeState, Integer> stateValueMap;
-
   /**
    * Constructs a new {@code ProbabilityVector}. This constructor is used internally.
    *
@@ -76,7 +73,6 @@ public class ProbabilityVector {
    * @param strideLengths the stride values used to compute the probability index.
    * @param probabilities the flat double array containing probability entries.
    * @param nodeIndexMap a look-up map pointing from nodes to their structural array indexes.
-   * @param stateValueMap a look-up map pointing from states to their internal value indexes.
    */
   public ProbabilityVector(
       Node[] nodeArray,
@@ -84,15 +80,13 @@ public class ProbabilityVector {
       int[] numberOfStates,
       int[] strideLengths,
       double[] probabilities,
-      Map<Node, Integer> nodeIndexMap,
-      Map<NodeState, Integer> stateValueMap) {
+      Map<Node, Integer> nodeIndexMap) {
     this.nodeArray = nodeArray;
     this.stateArrays = stateArrays;
     this.numberOfStates = numberOfStates;
     this.strideLengths = strideLengths;
     this.probabilities = probabilities;
     this.nodeIndexMap = nodeIndexMap;
-    this.stateValueMap = stateValueMap;
   }
 
   /**
@@ -165,15 +159,5 @@ public class ProbabilityVector {
    */
   public Map<Node, Integer> getNodeIndexMap() {
     return this.nodeIndexMap;
-  }
-
-  /**
-   * Returns an index lookup map, linking each {@link NodeState} to its index position within its
-   * node's state array.
-   *
-   * @return a map linking states to their relative index positions.
-   */
-  public Map<NodeState, Integer> getStateValueMap() {
-    return this.stateValueMap;
   }
 }

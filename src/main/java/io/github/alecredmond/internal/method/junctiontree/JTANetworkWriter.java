@@ -1,14 +1,13 @@
 package io.github.alecredmond.internal.method.junctiontree;
 
+import io.github.alecredmond.export.inference.NodeObservation;
 import io.github.alecredmond.export.network.BayesianNetworkData;
 import io.github.alecredmond.export.node.Node;
-import io.github.alecredmond.export.node.NodeState;
+import io.github.alecredmond.export.probabilitytables.ObservedTable;
 import io.github.alecredmond.export.probabilitytables.ProbabilityTable;
 import io.github.alecredmond.internal.application.junctiontree.Clique;
 import io.github.alecredmond.internal.application.junctiontree.JunctionTreeData;
 import io.github.alecredmond.internal.application.junctiontree.Separator;
-import io.github.alecredmond.internal.method.node.NodeUtils;
-import io.github.alecredmond.internal.method.probabilitytables.TableUtils;
 import io.github.alecredmond.internal.method.probabilitytables.ObservedTableImpl;
 import io.github.alecredmond.internal.method.probabilitytables.tabletransfer.TableTransfer;
 import java.util.*;
@@ -56,30 +55,26 @@ class JTANetworkWriter {
   }
 
   public void writeObservations() {
-    BayesianNetworkData networkData = jtd.getNetworkData();
-
     Arrays.stream(jtd.getCliques())
         .map(Clique::getWriteToObserved)
         .flatMap(Collection::stream)
         .parallel()
         .forEach(TableTransfer::transfer);
 
-    jtd.getObservedTablesMap().values().parallelStream().forEach(ProbabilityTable::normalizeTable);
+    Collection<ObservedTable> observedTables = jtd.getObservedTablesMap().values();
 
-    Map<Node, NodeState> observationMap = Collections.unmodifiableMap(jtd.getObservedEvidence());
-    networkData.getNodes().forEach(node -> updateObservedTables(node, observationMap));
-  }
+    observedTables.parallelStream().forEach(ProbabilityTable::normalizeTable);
 
-  private void updateObservedTables(Node node, Map<Node, NodeState> observationMap) {
-    ObservedTableImpl oti = ((ObservedTableImpl) jtd.getObservedTablesMap().get(node));
-    oti.setObservations(observationMap);
-    oti.setTableName(
-        TableUtils.buildTableName(
-            List.of(node.getId()), NodeUtils.getNodeStateIds(jtd.getObservedEvidence().values())));
+    Map<Node, NodeObservation> observationMap =
+        Collections.unmodifiableMap(jtd.getObservedEvidence());
+
+    observedTables.stream()
+        .filter(ObservedTableImpl.class::isInstance)
+        .map(ObservedTableImpl.class::cast)
+        .forEach(oti -> oti.setObservations(observationMap));
   }
 
   public void writeBackToCPTs() {
-
     BayesianNetworkData bnd = jtd.getNetworkData();
 
     Arrays.stream(jtd.getCliques())

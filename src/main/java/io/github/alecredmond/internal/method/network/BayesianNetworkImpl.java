@@ -152,7 +152,7 @@ public class BayesianNetworkImpl implements BayesianNetwork, PropertyChangeListe
 
   public Set<Node> getNodes() {
     if (networkData.isSolved()) {
-      return Set.copyOf(new LinkedHashSet<>(networkData.getNodes()));
+      return Collections.unmodifiableSet(new LinkedHashSet<>(networkData.getNodes()));
     }
     return Set.copyOf(networkData.getNodeIDsMap().values());
   }
