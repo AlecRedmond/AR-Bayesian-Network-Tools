@@ -62,8 +62,11 @@ public class ConditionalTableImpl extends NetworkTableBase<ConditionalTableData>
   @Override
   public Map<NodeState, Double> getConditionalProb(Collection<NodeState> conditionStates) {
     try {
-      if (safeMode) TableUtils.assertAllNodesPresent(conditionStates, tableData.getConditions());
-      return TableUtils.buildConditionalProbMap(conditionStates, tableData);
+      Collection<NodeState> verified =
+          safeMode
+              ? TableUtils.assertAllNodesPresent(conditionStates, tableData.getConditions())
+              : conditionStates;
+      return TableUtils.buildConditionalProbMap(verified, tableData);
     } catch (NodeStateConflictException | ProbabilityTableRequestException e) {
       log.error(e.getMessage());
       return new HashMap<>();

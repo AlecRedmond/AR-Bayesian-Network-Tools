@@ -36,7 +36,7 @@ Add the latest release as a dependency in your pom.xml:
     <dependency>
         <groupId>io.github.alecredmond</groupId>
         <artifactId>ar-bayes-solver</artifactId>
-        <version>1.1.0</version>
+        <version>1.1.1</version>
     </dependency>
 </dependencies>
 ```
