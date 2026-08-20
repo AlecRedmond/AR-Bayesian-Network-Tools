@@ -14,4 +14,5 @@ public class SampleCollectionData {
   private final List<Sample> samples;
   private final Map<Node, NodeObservation> networkObservations;
   private final Node[] nodes;
+  private final Map<Node,Integer> nodeIndexMap;
 }

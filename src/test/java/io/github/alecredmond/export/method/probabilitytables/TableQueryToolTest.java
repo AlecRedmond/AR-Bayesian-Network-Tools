@@ -12,8 +12,10 @@ import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
 import io.github.alecredmond.export.probabilitytables.ConditionalTable;
 import io.github.alecredmond.export.probabilitytables.NetworkTable;
+import io.github.alecredmond.export.probabilitytables.ProbabilityVector;
 import io.github.alecredmond.export.probabilitytables.cptentry.CptEntry;
 import io.github.alecredmond.internal.method.node.NodeUtils;
+import io.github.alecredmond.internal.method.probabilitytables.probabilityvector.ProbabilityVectorFactory;
 import io.github.alecredmond.internal.method.vectoriterator.misciterators.StateCombinationGenerator;
 import java.io.Serializable;
 import java.util.*;
@@ -39,9 +41,7 @@ class TableQueryToolTest {
       BiFunction<NetworkTable, BayesianNetwork, Stream<Arguments>> function,
       Function<NetworkScenario, BayesianNetwork> networkInit,
       Predicate<? super NetworkTable> tableFilter) {
-    return Arrays.stream(NetworkScenario.values())
-        .filter(networkScenario -> !FANTASY_GRAPH.equals(networkScenario) || SOLVE_LONG_TESTS)
-        .map(networkInit)
+    return getBayesianNetworkStream(networkInit)
         .flatMap(
             network ->
                 network.getNetworkData().getNetworkTablesMap().values().stream()
@@ -49,6 +49,17 @@ class TableQueryToolTest {
                     .map(t -> Optional.ofNullable(function.apply(t, network)))
                     .filter(Optional::isPresent)
                     .flatMap(Optional::get));
+  }
+
+  private static Stream<BayesianNetwork> getBayesianNetworkStream(
+      Function<NetworkScenario, BayesianNetwork> networkInit) {
+    return Arrays.stream(NetworkScenario.values())
+        .filter(networkScenario -> !FANTASY_GRAPH.equals(networkScenario) || SOLVE_LONG_TESTS)
+        .map(networkInit);
+  }
+
+  public static Stream<Arguments> provideOverloadedCptQueryNetworks() {
+    return getBayesianNetworkStream(s -> s.get().solveNetwork()).map(Arguments::of);
   }
 
   public static Stream<Arguments> provideNetworkTables() {
@@ -88,7 +99,8 @@ class TableQueryToolTest {
     if (eventStateConstraints.isEmpty()) return null;
 
     List<Collection<NodeState>> conditions =
-        new StateCombinationGenerator(t).generateCombos(t.getConditions(), ArrayList::new);
+        new StateCombinationGenerator(t.getVector())
+            .generateCombos(t.getConditions(), ArrayList::new);
 
     if (conditions.isEmpty()) {
       Map<NodeState, ProbabilityConstraint> map = new HashMap<>();
@@ -242,5 +254,40 @@ class TableQueryToolTest {
                     assertEquals(conditionalProbMap.get(eventState), probability, DOUBLE_EQUALITY);
                   });
         });
+  }
+
+  @ParameterizedTest
+  @MethodSource("provideOverloadedCptQueryNetworks")
+  void testOverloadedCptQueries(BayesianNetwork network) {
+    List<Node> nodes = network.getNetworkData().getNodes();
+    ProbabilityVector vector = new ProbabilityVectorFactory().build(nodes);
+    StateCombinationGenerator generator = new StateCombinationGenerator(vector);
+
+    List<Set<NodeState>> allStates =
+        generator.generateCombos(new LinkedHashSet<>(nodes), LinkedHashSet::new);
+    List<NetworkTable> networkTables = network.getNetworkTables().values().stream().toList();
+
+    for (Set<NodeState> stateSet : allStates) {
+      Map<Node, NodeState> request = NodeUtils.generateRequest(stateSet);
+      for (NetworkTable networkTable : networkTables) {
+        List<NodeState> allInTable = limitToOverlapOnly(request, networkTable.getNodes());
+        List<NodeState> conditionsOnly = limitToOverlapOnly(request, networkTable.getConditions());
+
+        networkTable.setSafeMode(false);
+        double probabilityA = networkTable.getProbability(stateSet);
+        double probabilityB = networkTable.getProbability(allInTable);
+        assertEquals(probabilityA, probabilityB, DOUBLE_EQUALITY);
+        assertNotNull(networkTable.getProbability(conditionsOnly));
+
+        networkTable.setSafeMode(true);
+        double probabilityC = networkTable.getProbability(stateSet);
+        assertEquals(probabilityA, probabilityC, DOUBLE_EQUALITY);
+        assertNull(networkTable.getProbability(conditionsOnly));
+      }
+    }
+  }
+
+  private List<NodeState> limitToOverlapOnly(Map<Node, NodeState> request, Collection<Node> nodes) {
+    return nodes.stream().map(request::get).toList();
   }
 }

@@ -93,7 +93,7 @@ public class TableUtils {
   public static <T extends Collection<NodeState>, R extends T> List<T> generateStateCombinations(
       Set<Node> includedNodes, Supplier<R> supplier, ProbabilityTable table) {
     if (includedNodes.isEmpty()) return new ArrayList<>();
-    return new StateCombinationGenerator(table).generateCombos(includedNodes, supplier);
+    return new StateCombinationGenerator(table.getVector()).generateCombos(includedNodes, supplier);
   }
 
   public static Set<Node> getCommonNodes(ProbabilityTable tableA, ProbabilityTable tableB) {

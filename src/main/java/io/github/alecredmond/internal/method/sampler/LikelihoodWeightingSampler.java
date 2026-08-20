@@ -105,7 +105,7 @@ public class LikelihoodWeightingSampler extends MonteCarloSamplerImpl {
       Map<Set<NodeState>, Double> weightedStateSets) {
     double weight = 1.0;
     for (SamplePicker samplePicker : samplePickers) {
-      weight *= samplePicker.selectStateAndReturnWeight(selectedStateArray, weight);
+      weight *= samplePicker.selectStateAndReturnWeight(selectedStateArray);
       if (weight <= 0) return;
     }
     Set<NodeState> selectedStates = new LinkedHashSet<>(Arrays.asList(selectedStateArray));
