@@ -52,6 +52,10 @@ public class SampleCollectionImpl implements SampleCollection {
     return collectionData.getSamples();
   }
 
+  Map<Node, Integer> getIndexMap() {
+    return collectionData.getNodeIndexMap();
+  }
+
   public <T extends Serializable> void setDisplayedNodesById(Collection<T> nodeIds) {
     Set<Node> nodes = NetworkDataUtils.getNodesByID(nodeIds, networkData);
     setDisplayedNodes(nodes);

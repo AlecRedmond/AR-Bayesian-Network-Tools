@@ -3,6 +3,7 @@ package io.github.alecredmond.internal.method.vectoriterator.misciterators;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
 import io.github.alecredmond.export.probabilitytables.ProbabilityTable;
+import io.github.alecredmond.export.probabilitytables.ProbabilityVector;
 import io.github.alecredmond.internal.application.vectoriterator.VectorOdometer;
 import io.github.alecredmond.internal.method.vectoriterator.VectorIterator;
 import io.github.alecredmond.internal.method.vectoriterator.iteratorutils.resetlogictypes.OdometerResetDefault;
@@ -21,8 +22,8 @@ public class StateCombinationGenerator
   private final VectorOdometer odometer;
   private Set<Node> includedNodes;
 
-  public StateCombinationGenerator(ProbabilityTable table) {
-    this.odometer = new VectorOdometer(table.getVector());
+  public StateCombinationGenerator(ProbabilityVector vector) {
+    this.odometer = new VectorOdometer(vector);
     this.includedNodes = new HashSet<>();
     this.iterator = new VectorIterator<>(odometer, this);
   }

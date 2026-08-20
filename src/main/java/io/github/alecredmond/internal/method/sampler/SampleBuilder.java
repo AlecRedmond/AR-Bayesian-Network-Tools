@@ -6,6 +6,7 @@ import io.github.alecredmond.export.network.BayesianNetworkData;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.sampler.Sample;
 import io.github.alecredmond.internal.application.sampler.SampleCollectionData;
+import io.github.alecredmond.internal.method.node.NodeUtils;
 import java.util.*;
 import java.util.stream.IntStream;
 import lombok.NoArgsConstructor;
@@ -31,6 +32,7 @@ public class SampleBuilder {
             .samples(radixSort(sampleMap.keySet(), observations, nodeArray))
             .networkObservations(Collections.unmodifiableMap(observations))
             .nodes(nodeArray)
+            .nodeIndexMap(NodeUtils.buildNodeIndexMap(nodeArray))
             .build();
 
     return new SampleCollectionImpl(collectionData, networkData);

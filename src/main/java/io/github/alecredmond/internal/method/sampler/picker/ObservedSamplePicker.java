@@ -14,9 +14,9 @@ public class ObservedSamplePicker extends AbstractSamplePicker {
   }
 
   @Override
-  protected double pickNextState(NodeState[] sampleArray, double currentWeight) {
+  public double selectStateAndReturnWeight(NodeState[] sampleArray) {
     sampleArray[eventNodeIndexInSampleArray] = observedState;
     int cptIndex = super.getInitialCptIndex(sampleArray) + cptIndexDelta;
-    return currentWeight * cptProbabilities[cptIndex];
+    return cptProbabilities[cptIndex];
   }
 }

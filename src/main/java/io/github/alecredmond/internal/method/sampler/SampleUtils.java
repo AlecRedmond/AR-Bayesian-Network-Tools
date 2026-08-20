@@ -1,7 +1,9 @@
 package io.github.alecredmond.internal.method.sampler;
 
+import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
 import io.github.alecredmond.export.sampler.Sample;
+import io.github.alecredmond.internal.method.node.NodeUtils;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -23,8 +25,31 @@ public class SampleUtils {
 
   private static Stream<Sample> streamAllContaining(
       SampleCollectionImpl sampleCollection, Collection<NodeState> states) {
-    Set<NodeState> stateSet = new HashSet<>(states);
-    return sampleCollection.getSamples().stream().filter(sample -> sample.containsAll(stateSet));
+    Map<Integer, Set<NodeState>> indexRequestMap =
+        buildIndexRequestMap(
+            NodeUtils.generateMultiRequest(states), sampleCollection.getIndexMap());
+    return sampleCollection.getSamples().stream()
+        .filter(sample -> containsRequest(sample, indexRequestMap));
+  }
+
+  private static Map<Integer, Set<NodeState>> buildIndexRequestMap(
+      Map<Node, Set<NodeState>> multirequest, Map<Node, Integer> indexMap) {
+    return multirequest.entrySet().stream()
+        .map(e -> Map.entry(indexMap.get(e.getKey()), e.getValue()))
+        .collect(
+            Collectors.toMap(
+                Map.Entry::getKey, Map.Entry::getValue, (x, y) -> y, LinkedHashMap::new));
+  }
+
+  private static boolean containsRequest(
+      Sample sample, Map<Integer, Set<NodeState>> indexRequestMap) {
+    NodeState[] states = sample.getAllStates();
+    for (Map.Entry<Integer, Set<NodeState>> entry : indexRequestMap.entrySet()) {
+      Integer index = entry.getKey();
+      Set<NodeState> request = entry.getValue();
+      if (!request.contains(states[index])) return false;
+    }
+    return true;
   }
 
   public static List<Sample> listSamplesIncludingStates(

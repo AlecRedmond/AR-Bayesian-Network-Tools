@@ -22,14 +22,6 @@ public abstract class AbstractSamplePicker implements SamplePicker {
     this.sampleWeighting = factoryData.getSampleWeighting();
   }
 
-  @Override
-  public double selectStateAndReturnWeight(NodeState[] sampleArray, double currentWeight) {
-    if (currentWeight == 0.0) return 0.0;
-    return pickNextState(sampleArray, currentWeight);
-  }
-
-  protected abstract double pickNextState(NodeState[] sampleArray, double currentWeight);
-
   protected int randomIndex(double[] weights, double totalWeight) {
     double randomValue = RANDOM.nextDouble() * totalWeight;
     int i;
