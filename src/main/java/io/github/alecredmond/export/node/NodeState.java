@@ -1,5 +1,6 @@
 package io.github.alecredmond.export.node;
 
+import io.github.alecredmond.export.nodedef.StateDef;
 import java.io.Serializable;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -36,6 +37,10 @@ public class NodeState {
 
   /** The parent {@link Node} that exhibits this state. */
   private final Node node;
+
+  private StateDef stateDef;
+
+  private String name;
 
   private int position;
 

@@ -6,6 +6,8 @@ import io.github.alecredmond.exceptions.BayesNetIDException;
 import io.github.alecredmond.export.constraints.ProbabilityConstraint;
 import io.github.alecredmond.export.network.BayesianNetwork;
 import io.github.alecredmond.export.network.BayesianNetworkBuilder;
+import io.github.alecredmond.export.nodedef.NodeDef;
+import io.github.alecredmond.export.probabilitytables.NetworkTable;
 import io.github.alecredmond.internal.method.node.NodeUtils;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
@@ -61,6 +63,14 @@ public class Node {
 
   /** The children of this {@code Node} in the {@link BayesianNetwork} structure. */
   private List<Node> children;
+
+  private NodeDef nodeDef;
+
+  private String name;
+
+  private NetworkTable cpt;
+
+  private BayesianNetwork network;
 
   /**
    * Constructs a new {@code Node} using its identifier and a collection of state identifiers.

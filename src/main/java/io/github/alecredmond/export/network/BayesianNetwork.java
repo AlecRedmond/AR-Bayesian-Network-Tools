@@ -5,16 +5,18 @@ import io.github.alecredmond.exceptions.ConstraintValidationException;
 import io.github.alecredmond.exceptions.NetworkStructureException;
 import io.github.alecredmond.export.constraints.MarginalConstraint;
 import io.github.alecredmond.export.constraints.ProbabilityConstraint;
+import io.github.alecredmond.export.inference.InferenceAlgorithm;
+import io.github.alecredmond.export.inference.InferenceEngine;
+import io.github.alecredmond.export.network.serialized.SerializedBayesianNetwork;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
+import io.github.alecredmond.export.nodedef.NodeDef;
 import io.github.alecredmond.export.probabilitytables.NetworkTable;
-import io.github.alecredmond.export.solver.BayesSolver;
-import io.github.alecredmond.export.inference.InferenceEngine;
-import io.github.alecredmond.export.inference.InferenceAlgorithm;
 import io.github.alecredmond.export.sampler.MonteCarloSampler;
-import io.github.alecredmond.export.network.serialized.SerializedBayesianNetwork;
+import io.github.alecredmond.export.solver.BayesSolver;
 import io.github.alecredmond.internal.fileio.NetworkFileIO;
 import io.github.alecredmond.internal.method.network.BayesianNetworkImpl;
+import io.github.alecredmond.internal.method.nodedef.NodeDefNetworkBuilder;
 import io.github.alecredmond.internal.serialization.BayesianNetworkSerializer;
 import java.io.File;
 import java.io.Serializable;
@@ -135,6 +137,11 @@ public interface BayesianNetwork {
    */
   static BayesianNetwork loadNetwork(SerializedBayesianNetwork serializedNetwork) {
     return new BayesianNetworkSerializer().deSerialize(serializedNetwork);
+  }
+
+  static <T extends NodeDef> BayesianNetwork createFromNodeDefs(
+      Collection<T> nodeDefs, String networkName) {
+    return new NodeDefNetworkBuilder().createNetwork(nodeDefs, networkName);
   }
 
   // ----------------------------------------------------------------------------------------------
@@ -750,8 +757,9 @@ public interface BayesianNetwork {
   InferenceEngine buildInferenceEngine();
 
   /**
-   * Creates a new Monte Carlo {@link MonteCarloSampler} from this {@code BayesianNetwork}. A {@link MonteCarloSampler}
-   * provides utilities for running indirect inference on a {@code BayesianNetwork}.
+   * Creates a new Monte Carlo {@link MonteCarloSampler} from this {@code BayesianNetwork}. A {@link
+   * MonteCarloSampler} provides utilities for running indirect inference on a {@code
+   * BayesianNetwork}.
    *
    * @return a new {@link MonteCarloSampler} referencing this {@code BayesianNetwork}.
    */

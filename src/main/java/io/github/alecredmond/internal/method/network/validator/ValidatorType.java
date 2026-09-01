@@ -8,7 +8,8 @@ public enum ValidatorType {
   ID_VALIDATOR(NetworkIdValidator::new),
   STRUCTURE_VALIDATOR(NetworkStructureValidator::new),
   CONSTRAINT_VALIDATOR(NetworkConstraintValidator::new),
-  STATE_POSITION_VALIDATOR(NodeStatePositionValidator::new);
+  STATE_POSITION_VALIDATOR(NodeStatePositionValidator::new),
+  ALL_NODES_ATTACHED_TO_NETWORK(NodeLinkedToNetworkValidator::new);
 
   private final Supplier<NetworkValidator> validatorSupplier;
 

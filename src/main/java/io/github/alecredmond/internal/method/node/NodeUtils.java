@@ -3,6 +3,8 @@ package io.github.alecredmond.internal.method.node;
 import io.github.alecredmond.exceptions.NodeStateConflictException;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
+import io.github.alecredmond.export.nodedef.NodeDef;
+import io.github.alecredmond.export.nodedef.StateDef;
 import java.io.Serializable;
 import java.util.*;
 import java.util.function.Predicate;
@@ -78,6 +80,14 @@ public class NodeUtils {
                           return newPerturbation;
                         }))
         .toList();
+  }
+
+  public static List<Serializable> getDefIds(List<NodeDef> parentDefs) {
+    return parentDefs.stream().map(NodeDef::getId).toList();
+  }
+
+  public static List<Serializable> getDefStateIds(List<StateDef> stateDefs) {
+    return stateDefs.stream().map(StateDef::getId).toList();
   }
 
   public static Set<Node> getNodes(Collection<NodeState> states) {

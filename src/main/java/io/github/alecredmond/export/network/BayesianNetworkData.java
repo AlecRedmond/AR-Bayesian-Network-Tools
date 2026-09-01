@@ -7,10 +7,11 @@ import io.github.alecredmond.export.probabilitytables.ConditionalTable;
 import io.github.alecredmond.export.probabilitytables.NetworkTable;
 import io.github.alecredmond.export.probabilitytables.RootNodeTable;
 import io.github.alecredmond.export.solver.BayesSolver;
-
 import java.io.Serializable;
 import java.util.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 /**
  * Container for data used in a {@link BayesianNetwork}.
@@ -68,6 +69,8 @@ public class BayesianNetworkData {
    */
   private boolean solved;
 
+  @EqualsAndHashCode.Exclude @ToString.Exclude private BayesianNetwork bayesianNetwork;
+
   /**
    * Constructs a new, empty {@code BayesianNetworkData} instance.
    *
@@ -82,6 +85,7 @@ public class BayesianNetworkData {
     this.nodes = new ArrayList<>();
     this.networkName = "UNNAMED NETWORK";
     this.solved = false;
+    this.bayesianNetwork = null;
   }
 
   /**

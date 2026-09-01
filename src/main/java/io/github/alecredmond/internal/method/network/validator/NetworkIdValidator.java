@@ -21,6 +21,7 @@ public class NetworkIdValidator implements NetworkValidator {
     Serializable nodeId = node.getId();
     List<Serializable> stateIds = node.getNodeStates().stream().map(NodeState::getId).toList();
     validateNewIds(nodeId, stateIds, data);
+    node.setNetwork(data.getBayesianNetwork());
   }
 
   public Set<Serializable> validateExistingData(BayesianNetworkData data) {

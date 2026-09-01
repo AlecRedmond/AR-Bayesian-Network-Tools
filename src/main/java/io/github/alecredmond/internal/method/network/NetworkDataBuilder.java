@@ -58,6 +58,7 @@ public class NetworkDataBuilder {
               NetworkTable table = tableBuilder.buildTable(events, conditions);
               table.normalizeTable();
               networkData.getNetworkTablesMap().put(node, table);
+              node.setCpt(table);
             });
   }
 
