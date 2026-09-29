@@ -5,7 +5,7 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.UUID;
 
-import io.github.alecredmond.export.nodedef.NodeDef;
+import io.github.alecredmond.export.nodedef.NodeDefinition;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -15,10 +15,10 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @ToString
-abstract class AbstractNodeDef implements NodeDef {
+abstract class AbstractNodeDef implements NodeDefinition {
   @EqualsAndHashCode.Include protected final Serializable id;
   protected String name;
-  @ToString.Exclude protected List<NodeDef> parentDefs;
+  @ToString.Exclude protected List<NodeDefinition> parentDefs;
   @ToString.Exclude protected Node node;
 
   protected AbstractNodeDef() {
@@ -45,7 +45,7 @@ abstract class AbstractNodeDef implements NodeDef {
   }
 
   @Override
-  public List<NodeDef> getParentDefs() {
+  public List<NodeDefinition> getParentDefs() {
     return this.parentDefs;
   }
 
@@ -60,7 +60,7 @@ abstract class AbstractNodeDef implements NodeDef {
     updateNode();
   }
 
-  public void setParentDefs(List<NodeDef> parentDefs) {
+  public void setParentDefs(List<NodeDefinition> parentDefs) {
     this.parentDefs = parentDefs;
     updateNode();
   }

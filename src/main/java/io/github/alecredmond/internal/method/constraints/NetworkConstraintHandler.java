@@ -3,6 +3,7 @@ package io.github.alecredmond.internal.method.constraints;
 import io.github.alecredmond.exceptions.ConstraintValidationException;
 import io.github.alecredmond.export.constraints.ProbabilityConstraint;
 import io.github.alecredmond.export.network.BayesianNetworkData;
+import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
 import io.github.alecredmond.internal.application.constraint.ConstraintFactoryOutput;
 import io.github.alecredmond.internal.method.node.NodeUtils;
@@ -39,6 +40,21 @@ public class NetworkConstraintHandler {
     return Optional.empty();
   }
 
+  public void removeCptConstraints(Node node) {
+    Set<Node> eventNode = Set.of(node);
+    Set<Node> conditionNodes = new HashSet<>(node.getParents());
+    removeConstraints(
+        constraint ->
+            constraint.getEventNodes().equals(eventNode)
+                && constraint.getConditionNodes().equals(conditionNodes),
+        networkData);
+  }
+
+  public static boolean removeConstraints(
+      Predicate<ProbabilityConstraint> predicate, BayesianNetworkData networkData) {
+    return networkData.getConstraints().removeIf(predicate);
+  }
+
   public Optional<ConstraintValidationException> addConstraints(
       Set<NodeState> eventStates, Set<NodeState> conditionStates, double probability) {
     List<Set<NodeState>> splitConditions = NodeUtils.splitStatesSharingNodes(conditionStates);
@@ -65,11 +81,6 @@ public class NetworkConstraintHandler {
 
   public boolean removeConstraint(Set<NodeState> eventStates, Set<NodeState> conditionStates) {
     return removeConstraints(exactMatch(eventStates, conditionStates), networkData);
-  }
-
-  public static boolean removeConstraints(
-      Predicate<ProbabilityConstraint> predicate, BayesianNetworkData networkData) {
-    return networkData.getConstraints().removeIf(predicate);
   }
 
   private Predicate<ProbabilityConstraint> exactMatch(

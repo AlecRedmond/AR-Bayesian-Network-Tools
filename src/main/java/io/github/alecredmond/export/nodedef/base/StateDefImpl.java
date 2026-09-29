@@ -4,7 +4,7 @@ import io.github.alecredmond.export.node.NodeState;
 import java.io.Serializable;
 import java.util.UUID;
 
-import io.github.alecredmond.export.nodedef.NodeDef;
+import io.github.alecredmond.export.nodedef.NodeDefinition;
 import io.github.alecredmond.export.nodedef.StateDef;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -15,16 +15,16 @@ import lombok.ToString;
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class StateDefImpl implements StateDef {
   @EqualsAndHashCode.Include @ToString.Include protected final Serializable id;
-  @EqualsAndHashCode.Include protected final NodeDef nodeDef;
+  @EqualsAndHashCode.Include protected final NodeDefinition nodeDef;
   @ToString.Include protected String name;
   protected NodeState nodeState;
 
-  public StateDefImpl(Serializable id, NodeDef nodeDef) {
+  public StateDefImpl(Serializable id, NodeDefinition nodeDef) {
     this.id = id;
     this.nodeDef = nodeDef;
   }
 
-  public StateDefImpl(NodeDef nodeDef) {
+  public StateDefImpl(NodeDefinition nodeDef) {
     this.id = UUID.randomUUID();
     this.nodeDef = nodeDef;
   }
@@ -33,4 +33,5 @@ public class StateDefImpl implements StateDef {
     this.name = name;
     nodeDef.updateNode();
   }
+
 }

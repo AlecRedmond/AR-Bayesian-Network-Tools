@@ -12,5 +12,5 @@ public interface StateDef {
 
   void setNodeState(NodeState nodeState);
 
-  DiscreteNodeDef getNodeDef();
+  NodeDefinition getNodeDef();
 }

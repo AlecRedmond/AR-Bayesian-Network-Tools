@@ -341,7 +341,7 @@ public class BayesianNetworkImpl implements BayesianNetwork, PropertyChangeListe
   }
 
   public BayesianNetwork buildNetworkData() {
-    new NetworkDataBuilder(networkData).build();
+    new NetworkDataBuilder(this).build();
     return this;
   }
 

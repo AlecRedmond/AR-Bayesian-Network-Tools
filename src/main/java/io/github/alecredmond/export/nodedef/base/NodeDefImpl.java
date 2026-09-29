@@ -1,8 +1,8 @@
 package io.github.alecredmond.export.nodedef.base;
 
-import io.github.alecredmond.export.nodedef.DiscreteNodeDef;
+import io.github.alecredmond.export.nodedef.NodeDefinition;
 import io.github.alecredmond.export.nodedef.StateDef;
-import io.github.alecredmond.export.nodedef.cptdef.CptDef;
+import io.github.alecredmond.export.nodedef.attachedcpt.AttachedCpt;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Optional;
@@ -15,14 +15,14 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 @EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = true)
 @ToString(callSuper = true)
-public class DiscreteNodeDefImpl extends AbstractNodeDef implements DiscreteNodeDef {
+public class NodeDefImpl extends AbstractNodeDef implements NodeDefinition {
   protected List<StateDef> stateDefs;
 
-  public DiscreteNodeDefImpl() {
+  public NodeDefImpl() {
     super();
   }
 
-  public <T extends Serializable> DiscreteNodeDefImpl(T id) {
+  public <T extends Serializable> NodeDefImpl(T id) {
     super(id);
   }
 
@@ -31,13 +31,14 @@ public class DiscreteNodeDefImpl extends AbstractNodeDef implements DiscreteNode
     return this.stateDefs;
   }
 
-  @Override
-  public Optional<CptDef> getCptDef() {
-    return Optional.empty();
-  }
-
   public void setStateDefs(List<StateDef> stateDefs) {
     this.stateDefs = stateDefs;
     updateNode();
   }
+
+  @Override
+  public Optional<AttachedCpt> getAttachedCpt() {
+    return Optional.empty();
+  }
+
 }

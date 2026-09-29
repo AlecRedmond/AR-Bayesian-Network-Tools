@@ -3,7 +3,7 @@ package io.github.alecredmond.internal.method.node;
 import io.github.alecredmond.exceptions.NodeStateConflictException;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
-import io.github.alecredmond.export.nodedef.NodeDef;
+import io.github.alecredmond.export.nodedef.NodeDefinition;
 import io.github.alecredmond.export.nodedef.StateDef;
 import java.io.Serializable;
 import java.util.*;
@@ -82,8 +82,8 @@ public class NodeUtils {
         .toList();
   }
 
-  public static List<Serializable> getDefIds(List<NodeDef> parentDefs) {
-    return parentDefs.stream().map(NodeDef::getId).toList();
+  public static List<Serializable> getDefIds(List<NodeDefinition> parentDefs) {
+    return parentDefs.stream().map(NodeDefinition::getId).toList();
   }
 
   public static List<Serializable> getDefStateIds(List<StateDef> stateDefs) {

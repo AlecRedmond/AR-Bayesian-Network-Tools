@@ -1,16 +1,18 @@
 package io.github.alecredmond.export.nodedef;
 
 import io.github.alecredmond.export.node.Node;
+import io.github.alecredmond.export.nodedef.attachedcpt.AttachedCpt;
 import io.github.alecredmond.internal.method.nodedef.NodeDefUpdateUtility;
 import java.io.Serializable;
 import java.util.List;
+import java.util.Optional;
 
-public interface NodeDef {
+public interface NodeDefinition {
   Serializable getId();
 
   String getName();
 
-  List<NodeDef> getParentDefs();
+  List<NodeDefinition> getParentDefs();
 
   Node getNode();
 
@@ -19,4 +21,8 @@ public interface NodeDef {
   default void updateNode() {
     NodeDefUpdateUtility.updateNode(this);
   }
+
+  List<StateDef> getStateDefs();
+
+  Optional<AttachedCpt> getAttachedCpt();
 }

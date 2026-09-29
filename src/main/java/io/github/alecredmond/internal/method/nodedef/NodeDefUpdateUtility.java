@@ -4,8 +4,7 @@ import io.github.alecredmond.exceptions.BayesNetIDException;
 import io.github.alecredmond.export.network.BayesianNetwork;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
-import io.github.alecredmond.export.nodedef.DiscreteNodeDef;
-import io.github.alecredmond.export.nodedef.NodeDef;
+import io.github.alecredmond.export.nodedef.NodeDefinition;
 import io.github.alecredmond.export.nodedef.StateDef;
 import io.github.alecredmond.internal.method.network.changehandlers.CollectionChangeAnalyzer;
 import io.github.alecredmond.internal.method.node.NodeUtils;
@@ -18,7 +17,7 @@ import java.util.Optional;
 public class NodeDefUpdateUtility {
   private NodeDefUpdateUtility() {}
 
-  public static void updateNode(NodeDef nodeDef) {
+  public static void updateNode(NodeDefinition nodeDef) {
     Optional.ofNullable(nodeDef.getNode())
         .ifPresent(
             node -> {
@@ -29,25 +28,23 @@ public class NodeDefUpdateUtility {
             });
   }
 
-  private static void checkId(NodeDef nodeDef, Node node) {
+  private static void checkId(NodeDefinition nodeDef, Node node) {
     if (nodeDef.getId().equals(node.getId())) return;
     throw new BayesNetIDException(
         "Node Definition %s has changed ID, Node %s has been invalidated!"
             .formatted(nodeDef, node));
   }
 
-  private static void checkName(NodeDef nodeDef, Node node) {
+  private static void checkName(NodeDefinition nodeDef, Node node) {
     if (nodeDef.getName().equals(node.getName())) return;
     node.setName(nodeDef.getName());
   }
 
-  private static void checkNodeStates(NodeDef nodeDef, Node node) {
-    if (!(nodeDef instanceof DiscreteNodeDef discreteNodeDef)) return;
-
+  private static void checkNodeStates(NodeDefinition nodeDef, Node node) {
     CollectionChangeAnalyzer<Serializable> analyzer =
         new CollectionChangeAnalyzer<>(
             NodeUtils.getNodeStateIds(node.getNodeStates()),
-            NodeUtils.getDefStateIds(discreteNodeDef.getStateDefs()));
+            NodeUtils.getDefStateIds(nodeDef.getStateDefs()));
 
     if (analyzer.isCollectionIdenticallyOrdered()) return;
 
@@ -56,14 +53,14 @@ public class NodeDefUpdateUtility {
     analyzer.getRemoved().forEach(stateMap::remove);
 
     List<NodeState> newStates =
-        discreteNodeDef.getStateDefs().stream()
+        nodeDef.getStateDefs().stream()
             .map(stateDef -> addOrCreateNodeState(stateDef, node, stateMap))
             .toList();
 
     node.setNodeStates(newStates);
   }
 
-  private static void checkParents(NodeDef nodeDef, Node node) {
+  private static void checkParents(NodeDefinition nodeDef, Node node) {
     List<Serializable> defParentIds = NodeUtils.getDefIds(nodeDef.getParentDefs());
 
     CollectionChangeAnalyzer<Serializable> analyzer =

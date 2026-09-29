@@ -27,6 +27,6 @@ module BayesSolver {
   exports io.github.alecredmond.export.probabilitytables.serialized;
   exports io.github.alecredmond.export.sampler;
   exports io.github.alecredmond.export.solver;
-    exports io.github.alecredmond.export.nodedef.cptdef;
-    exports io.github.alecredmond.export.nodedef.base;
+  exports io.github.alecredmond.export.nodedef.base;
+  exports io.github.alecredmond.export.nodedef.attachedcpt;
 }
