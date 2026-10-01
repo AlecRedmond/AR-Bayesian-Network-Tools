@@ -55,11 +55,11 @@ public class JunctionTableSummer implements OdometerResetDefault, OdometerUpdate
   public Function<Node, NodeState> initialStatePositionSetter() {
     return node ->
         requestNodes.contains(node)
-            ? node.getNodeStates().stream()
+            ? node.getStates().stream()
                 .filter(requestStates::contains)
                 .findFirst()
                 .orElseThrow()
-            : node.getNodeStates().getFirst();
+            : node.getStates().getFirst();
   }
 
   @Override

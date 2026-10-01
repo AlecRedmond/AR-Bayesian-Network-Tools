@@ -7,6 +7,8 @@ import io.github.alecredmond.export.network.BayesianNetworkData;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
 import io.github.alecredmond.internal.method.node.NodeUtils;
+import io.github.alecredmond.internal.method.utils.CollectionToString;
+
 import java.util.*;
 
 /**
@@ -195,10 +197,10 @@ public class NodeObservation {
     String stringStates;
     if (observedStates.size() >= eliminatedStates.size()) {
       format = "%s!={%s}";
-      stringStates = NodeUtils.formatStatesToString(eliminatedStates);
+        stringStates = CollectionToString.apply(eliminatedStates);
     } else {
       format = "%s=={%s}";
-      stringStates = NodeUtils.formatStatesToString(observedStates);
+        stringStates = CollectionToString.apply(observedStates);
     }
     return format.formatted(node, stringStates);
   }

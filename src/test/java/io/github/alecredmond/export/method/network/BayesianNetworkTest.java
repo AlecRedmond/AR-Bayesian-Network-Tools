@@ -79,7 +79,7 @@ class BayesianNetworkTest {
       Node nodeA = net.getNode("A");
 
       assertNotNull(nodeA);
-      assertEquals(2, nodeA.getNodeStates().size());
+      assertEquals(2, nodeA.getStates().size());
       assertNotNull(net.getNodeState("A_T"));
       assertNotNull(net.getNodeState("A_F"));
     }
@@ -106,7 +106,7 @@ class BayesianNetworkTest {
       net.addNewNode("A", List.of());
       Node nodeA = net.getNode("A");
       assertNotNull(nodeA);
-      assertTrue(nodeA.getNodeStates().isEmpty());
+      assertTrue(nodeA.getStates().isEmpty());
     }
 
     @Test
@@ -272,10 +272,10 @@ class BayesianNetworkTest {
     void buildNetwork() {
       Node a = new Node("A", List.of("A_T", "A_F"));
       Node b = new Node("B", List.of("B_T", "B_F"));
-      aT = a.getNodeStates().getFirst();
-      aF = a.getNodeStates().getLast();
-      bT = b.getNodeStates().getFirst();
-      bF = b.getNodeStates().getLast();
+      aT = a.getStates().getFirst();
+      aF = a.getStates().getLast();
+      bT = b.getStates().getFirst();
+      bF = b.getStates().getLast();
       net.addNode(a);
       net.addNode(b);
       net.addParents(b, a);

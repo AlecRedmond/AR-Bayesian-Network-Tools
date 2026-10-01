@@ -136,7 +136,7 @@ public class ConstraintSolverBase
   @Override
   public Function<Node, NodeState> initialStatePositionSetter() {
     Map<Node, NodeState> condMap = NodeUtils.generateRequest(constraint.getConditionStates());
-    return node -> condMap.containsKey(node) ? condMap.get(node) : node.getNodeStates().getFirst();
+    return node -> condMap.containsKey(node) ? condMap.get(node) : node.getStates().getFirst();
   }
 
   @Override

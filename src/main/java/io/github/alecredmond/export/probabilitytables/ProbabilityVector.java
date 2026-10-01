@@ -1,5 +1,6 @@
 package io.github.alecredmond.export.probabilitytables;
 
+import io.github.alecredmond.export.cartesianvector.CartesianVector;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
 import java.util.Map;
@@ -17,42 +18,15 @@ import lombok.EqualsAndHashCode;
  * P(S) = probabilities[index]
  * }</pre>
  *
- * <p>Node ordering is defined by {@link #nodeArray}. The same index positions map consistently
+ * <p>Node ordering is defined by {@link #orderedNodes}. The same index positions map consistently
  * across {@link #stateArrays}, {@link #numberOfStates}, and {@link #strideLengths}.
  *
  * @see ProbabilityTable
  * @author Alec Redmond
  */
 @SuppressWarnings("LombokGetterMayBeUsed")
-@EqualsAndHashCode
-public class ProbabilityVector {
-
-  /** The ordered array of nodes managed by this probability vector. */
-  private final Node[] nodeArray;
-
-  /**
-   * The states available for each node, parallel to {@link #nodeArray}. {@code stateArrays[i]}
-   * contains all {@link NodeState} values for {@code nodeArray[i]}. <br>
-   * Accessing {@code stateArrays[i][j]} is equivalent to {@code
-   * nodeArray[i].getNodeStates().get(j)}.
-   */
-  private final NodeState[][] stateArrays;
-
-  /**
-   * The number of {@link NodeState} values for each node, parallel to {@link #nodeArray}.
-   * Equivalent to {@code stateArrays[i].length} for each index {@code i}.
-   */
-  private final int[] numberOfStates;
-
-  /**
-   * The stride values used to compute an index into {@link #probabilities} for a given state
-   * combination, parallel to {@link #nodeArray}. The multiplier decreases along the length of the
-   * array such that:<br>
-   * {@code strideLengths[i+1] = strideLengths[i] / numberOfStates[i]} <br>
-   * The final element will always equal 1.<br>
-   * See the class-level documentation for the full indexing formula.
-   */
-  private final int[] strideLengths;
+@EqualsAndHashCode(callSuper = true)
+public class ProbabilityVector extends CartesianVector<Node, NodeState> {
 
   /**
    * The probability value for each {@link NodeState} combination in the Cartesian product. The
@@ -61,13 +35,13 @@ public class ProbabilityVector {
    */
   private final double[] probabilities;
 
-  /** Maps each {@link Node} in this vector to its index position in {@link #nodeArray}. */
+  /** Maps each {@link Node} in this vector to its index position in {@link #orderedNodes}. */
   private final Map<Node, Integer> nodeIndexMap;
 
   /**
    * Constructs a new {@code ProbabilityVector}. This constructor is used internally.
    *
-   * @param nodeArray the ordered array of nodes in this vector.
+   * @param orderedNodes the ordered array of nodes in this vector.
    * @param stateArrays the multidimensional array of states parallel to the node array.
    * @param numberOfStates the number of states available for each node.
    * @param strideLengths the stride values used to compute the probability index.
@@ -75,16 +49,14 @@ public class ProbabilityVector {
    * @param nodeIndexMap a look-up map pointing from nodes to their structural array indexes.
    */
   public ProbabilityVector(
-      Node[] nodeArray,
+      Node[] orderedNodes,
       NodeState[][] stateArrays,
       int[] numberOfStates,
       int[] strideLengths,
       double[] probabilities,
-      Map<Node, Integer> nodeIndexMap) {
-    this.nodeArray = nodeArray;
-    this.stateArrays = stateArrays;
-    this.numberOfStates = numberOfStates;
-    this.strideLengths = strideLengths;
+      Map<Node, Integer> nodeIndexMap,
+      int rank) {
+    super(orderedNodes, stateArrays, numberOfStates, strideLengths, rank);
     this.probabilities = probabilities;
     this.nodeIndexMap = nodeIndexMap;
   }
@@ -101,28 +73,18 @@ public class ProbabilityVector {
    *
    * @return the parallel node array.
    */
-  public Node[] getNodeArray() {
-    return this.nodeArray;
+  @Override
+  public Node[] getOrderedNodes() {
+    return this.orderedNodes;
   }
 
   /**
-   * Returns the states available for each node, parallel to {@link #nodeArray}. {@code
-   * stateArrays[i]} contains all {@link NodeState} values for {@code nodeArray[i]}. <br>
-   * Accessing {@code stateArrays[i][j]} is equivalent to {@code
-   * nodeArray[i].getNodeStates().get(j)}.
-   *
-   * @return the parallel matrix of node states.
-   */
-  public NodeState[][] getStateArrays() {
-    return this.stateArrays;
-  }
-
-  /**
-   * Returns the number of {@link NodeState} values for each node, parallel to {@link #nodeArray}.
-   * Equivalent to {@code stateArrays[i].length} for each index {@code i}.
+   * Returns the number of {@link NodeState} values for each node, parallel to {@link
+   * #orderedNodes}. Equivalent to {@code stateArrays[i].length} for each index {@code i}.
    *
    * @return the parallel array of state counts.
    */
+  @Override
   public int[] getNumberOfStates() {
     return this.numberOfStates;
   }
@@ -136,8 +98,32 @@ public class ProbabilityVector {
    *
    * @return the parallel array of stride lengths.
    */
+  @Override
   public int[] getStrideLengths() {
     return this.strideLengths;
+  }
+
+  /**
+   * Returns the states available for each node, parallel to {@link #orderedNodes}. {@code
+   * stateArrays[i]} contains all {@link NodeState} values for {@code nodeArray[i]}. <br>
+   * Accessing {@code stateArrays[i][j]} is equivalent to {@code
+   * nodeArray[i].getNodeStates().get(j)}.
+   *
+   * @return the parallel matrix of node states.
+   */
+  @Override
+  public NodeState[][] getStateArrays() {
+    return this.stateArrays;
+  }
+
+  @Override
+  protected int getNodeOrderIndex(Node node) {
+    return nodeIndexMap.get(node);
+  }
+
+  @Override
+  protected int getStatePositionIndex(NodeState nodeState) {
+    return nodeState.getPosition();
   }
 
   /**
@@ -153,7 +139,7 @@ public class ProbabilityVector {
 
   /**
    * Returns an index lookup map, linking each {@link Node} in this vector to its index position in
-   * {@link #nodeArray}.
+   * {@link #orderedNodes}.
    *
    * @return a map linking nodes to their absolute array index positions.
    */

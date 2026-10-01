@@ -58,10 +58,10 @@ public class SolverValidator {
 
   private boolean tableSizeIsCorrect(NetworkTable table) {
     ProbabilityVector vector = table.getVector();
-    Node[] nodes = vector.getNodeArray();
+    Node[] nodes = vector.getOrderedNodes();
     NodeState[][] states = vector.getStateArrays();
     for (int i = 0; i < nodes.length; i++) {
-      if (states[i].length != nodes[i].getNodeStates().size()) return false;
+      if (states[i].length != nodes[i].getStates().size()) return false;
     }
     return true;
   }

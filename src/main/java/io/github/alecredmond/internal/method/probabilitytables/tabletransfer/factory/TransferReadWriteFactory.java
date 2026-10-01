@@ -28,7 +28,7 @@ public abstract class TransferReadWriteFactory<T extends TransferIterator>
   }
 
   private int calculateTransferArrayLength() {
-    return commonNodes.stream().map(node -> node.getNodeStates().size()).reduce(1, (x, y) -> x * y);
+    return commonNodes.stream().map(node -> node.getStates().size()).reduce(1, (x, y) -> x * y);
   }
 
   protected TransferReadWriteFactory(

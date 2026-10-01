@@ -173,7 +173,7 @@ class TableQueryToolTest {
     networkTable.normalizeTable();
     int numOfConditionCombos =
         networkTable.getConditions().stream()
-            .mapToInt(c -> c.getNodeStates().size())
+            .mapToInt(c -> c.getStates().size())
             .reduce((x, y) -> x * y)
             .orElse(1);
     assertEquals(numOfConditionCombos, Arrays.stream(probs).sum(), DOUBLE_EQUALITY);
@@ -209,7 +209,7 @@ class TableQueryToolTest {
   void setSafeMode(NetworkTable networkTable) {
     Node networkNode = networkTable.getNetworkNode();
     double[] probs = networkTable.getProbabilities();
-    List<NodeState> eventStates = networkNode.getNodeStates();
+    List<NodeState> eventStates = networkNode.getStates();
     eventStates.forEach(
         state -> {
           assertTrue(networkTable.getConditionalProb(List.of(state)).isEmpty());

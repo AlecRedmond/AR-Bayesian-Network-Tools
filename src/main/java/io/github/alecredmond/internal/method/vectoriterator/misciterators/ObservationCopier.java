@@ -65,7 +65,7 @@ public class ObservationCopier implements OdometerResetDefault, OdometerUpdateBl
     for (NodeState nodeState : toEliminate) {
       Node node = nodeState.getNode();
       if (requestNodes.add(node)) {
-        requestStates.addAll(node.getNodeStates());
+        requestStates.addAll(node.getStates());
       }
       requestStates.remove(nodeState);
     }
@@ -76,11 +76,11 @@ public class ObservationCopier implements OdometerResetDefault, OdometerUpdateBl
   public Function<Node, NodeState> initialStatePositionSetter() {
     return node ->
         requestNodes.contains(node)
-            ? node.getNodeStates().stream()
+            ? node.getStates().stream()
                 .filter(requestStates::contains)
                 .findFirst()
-                .orElse(node.getNodeStates().getFirst())
-            : node.getNodeStates().getFirst();
+                .orElse(node.getStates().getFirst())
+            : node.getStates().getFirst();
   }
 
   @Override

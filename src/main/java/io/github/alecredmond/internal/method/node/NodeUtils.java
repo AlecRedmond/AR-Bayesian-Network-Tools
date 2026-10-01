@@ -1,6 +1,7 @@
 package io.github.alecredmond.internal.method.node;
 
 import io.github.alecredmond.exceptions.NodeStateConflictException;
+import io.github.alecredmond.export.cartesianvector.CartesianVariable;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
 import java.io.Serializable;
@@ -84,33 +85,10 @@ public class NodeUtils {
     return states.stream().map(NodeState::getNode).collect(Collectors.toSet());
   }
 
-  public static Map<Node, Integer> buildNodeIndexMap(Node[] nodes) {
+  public static <N extends CartesianVariable> Map<N, Integer> buildNodeIndexMap(N[] nodes) {
     return IntStream.range(0, nodes.length)
         .mapToObj(i -> Map.entry(nodes[i], i))
         .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-  }
-
-  public static String formatStatesToString(Collection<NodeState> stateCollection) {
-    return formatCollectionToString(stateCollection);
-  }
-
-  private static <T> String formatCollectionToString(Collection<T> collection) {
-    if (collection.isEmpty()) return "";
-    StringBuilder sb = new StringBuilder();
-    Iterator<T> iterator = collection.iterator();
-    while (iterator.hasNext()) {
-      sb.append(iterator.next().toString());
-      if (iterator.hasNext()) sb.append(", ");
-    }
-    return sb.toString();
-  }
-
-  public static <T extends Serializable> String formatIDsToString(Collection<T> ids) {
-    return formatCollectionToString(ids);
-  }
-
-  public static String formatNodesToString(Collection<Node> nodeCollection) {
-    return formatCollectionToString(nodeCollection);
   }
 
   public static List<Serializable> getNodeIds(Collection<Node> nodes) {
@@ -122,7 +100,7 @@ public class NodeUtils {
   }
 
   public static List<Serializable> getAllNodeStateIds(Collection<Node> nodes) {
-    return nodes.stream().flatMap(n -> n.getNodeStates().stream()).map(NodeState::getId).toList();
+    return nodes.stream().flatMap(n -> n.getStates().stream()).map(NodeState::getId).toList();
   }
 
   public static <E extends Serializable> List<NodeState> statesWithoutId(

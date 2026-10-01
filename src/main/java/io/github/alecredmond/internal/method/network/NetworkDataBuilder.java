@@ -42,7 +42,7 @@ public class NetworkDataBuilder {
 
     nodes.forEach(n -> nodeIdMap.put(n.getId(), n));
     nodes.stream()
-        .map(Node::getNodeStates)
+        .map(Node::getStates)
         .flatMap(Collection::stream)
         .forEach(nodeState -> stateIdMap.put(nodeState.getId(), nodeState));
   }

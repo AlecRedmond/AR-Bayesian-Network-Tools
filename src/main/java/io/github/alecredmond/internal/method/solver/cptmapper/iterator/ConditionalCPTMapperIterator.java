@@ -7,7 +7,8 @@ import io.github.alecredmond.export.probabilitytables.ConditionalTable;
 import io.github.alecredmond.internal.method.constraints.strategy.ValidatedConstraint;
 import io.github.alecredmond.internal.method.constraints.types.conditionalconstraint.ConditionalConstraintValidator;
 import io.github.alecredmond.internal.method.solver.cptmapper.constraintsorter.ConditionalTableConstraintSorter;
-import io.github.alecredmond.internal.method.node.NodeUtils;
+import io.github.alecredmond.internal.method.utils.CollectionToString;
+
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -27,15 +28,15 @@ public class ConditionalCPTMapperIterator
 
   @Override
   protected ConditionalConstraint[] buildRowConstraintsArray() {
-    return new ConditionalConstraint[networkTable.getNetworkNode().getNodeStates().size()];
+    return new ConditionalConstraint[networkTable.getNetworkNode().getStates().size()];
   }
 
   @Override
   protected String getIllegalSumString(MissingEntryCheck entryCheck) {
     Set<NodeState> condition = getConditionsFromConstraints(entryCheck);
-    return "A probability row for condition %s in table %s does not add to exactly 1.0! - was %.6f"
+      return "A probability row for condition %s in table %s does not add to exactly 1.0! - was %.6f"
         .formatted(
-            NodeUtils.formatStatesToString(condition),
+                CollectionToString.apply(condition),
             networkTable.getTableName(),
             1 - entryCheck.remainder.doubleValue());
   }

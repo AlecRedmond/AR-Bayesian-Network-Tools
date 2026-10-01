@@ -1,15 +1,10 @@
 package io.github.alecredmond.internal.method.network.validator;
 
-import static io.github.alecredmond.internal.method.node.NodeUtils.formatNodesToString;
-
 import io.github.alecredmond.exceptions.NetworkStructureException;
 import io.github.alecredmond.export.network.BayesianNetworkData;
 import io.github.alecredmond.export.node.Node;
-
-import java.util.ArrayDeque;
-import java.util.HashSet;
-import java.util.Queue;
-import java.util.Set;
+import io.github.alecredmond.internal.method.utils.CollectionToString;
+import java.util.*;
 import java.util.stream.Stream;
 import lombok.Data;
 
@@ -65,7 +60,7 @@ public class NetworkStructureValidator implements NetworkValidator {
     if (remaining.isEmpty()) return;
     throw new NetworkStructureException(
         "Unable to build Network data due to unconnected structure!%nCONNECTED: %s%nNO PATH: %s"
-            .formatted(formatNodesToString(visited), formatNodesToString(remaining)));
+            .formatted(CollectionToString.apply(visited), CollectionToString.apply(remaining)));
   }
 
   public void checkExists(Node node, BayesianNetworkData networkData) {

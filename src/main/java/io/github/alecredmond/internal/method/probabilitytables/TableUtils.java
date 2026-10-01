@@ -1,7 +1,6 @@
 package io.github.alecredmond.internal.method.probabilitytables;
 
 import static io.github.alecredmond.export.inference.ObservationStatus.*;
-import static io.github.alecredmond.internal.method.node.NodeUtils.formatIDsToString;
 
 import io.github.alecredmond.exceptions.ProbabilityTableRequestException;
 import io.github.alecredmond.export.inference.NodeObservation;
@@ -12,6 +11,7 @@ import io.github.alecredmond.export.probabilitytables.ProbabilityVector;
 import io.github.alecredmond.internal.application.probabilitytables.base.ProbabilityTableData;
 import io.github.alecredmond.internal.application.probabilitytables.base.SingleEventTableData;
 import io.github.alecredmond.internal.method.node.NodeUtils;
+import io.github.alecredmond.internal.method.utils.CollectionToString;
 import io.github.alecredmond.internal.method.vectoriterator.misciterators.StateCombinationGenerator;
 import java.io.Serializable;
 import java.util.*;
@@ -64,8 +64,7 @@ public class TableUtils {
     }
     throw new ProbabilityTableRequestException(
         "request %s does not contain all nodes requested %s"
-            .formatted(
-                NodeUtils.formatStatesToString(states), NodeUtils.formatNodesToString(allNodes)));
+            .formatted(CollectionToString.apply(states), CollectionToString.apply(allNodes)));
   }
 
   public static <S extends Serializable, T extends ProbabilityTableData>
@@ -78,7 +77,7 @@ public class TableUtils {
             Optional.ofNullable(idMap.get(id)).ifPresentOrElse(states::add, () -> missing.add(id)));
     if (missing.isEmpty()) return states;
     throw new ProbabilityTableRequestException(
-        "IDs %s not found in table %s!".formatted(formatIDsToString(missing), tableData));
+        "IDs %s not found in table %s!".formatted(CollectionToString.apply(missing), tableData));
   }
 
   public static void marginalizeJointTable(ProbabilityTable table) {
@@ -103,7 +102,7 @@ public class TableUtils {
   public static <T extends SingleEventTableData> Map<NodeState, Double> buildConditionalProbMap(
       Collection<NodeState> conditionStates, T tableData) {
     Map<NodeState, Double> map = new LinkedHashMap<>();
-    List<NodeState> events = tableData.getEventNode().getNodeStates();
+    List<NodeState> events = tableData.getEventNode().getStates();
     double[] probabilities = tableData.getProbabilities();
     int firstIndex = getIndex(conditionStates, tableData);
     int bound = events.size();
@@ -112,7 +111,7 @@ public class TableUtils {
   }
 
   public static Map<NodeState, Double> buildMarginalProbMap(SingleEventTableData tableData) {
-    List<NodeState> states = tableData.getEventNode().getNodeStates();
+    List<NodeState> states = tableData.getEventNode().getStates();
     double[] prob = tableData.getProbabilities();
     Map<NodeState, Double> map = new LinkedHashMap<>();
     for (int i = 0; i < prob.length; i++) {
@@ -124,10 +123,10 @@ public class TableUtils {
   public static String buildTableName(
       List<Serializable> eventIds, List<Serializable> conditionIds) {
     StringBuilder sb = new StringBuilder("P(");
-    sb.append(formatIDsToString(eventIds));
+    sb.append(CollectionToString.apply(eventIds));
     if (!conditionIds.isEmpty()) {
       sb.append("|");
-      sb.append(formatIDsToString(conditionIds));
+      sb.append(CollectionToString.apply(conditionIds));
     }
     return sb.append(")").toString();
   }

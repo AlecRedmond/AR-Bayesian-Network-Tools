@@ -20,7 +20,7 @@ public class RootCPTMapperIterator extends CptMapperIterator<RootNodeTable, Marg
 
   @Override
   protected MarginalConstraint[] buildRowConstraintsArray() {
-    return new MarginalConstraint[networkTable.getNetworkNode().getNodeStates().size()];
+    return new MarginalConstraint[networkTable.getNetworkNode().getStates().size()];
   }
 
   @Override

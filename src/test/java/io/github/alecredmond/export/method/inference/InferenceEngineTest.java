@@ -13,9 +13,11 @@ import io.github.alecredmond.export.sampler.MonteCarloSampler;
 import io.github.alecredmond.export.sampler.SampleCollection;
 import io.github.alecredmond.internal.application.junctiontree.Clique;
 import io.github.alecredmond.internal.method.inference.InferenceEngineImpl;
-import io.github.alecredmond.internal.method.node.NodeUtils;
 import io.github.alecredmond.internal.method.solver.BayesSolverImpl;
+
 import java.util.List;
+
+import io.github.alecredmond.internal.method.utils.CollectionToString;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -201,13 +203,13 @@ class InferenceEngineTest {
       Clique[] cliques = solver.getJta().getData().getCliques();
       System.out.println("SOLVER CLIQUES:");
       for (Clique clique : cliques) {
-        System.out.println(NodeUtils.formatNodesToString(clique.getNodes()));
+          System.out.println(CollectionToString.apply(clique.getNodes()));
       }
       assertDoesNotThrow(() -> test = net.buildInferenceEngine());
       cliques = ((InferenceEngineImpl) test).getJunctionTree().getData().getCliques();
       System.out.println("INFERENCE CLIQUES:");
       for (Clique clique : cliques) {
-        System.out.println(NodeUtils.formatNodesToString(clique.getNodes()));
+          System.out.println(CollectionToString.apply(clique.getNodes()));
       }
 
       if (PRINT_TABLES) test.printObserved();

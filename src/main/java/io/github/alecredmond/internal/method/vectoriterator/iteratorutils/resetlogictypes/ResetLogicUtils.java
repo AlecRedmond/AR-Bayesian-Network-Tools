@@ -19,7 +19,7 @@ public class ResetLogicUtils {
       if (!requestNodes.contains(node)) {
         return new boolean[0];
       }
-      List<NodeState> states = node.getNodeStates();
+      List<NodeState> states = node.getStates();
       boolean[] isEvidence = new boolean[states.size()];
       IntStream.range(0, states.size())
           .filter(y -> requestStates.contains(states.get(y)))
@@ -49,6 +49,6 @@ public class ResetLogicUtils {
   }
 
   public static Function<Node, NodeState> initializeToFirstNodeStates() {
-    return node -> node.getNodeStates().getFirst();
+    return node -> node.getStates().getFirst();
   }
 }

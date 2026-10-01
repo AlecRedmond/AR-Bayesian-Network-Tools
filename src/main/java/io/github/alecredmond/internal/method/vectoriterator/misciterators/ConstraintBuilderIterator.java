@@ -8,7 +8,7 @@ import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
 import io.github.alecredmond.export.probabilitytables.ProbabilityVector;
 import io.github.alecredmond.internal.application.vectoriterator.VectorOdometer;
-import io.github.alecredmond.internal.method.node.NodeUtils;
+import io.github.alecredmond.internal.method.utils.CollectionToString;
 import io.github.alecredmond.internal.method.utils.DoublePrecision;
 import io.github.alecredmond.internal.method.vectoriterator.VectorIterator;
 import io.github.alecredmond.internal.method.vectoriterator.iteratorutils.resetlogictypes.OdometerResetOnlyOnBuild;
@@ -115,18 +115,18 @@ public class ConstraintBuilderIterator
   private void assertSumEqualsOne(List<? extends ProbabilityConstraint> constraints, double sum) {
     if (DoublePrecision.fuzzyEquals(sum, 1.0)) return;
     Set<NodeState> condition = constraints.getFirst().getConditionStates();
-    throw new ConstraintValidationException(
+      throw new ConstraintValidationException(
         "Constraints on [%s] the condition [%s] do not sum to 1"
-            .formatted(event.getId(), NodeUtils.formatStatesToString(condition)));
+            .formatted(event.getId(), CollectionToString.apply(condition)));
   }
 
   private void assertSumWouldNotExceedOne(
       List<? extends ProbabilityConstraint> constraints, double sum) {
     if (sum < 1.0) return;
     Set<NodeState> condition = constraints.getFirst().getConditionStates();
-    throw new ConstraintValidationException(
+      throw new ConstraintValidationException(
         "Constraints on [%s] the condition [%s] would sum to > 1"
-            .formatted(event.getId(), NodeUtils.formatStatesToString(condition)));
+            .formatted(event.getId(), CollectionToString.apply(condition)));
   }
 
   private Set<NodeState> getConditionStates(NodeState[] states) {

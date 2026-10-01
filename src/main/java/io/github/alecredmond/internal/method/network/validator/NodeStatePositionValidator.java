@@ -12,7 +12,7 @@ public class NodeStatePositionValidator implements NetworkValidator {
 
   private void checkPositionsCorrect(Node node) {
     int position = 0;
-    for (NodeState state : node.getNodeStates()) {
+    for (NodeState state : node.getStates()) {
       if (state.getPosition() == position++) continue;
       throw new IllegalStateException(
           "NodeState %s was in position %d, expected position %d"

@@ -1,13 +1,13 @@
 package io.github.alecredmond.export.network;
 
-import static io.github.alecredmond.internal.method.node.NodeUtils.formatIDsToString;
-
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+
+import io.github.alecredmond.internal.method.utils.CollectionToString;
 import lombok.Data;
 import lombok.NonNull;
 
@@ -192,9 +192,9 @@ public class BayesianNetworkBuilderNode<T extends Serializable> {
     if (parents.remove(id)) {
       return parents.isEmpty() ? null : parents;
     }
-    throw new IllegalArgumentException(
+      throw new IllegalArgumentException(
         "cptNodeOrder list {%s} does not contain node id {%s}!"
-            .formatted(formatIDsToString(cptStrideOrderDesc), id));
+            .formatted(CollectionToString.apply(cptStrideOrderDesc), id));
   }
 
   /**

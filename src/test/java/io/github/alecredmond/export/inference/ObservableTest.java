@@ -40,7 +40,7 @@ class ObservableTest {
   private static boolean suitableTreeWidth(BayesianNetwork network) {
     double logWidth =
         network.getNetworkData().getNodeIDsMap().values().stream()
-            .map(Node::getNodeStates)
+            .map(Node::getStates)
             .mapToInt(Collection::size)
             .mapToDouble(Math::log)
             .sum();
@@ -189,7 +189,7 @@ class ObservableTest {
   }
 
   List<ObservationRecord> recursiveObservationFinder(Node node) {
-    List<NodeState> states = node.getNodeStates();
+    List<NodeState> states = node.getStates();
     List<ObservationRecord> remainingObs = new ArrayList<>();
     for (int kept = states.size(); kept >= 0; kept--) {
       recursivelyGenerateEliminationSets(

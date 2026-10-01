@@ -85,6 +85,6 @@ public class CptConditionIterator implements OdometerResetDefault, OdometerUpdat
     return node ->
         lockedPositionMap.containsKey(node)
             ? lockedPositionMap.get(node)
-            : node.getNodeStates().getFirst();
+            : node.getStates().getFirst();
   }
 }

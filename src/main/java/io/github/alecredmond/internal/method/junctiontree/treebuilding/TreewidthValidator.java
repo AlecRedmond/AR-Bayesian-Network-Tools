@@ -1,6 +1,7 @@
 package io.github.alecredmond.internal.method.junctiontree.treebuilding;
 
 import io.github.alecredmond.exceptions.TreewidthException;
+import io.github.alecredmond.export.cartesianvector.CartesianVariable;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.internal.application.junctiontree.JunctionTreeData;
 import java.util.Collection;
@@ -30,11 +31,11 @@ public class TreewidthValidator {
             .formatted(equivalentTreeWidth));
   }
 
-  private static double getLogCardinality(Collection<Node> nodes) {
-    return nodes.stream().mapToInt(n -> n.getNodeStates().size()).mapToDouble(Math::log).sum();
+  private static <N extends CartesianVariable> double getLogCardinality(Collection<N> nodes) {
+    return nodes.stream().mapToInt(n -> n.getStates().size()).mapToDouble(Math::log).sum();
   }
 
-  public static boolean validateVectorLength(Collection<Node> nodes) {
+  public static <N extends CartesianVariable> boolean validateVectorLength(Collection<N> nodes) {
     return getLogCardinality(nodes) <= LOG_INT_MAX;
   }
 }

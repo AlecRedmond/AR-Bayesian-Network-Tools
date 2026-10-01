@@ -116,7 +116,7 @@ class NewBayesianNetworkTest {
       Node node = test.getNode(id);
       assertNotNull(node);
       Set<Serializable> idSet = new HashSet<>(stateIds);
-      node.getNodeStates().forEach(state -> assertTrue(idSet.contains(state.getId())));
+      node.getStates().forEach(state -> assertTrue(idSet.contains(state.getId())));
     }
 
     @ParameterizedTest
@@ -264,7 +264,7 @@ class NewBayesianNetworkTest {
           nodeId,
           newStateIds,
           expectedConstraints,
-          (n, a) -> n.setNodeStates((List<NodeState>) a.getNewCollection()),
+          (n, a) -> n.setStates((List<NodeState>) a.getNewCollection()),
           (n, a) -> {});
     }
 
@@ -275,7 +275,7 @@ class NewBayesianNetworkTest {
         BiConsumer<Node, CollectionChangeAnalyzer<NodeState>> addStates,
         BiConsumer<Node, CollectionChangeAnalyzer<NodeState>> removeStates) {
       Node node = test.getNode(nodeId);
-      List<NodeState> oldStates = new ArrayList<>(node.getNodeStates());
+      List<NodeState> oldStates = new ArrayList<>(node.getStates());
       List<NodeState> newStates = newStateIds.stream().map(id -> new NodeState(id, node)).toList();
       CollectionChangeAnalyzer<NodeState> analyzer =
           new CollectionChangeAnalyzer<>(oldStates, newStates);
@@ -311,9 +311,9 @@ class NewBayesianNetworkTest {
         Serializable nodeId, Serializable stateId, Class<Exception> exceptionClass) {
       try {
         Node node = test.getNode(nodeId);
-        Set<NodeState> states = new HashSet<>(node.getNodeStates());
+        Set<NodeState> states = new HashSet<>(node.getStates());
         assertFalse(node.addState(stateId));
-        assertEquals(states, new HashSet<>(node.getNodeStates()));
+        assertEquals(states, new HashSet<>(node.getStates()));
       } catch (Exception e) {
         assertEquals(e.getClass(), exceptionClass);
       }
@@ -325,11 +325,11 @@ class NewBayesianNetworkTest {
         Serializable nodeId, Serializable stateId, Class<Exception> exceptionClass) {
       try {
         Node node = test.getNode(nodeId);
-        Set<NodeState> originalStates = new HashSet<>(node.getNodeStates());
-        List<NodeState> toSet = new ArrayList<>(node.getNodeStates());
+        Set<NodeState> originalStates = new HashSet<>(node.getStates());
+        List<NodeState> toSet = new ArrayList<>(node.getStates());
         toSet.add(new NodeState(stateId, node));
-        assertFalse(node.setNodeStates(toSet));
-        assertEquals(originalStates, new HashSet<>(node.getNodeStates()));
+        assertFalse(node.setStates(toSet));
+        assertEquals(originalStates, new HashSet<>(node.getStates()));
       } catch (Exception e) {
         assertEquals(e.getClass(), exceptionClass);
       }
@@ -694,7 +694,7 @@ class NewBayesianNetworkTest {
       if (addNull) states.add(null);
       if (toCreate.isEmpty()) return states;
       Node node = new Node(UUID.randomUUID(), toCreate);
-      states.addAll(node.getNodeStates());
+      states.addAll(node.getStates());
       return states;
     }
 

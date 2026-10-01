@@ -3,6 +3,7 @@ package io.github.alecredmond.export.node;
 import static io.github.alecredmond.internal.method.network.changehandlers.NetworkPropertyChangeEvent.*;
 
 import io.github.alecredmond.exceptions.BayesNetIDException;
+import io.github.alecredmond.export.cartesianvector.CartesianVariable;
 import io.github.alecredmond.export.constraints.ProbabilityConstraint;
 import io.github.alecredmond.export.network.BayesianNetwork;
 import io.github.alecredmond.export.network.BayesianNetworkBuilder;
@@ -39,7 +40,7 @@ import lombok.extern.slf4j.Slf4j;
 @Data
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Slf4j
-public class Node {
+public class Node implements CartesianVariable {
 
   /**
    * The identifier for this {@code Node}. This value must be unique within its associated {@link
@@ -54,7 +55,7 @@ public class Node {
   private final PropertyChangeSupport support = new PropertyChangeSupport(this);
 
   /** The ordered list of {@link NodeState} values that this {@code Node} can exhibit. */
-  private List<NodeState> nodeStates;
+  private List<NodeState> states;
 
   /** The parents of this {@code Node} in the {@link BayesianNetwork} structure. */
   private List<Node> parents;
@@ -78,17 +79,17 @@ public class Node {
     this.id = nodeId;
     this.parents = List.of();
     this.children = List.of();
-    this.nodeStates = stateIDs.stream().map(stateId -> new NodeState(stateId, this)).toList();
+    this.states = stateIDs.stream().map(stateId -> new NodeState(stateId, this)).toList();
     writeStatePositions();
   }
 
   /**
-   * Sets the position in each {@link NodeState} to equal its index in {@link #getNodeStates()}.
-   * This method runs internally whenever {@link #nodeStates} is updated.
+   * Sets the position in each {@link NodeState} to equal its index in {@link #getStates()}.
+   * This method runs internally whenever {@link #states} is updated.
    */
   void writeStatePositions() {
     int position = 0;
-    for (NodeState state : nodeStates) {
+    for (NodeState state : states) {
       state.setPosition(position++);
     }
   }
@@ -104,7 +105,7 @@ public class Node {
     this.id = nodeId;
     this.parents = List.of();
     this.children = List.of();
-    this.nodeStates = List.of();
+    this.states = List.of();
   }
 
   /**
@@ -164,7 +165,7 @@ public class Node {
    */
   public <T extends Serializable> boolean addState(@NonNull T stateID) {
     NodeState newState = new NodeState(stateID, this);
-    return setNodeStates(NodeUtils.addToList(nodeStates, newState));
+    return setStates(NodeUtils.addToList(states, newState));
   }
 
   /**
@@ -178,16 +179,16 @@ public class Node {
    * @return {@code true} if the new list was successfully set, or {@code false} if validation
    *     failed.
    */
-  public boolean setNodeStates(List<NodeState> nodeStates) {
-    List<NodeState> oldStates = this.nodeStates;
-    this.nodeStates = Collections.unmodifiableList(nodeStates);
+  public boolean setStates(List<NodeState> nodeStates) {
+    List<NodeState> oldStates = this.states;
+    this.states = Collections.unmodifiableList(nodeStates);
     try {
       support.firePropertyChange(NODE_STATES_UPDATED.name(), oldStates, nodeStates);
       writeStatePositions();
       return true;
     } catch (BayesNetIDException e) {
       log.error("Error setting states, '{}' reverting...", e.getMessage());
-      this.nodeStates = oldStates;
+      this.states = oldStates;
       return false;
     }
   }
@@ -201,7 +202,7 @@ public class Node {
    *     validation failed.
    */
   public <E extends Serializable> boolean removeState(E stateID) {
-    return setNodeStates(NodeUtils.statesWithoutId(nodeStates, stateID));
+    return setStates(NodeUtils.statesWithoutId(states, stateID));
   }
 
   /**
@@ -282,8 +283,8 @@ public class Node {
    *
    * @return an unmodifiable {@link List} of the node's states.
    */
-  public List<NodeState> getNodeStates() {
-    return this.nodeStates;
+  public List<NodeState> getStates() {
+    return this.states;
   }
 
   /**

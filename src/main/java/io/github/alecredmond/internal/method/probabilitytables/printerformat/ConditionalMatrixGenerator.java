@@ -17,7 +17,7 @@ public class ConditionalMatrixGenerator extends PrinterMatrixGeneratorBase
 
   @Override
   protected PrinterStateMatrix buildPrinterStateMatrix() {
-    List<NodeState> states = table.getNetworkNode().getNodeStates();
+    List<NodeState> states = table.getNetworkNode().getStates();
     int cols = states.size();
     int rows = table.getProbabilities().length / cols;
     int conditionSize = table.getConditions().size();

@@ -19,9 +19,9 @@ public class VectorOdometer {
   private boolean[][] nodeStateEvidenceArray;
 
   public VectorOdometer(ProbabilityVector vector) {
-    int keyLength = vector.getNodeArray().length;
+    int keyLength = vector.getOrderedNodes().length;
     probabilities = vector.getProbabilities();
-    nodeArray = vector.getNodeArray();
+    nodeArray = vector.getOrderedNodes();
     stateArrays = vector.getStateArrays();
     numberOfStates = vector.getNumberOfStates();
     strideLengths = vector.getStrideLengths();

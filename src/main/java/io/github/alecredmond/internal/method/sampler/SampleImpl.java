@@ -5,9 +5,11 @@ import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
 import io.github.alecredmond.export.sampler.Sample;
 import io.github.alecredmond.internal.application.sampler.SampleData;
-import io.github.alecredmond.internal.method.node.NodeUtils;
+
 import java.util.*;
 import java.util.function.Supplier;
+
+import io.github.alecredmond.internal.method.utils.CollectionToString;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
@@ -42,9 +44,9 @@ public class SampleImpl implements Sample {
 
   @Override
   public String toString() {
-    return "%s : %d"
+      return "%s : %d"
         .formatted(
-            NodeUtils.formatStatesToString(sampleData.getRawStateSet()), sampleData.getCount());
+                CollectionToString.apply(sampleData.getRawStateSet()), sampleData.getCount());
   }
 
   public boolean containsAll(Collection<NodeState> states) {

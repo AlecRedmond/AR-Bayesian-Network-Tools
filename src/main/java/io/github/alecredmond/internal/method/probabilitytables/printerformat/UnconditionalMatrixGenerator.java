@@ -17,7 +17,7 @@ public class UnconditionalMatrixGenerator extends PrinterMatrixGeneratorBase
   @Override
   protected PrinterStateMatrix buildPrinterStateMatrix() {
     Node eventNode = tableData.getEventNode();
-    List<NodeState> eventStates = eventNode.getNodeStates();
+    List<NodeState> eventStates = eventNode.getStates();
     double[] probabilities = tableData.getProbabilities();
 
     int cols = eventStates.size();

@@ -42,7 +42,7 @@ class TableNormalizerTest {
     test = new TableNormalizer(table);
     test.normalize();
 
-    int blockSize = node.getNodeStates().size();
+    int blockSize = node.getStates().size();
     double average = 1.0 / blockSize;
     Arrays.stream(probs).forEach(p -> assertEquals(average, p, 1e-6));
 

@@ -8,9 +8,9 @@ import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
 import io.github.alecredmond.export.probabilitytables.NetworkTable;
 import io.github.alecredmond.internal.application.sampler.LikelihoodWeightingSamplerData;
-import io.github.alecredmond.internal.method.node.NodeUtils;
 import io.github.alecredmond.internal.method.sampler.picker.SamplePicker;
 import io.github.alecredmond.internal.method.sampler.picker.SamplePickerFactory;
+import io.github.alecredmond.internal.method.utils.CollectionToString;
 import io.github.alecredmond.internal.method.utils.WeightedAllocator;
 import java.util.*;
 import java.util.stream.IntStream;
@@ -64,7 +64,7 @@ public class LikelihoodWeightingSampler extends MonteCarloSamplerImpl {
             .map(NodeObservation::node)
             .toList();
     if (negated.isEmpty()) return false;
-    log.warn("Cannot run sampler, Nodes were negated: {}", NodeUtils.formatNodesToString(negated));
+    log.warn("Cannot run sampler, Nodes were negated: {}", CollectionToString.apply(negated));
     return true;
   }
 

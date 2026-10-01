@@ -53,7 +53,7 @@ public abstract class BaseTableBuilder {
 
   private static Map<Serializable, NodeState> buildNodeStateIDMap(Collection<Node> nodes) {
     return nodes.stream()
-        .map(Node::getNodeStates)
+        .map(Node::getStates)
         .flatMap(Collection::stream)
         .map(ns -> Map.entry(ns.getId(), ns))
         .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
