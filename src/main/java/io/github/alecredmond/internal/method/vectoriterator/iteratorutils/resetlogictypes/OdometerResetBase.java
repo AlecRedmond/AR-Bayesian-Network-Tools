@@ -11,7 +11,7 @@ public interface OdometerResetBase extends OdometerResetLogic<VectorOdometer> {
   @Override
   default void resetOdometer(VectorOdometer vectorOdometer) {
     Node[] nodeArray = vectorOdometer.getNodeArray();
-    int[] stateIndexes = vectorOdometer.getStateIndexes();
+    int[] stateIndexes = vectorOdometer.getStatePositions();
     NodeState[] states = vectorOdometer.getStates();
     boolean[] outerIteratorLocks = vectorOdometer.getOuterIteratorLocks();
     boolean[] innerIteratorLocks = vectorOdometer.getInnerIteratorLocks();

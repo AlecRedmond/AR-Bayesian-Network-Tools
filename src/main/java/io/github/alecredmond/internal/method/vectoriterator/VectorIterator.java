@@ -94,7 +94,7 @@ public class VectorIterator<T extends VectorOdometer> {
     int baseStride = initializer.getBaseStride();
     int[] numberOfStates = odometer.getNumberOfStates();
     int[] strideIfLocked = initializer.getStrideIfLocked();
-    int[] stateIndexes = odometer.getStateIndexes();
+    int[] stateIndexes = odometer.getStatePositions();
     boolean[] positionLocked = initializer.getLockedPositions();
     boolean overflow = false;
 

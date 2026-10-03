@@ -117,12 +117,12 @@ public class ProbabilityVector extends CartesianVector<Node, NodeState> {
   }
 
   @Override
-  protected int getNodeOrderIndex(Node node) {
+  public int getNodeOrderIndex(Node node) {
     return nodeIndexMap.get(node);
   }
 
   @Override
-  protected int getStatePositionIndex(NodeState nodeState) {
+  public int getStatePositionIndex(NodeState nodeState) {
     return nodeState.getPosition();
   }
 

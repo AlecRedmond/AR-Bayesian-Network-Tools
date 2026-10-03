@@ -12,8 +12,8 @@ public abstract class CartesianVector<N extends CartesianVariable, S extends Car
   protected final int[] strideLengths;
   protected final int rank;
 
-  protected abstract int getNodeOrderIndex(N n);
+  public abstract int getNodeOrderIndex(N n);
 
-  protected abstract int getStatePositionIndex(S s);
+  public abstract int getStatePositionIndex(S s);
 
 }

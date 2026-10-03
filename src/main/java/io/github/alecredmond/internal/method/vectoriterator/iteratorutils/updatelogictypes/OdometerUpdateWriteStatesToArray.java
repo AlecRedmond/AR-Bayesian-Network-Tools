@@ -11,7 +11,7 @@ public interface OdometerUpdateWriteStatesToArray extends OdometerUpdateLogic<Ve
     return (o, i) -> {
       NodeState[][] stateArrays = o.getStateArrays();
       NodeState[] states = o.getStates();
-      int[] stateIndexes = o.getStateIndexes();
+      int[] stateIndexes = o.getStatePositions();
       IntStream.range(0, states.length)
           .forEach(
               x -> {

@@ -35,7 +35,7 @@ public class JunctionTableSummer implements OdometerResetDefault, OdometerUpdate
     iterator.reset();
 
     double[] p = table.getProbabilities();
-    int[] stateIndexes = odometer.getStateIndexes();
+    int[] stateIndexes = odometer.getStatePositions();
     boolean[][] stateIsEvent = odometer.getNodeStateEvidenceArray();
 
     adder[0] = 0.0;

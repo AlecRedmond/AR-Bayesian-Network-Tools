@@ -31,7 +31,7 @@ public class ResetLogicUtils {
   public static <T extends VectorOdometer> boolean[] preBuildEvidenceCheckArray(
       VectorIterator<T> iterator) {
     T vectorOdometer = iterator.getController().getOdometer();
-    int[] stateIndexes = vectorOdometer.getStateIndexes();
+    int[] stateIndexes = vectorOdometer.getStatePositions();
     boolean[][] stateIsEvent = vectorOdometer.getNodeStateEvidenceArray();
     List<Boolean> bools = new ArrayList<>();
     iterator.iterateOuter(() -> bools.add(checkIsEvidence(stateIndexes, stateIsEvent)));

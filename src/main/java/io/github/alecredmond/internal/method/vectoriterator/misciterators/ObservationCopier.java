@@ -51,7 +51,7 @@ public class ObservationCopier implements OdometerResetDefault, OdometerUpdateBl
     double[] backup = backupVector.getProbabilities();
     Arrays.fill(observed, 0.0);
 
-    int[] stateIndexes = odometer.getStateIndexes();
+    int[] stateIndexes = odometer.getStatePositions();
     boolean[][] isEvidenceArray = odometer.getNodeStateEvidenceArray();
     iterator.iterateOuter(
         () -> {
