@@ -2,13 +2,13 @@ package io.github.alecredmond.internal.method.vectoriterator.misciterators;
 
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
-import io.github.alecredmond.export.probabilitytables.ProbabilityTable;
 import io.github.alecredmond.export.probabilitytables.ProbabilityVector;
 import io.github.alecredmond.internal.application.vectoriterator.VectorOdometer;
 import io.github.alecredmond.internal.method.vectoriterator.VectorIterator;
+import io.github.alecredmond.internal.method.vectoriterator.iteratorutils.UpdateStateArrayLogic;
 import io.github.alecredmond.internal.method.vectoriterator.iteratorutils.resetlogictypes.OdometerResetDefault;
 import io.github.alecredmond.internal.method.vectoriterator.iteratorutils.resetlogictypes.ResetLogicUtils;
-import io.github.alecredmond.internal.method.vectoriterator.iteratorutils.updatelogictypes.OdometerUpdateWriteStatesToArray;
+import io.github.alecredmond.internal.method.vectoriterator.standardtemplate.StandardIteratorFactory;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -16,16 +16,15 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public class StateCombinationGenerator
-    implements OdometerResetDefault, OdometerUpdateWriteStatesToArray {
-  private final VectorIterator<VectorOdometer> iterator;
+public class StateCombinationGenerator implements OdometerResetDefault {
+  private final VectorIterator iterator;
   private final VectorOdometer odometer;
   private Set<Node> includedNodes;
 
   public StateCombinationGenerator(ProbabilityVector vector) {
-    this.odometer = new VectorOdometer(vector);
     this.includedNodes = new HashSet<>();
-    this.iterator = new VectorIterator<>(odometer, this);
+    this.iterator = StandardIteratorFactory.create(this, vector);
+    this.odometer = iterator.getOdometer();
   }
 
   public <T extends Collection<NodeState>, R extends T> List<T> generateCombos(
@@ -45,7 +44,7 @@ public class StateCombinationGenerator
   }
 
   private int[] buildIncludedPositions(Set<Node> includedNodes) {
-    Node[] nodeArray = odometer.getNodeArray();
+    Node[] nodeArray = odometer.getOrderedNodes();
     return IntStream.range(0, nodeArray.length)
         .filter(x -> includedNodes.contains(nodeArray[x]))
         .toArray();
@@ -64,5 +63,10 @@ public class StateCombinationGenerator
   @Override
   public Predicate<Node> checkLockInner() {
     return node -> !includedNodes.contains(node);
+  }
+
+  @Override
+  public UpdateStateArrayLogic updateConsumerType() {
+    return UpdateStateArrayLogic.WRITE_STATES_TO_ARRAY;
   }
 }

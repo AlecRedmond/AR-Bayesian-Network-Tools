@@ -22,15 +22,11 @@ public abstract class CartesianOdometer<
     this.strideOverValues = OdometerInitializerUtils.buildStrideIfLocked(vector);
   }
 
-  public S[] getStates() {
-    return states;
-  }
-
   public int[] getStrideLengths() {
     return vector.getStrideLengths();
   }
 
-  public N[] getNodeArray() {
+  public N[] getOrderedNodes() {
     return vector.getOrderedNodes();
   }
 
@@ -40,9 +36,5 @@ public abstract class CartesianOdometer<
 
   public int[] getNumberOfStates() {
     return vector.getNumberOfStates();
-  }
-
-  public int[] getStatePositions() {
-    return statePositions;
   }
 }

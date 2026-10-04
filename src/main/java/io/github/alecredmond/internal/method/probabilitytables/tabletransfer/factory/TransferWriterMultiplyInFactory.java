@@ -2,6 +2,7 @@ package io.github.alecredmond.internal.method.probabilitytables.tabletransfer.fa
 
 import io.github.alecredmond.export.probabilitytables.ProbabilityTable;
 import io.github.alecredmond.internal.method.probabilitytables.tabletransfer.readwriters.TransferWriterMultiplyIn;
+import io.github.alecredmond.internal.method.vectoriterator.standardtemplate.StandardIteratorFactory;
 
 public class TransferWriterMultiplyInFactory
     extends TransferReadWriteFactory<TransferWriterMultiplyIn> {
@@ -12,6 +13,7 @@ public class TransferWriterMultiplyInFactory
 
   @Override
   public TransferWriterMultiplyIn build() {
-    return new TransferWriterMultiplyIn(writeTable.getVector(), transferArray, this);
+    return new TransferWriterMultiplyIn(
+        StandardIteratorFactory.createFactoryData(this, writeTable.getVector()), transferArray);
   }
 }

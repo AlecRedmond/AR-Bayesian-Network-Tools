@@ -1,20 +1,16 @@
 package io.github.alecredmond.internal.method.probabilitytables.tabletransfer.readwriters;
 
-import io.github.alecredmond.export.probabilitytables.ProbabilityVector;
-import io.github.alecredmond.internal.application.vectoriterator.VectorOdometer;
-import io.github.alecredmond.internal.method.probabilitytables.tabletransfer.factory.TransferWriterMultiplyInFactory;
+import io.github.alecredmond.internal.application.vectoriterator.IteratorFactoryData;
 import io.github.alecredmond.internal.method.vectoriterator.VectorIterator;
 import lombok.EqualsAndHashCode;
 
 @EqualsAndHashCode(callSuper = true)
-public class TransferWriterMultiplyIn extends VectorIterator<VectorOdometer>
-    implements TransferIterator {
+public class TransferWriterMultiplyIn extends VectorIterator implements TransferIterator {
   private final double[] transferArray;
   private final int[] tIndex = {0};
 
-  public TransferWriterMultiplyIn(
-      ProbabilityVector write, double[] transferArray, TransferWriterMultiplyInFactory logic) {
-    super(write, logic, VectorOdometer::new);
+  public TransferWriterMultiplyIn(IteratorFactoryData data, double[] transferArray) {
+    super(data);
     this.transferArray = transferArray;
   }
 

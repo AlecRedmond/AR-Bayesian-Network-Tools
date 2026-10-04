@@ -7,33 +7,38 @@ import io.github.alecredmond.internal.application.vectoriterator.VectorOdometer;
 import io.github.alecredmond.internal.method.node.NodeUtils;
 import io.github.alecredmond.internal.method.probabilitytables.JunctionTreeTable;
 import io.github.alecredmond.internal.method.vectoriterator.VectorIterator;
+import io.github.alecredmond.internal.method.vectoriterator.iteratorutils.UpdateStateArrayLogic;
 import io.github.alecredmond.internal.method.vectoriterator.iteratorutils.resetlogictypes.OdometerResetDefault;
 import io.github.alecredmond.internal.method.vectoriterator.iteratorutils.resetlogictypes.ResetLogicUtils;
-import io.github.alecredmond.internal.method.vectoriterator.iteratorutils.updatelogictypes.OdometerUpdateBlank;
+import io.github.alecredmond.internal.method.vectoriterator.standardtemplate.StandardIteratorFactory;
 import java.util.*;
+import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import lombok.Getter;
 
-public class ObservationCopier implements OdometerResetDefault, OdometerUpdateBlank {
+public class ObservationCopier implements OdometerResetDefault {
   private final ProbabilityVector mainVector;
   private final ProbabilityVector backupVector;
-  private final VectorIterator<VectorOdometer> iterator;
-  private final VectorOdometer odometer;
-  private Set<NodeState> requestStates;
-  private Set<Node> requestNodes;
+  private final VectorIterator iterator;
+  @Getter private final VectorOdometer odometer;
+  private final Set<NodeState> requestStates;
+  private final Set<Node> requestNodes;
 
   public ObservationCopier(JunctionTreeTable table) {
     this.backupVector = table.getBackupVector();
     this.mainVector = table.getVector();
     this.requestNodes = new HashSet<>();
     this.requestStates = new HashSet<>();
-    this.iterator = new VectorIterator<>(mainVector, this, VectorOdometer::new);
-    this.odometer = iterator.getController().getOdometer();
+    this.iterator = StandardIteratorFactory.create(this, mainVector);
+    this.odometer = iterator.getOdometer();
   }
 
   public void observeStates(Collection<NodeState> observedStates) {
-    this.requestStates = new HashSet<>(observedStates);
-    this.requestNodes = new HashSet<>(NodeUtils.getNodes(requestStates));
+    this.requestStates.clear();
+    this.requestNodes.clear();
+    this.requestStates.addAll(observedStates);
+    this.requestNodes.addAll(NodeUtils.getNodes(requestStates));
     if (observedStates.isEmpty()) writeFromBackupVector();
     else resetAndRunIterator();
   }
@@ -50,12 +55,10 @@ public class ObservationCopier implements OdometerResetDefault, OdometerUpdateBl
     double[] observed = mainVector.getProbabilities();
     double[] backup = backupVector.getProbabilities();
     Arrays.fill(observed, 0.0);
-
-    int[] stateIndexes = odometer.getStatePositions();
-    boolean[][] isEvidenceArray = odometer.getNodeStateEvidenceArray();
+    BooleanSupplier evidenceCheck = iterator.getIsEvidenceCheck();
     iterator.iterateOuter(
         () -> {
-          if (ResetLogicUtils.checkIsEvidence(stateIndexes, isEvidenceArray)) {
+          if (evidenceCheck.getAsBoolean()) {
             iterator.iterateInner((o, i) -> observed[i] = backup[i]);
           }
         });
@@ -84,11 +87,6 @@ public class ObservationCopier implements OdometerResetDefault, OdometerUpdateBl
   }
 
   @Override
-  public Function<Node, boolean[]> buildEvidenceMaps() {
-    return ResetLogicUtils.updateEvidenceArrayFunction(requestNodes, requestStates);
-  }
-
-  @Override
   public Predicate<Node> checkLockOuter() {
     return node -> !requestNodes.contains(node);
   }
@@ -96,5 +94,15 @@ public class ObservationCopier implements OdometerResetDefault, OdometerUpdateBl
   @Override
   public Predicate<Node> checkLockInner() {
     return requestNodes::contains;
+  }
+
+  @Override
+  public UpdateStateArrayLogic updateConsumerType() {
+    return UpdateStateArrayLogic.NO_UPDATE;
+  }
+
+  @Override
+  public Function<Node, boolean[]> evidenceChecker() {
+    return ResetLogicUtils.updateEvidenceArrayFunction(requestNodes, requestStates);
   }
 }

@@ -6,23 +6,24 @@ import io.github.alecredmond.export.constraints.ProbabilityConstraint;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
 import io.github.alecredmond.internal.application.junctiontree.Clique;
-import io.github.alecredmond.internal.method.probabilitytables.JunctionTreeTable;
+import io.github.alecredmond.internal.application.vectoriterator.CartesianIteratorLogic;
 import io.github.alecredmond.internal.application.vectoriterator.VectorOdometer;
 import io.github.alecredmond.internal.method.constraints.strategy.ConstraintSolver;
 import io.github.alecredmond.internal.method.node.NodeUtils;
+import io.github.alecredmond.internal.method.probabilitytables.JunctionTreeTable;
 import io.github.alecredmond.internal.method.vectoriterator.VectorIterator;
-import io.github.alecredmond.internal.method.vectoriterator.iteratorutils.resetlogictypes.OdometerResetOnlyOnBuild;
+import io.github.alecredmond.internal.method.vectoriterator.iteratorutils.UpdateStateArrayLogic;
 import io.github.alecredmond.internal.method.vectoriterator.iteratorutils.resetlogictypes.ResetLogicUtils;
-import io.github.alecredmond.internal.method.vectoriterator.iteratorutils.updatelogictypes.OdometerUpdateBlank;
+import io.github.alecredmond.internal.method.vectoriterator.standardtemplate.StandardIteratorFactory;
+import io.github.alecredmond.internal.method.vectoriterator.standardtemplate.StandardVectorIteratorTemplate;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class ConstraintSolverBase
-    implements OdometerResetOnlyOnBuild, OdometerUpdateBlank, ConstraintSolver {
-  protected final VectorIterator<VectorOdometer> iterator;
+public class ConstraintSolverBase implements ConstraintSolver, StandardVectorIteratorTemplate {
+  protected final VectorIterator iterator;
   protected final ProbabilityConstraint constraint;
   protected final List<Double> errors = new ArrayList<>();
   protected final boolean[] outerIterationIsEvidence;
@@ -30,25 +31,44 @@ public class ConstraintSolverBase
 
   public ConstraintSolverBase(ProbabilityConstraint constraint, JunctionTreeTable table) {
     this.constraint = constraint;
-    this.iterator = new VectorIterator<>(table.getVector(), this, VectorOdometer::new);
+    this.iterator = StandardIteratorFactory.create(this,table.getVector());
     this.outerIterationIsEvidence = ResetLogicUtils.preBuildEvidenceCheckArray(iterator);
   }
 
+  public Function<Node, NodeState> initialStatePositionSetter() {
+    Map<Node, NodeState> condMap = NodeUtils.generateRequest(constraint.getConditionStates());
+    return node -> condMap.containsKey(node) ? condMap.get(node) : node.getStates().getFirst();
+  }
+
   @Override
+  public CartesianIteratorLogic.ResetLogicType getResetLogicType() {
+    return CartesianIteratorLogic.ResetLogicType.CONSTANT;
+  }
+
   public Predicate<Node> checkLockOuter() {
     Set<Node> events = constraint.getEventNodes();
     return node -> !events.contains(node);
   }
 
-  @Override
   public Predicate<Node> checkLockInner() {
     Set<Node> allNodes = constraint.getAllNodes();
     return allNodes::contains;
   }
 
+  @Override
+  public Function<Node, boolean[]> evidenceChecker() {
+    return ResetLogicUtils.updateEvidenceArrayFunction(
+        constraint.getEventNodes(), constraint.getEventStates());
+  }
+
+  @Override
+  public UpdateStateArrayLogic updateConsumerType() {
+    return UpdateStateArrayLogic.NO_UPDATE;
+  }
+
   public double adjustAndReturnError() {
     acm.resetAccumulators();
-    VectorOdometer vectorOdometer = iterator.getController().getOdometer();
+    VectorOdometer vectorOdometer = iterator.getOdometer();
     double[] probabilities = vectorOdometer.getProbabilities();
     calculateProbability(probabilities);
 
@@ -131,19 +151,6 @@ public class ConstraintSolverBase
     } else {
       acm.complementJointProb += partialSum;
     }
-  }
-
-  @Override
-  public Function<Node, NodeState> initialStatePositionSetter() {
-    Map<Node, NodeState> condMap = NodeUtils.generateRequest(constraint.getConditionStates());
-    return node -> condMap.containsKey(node) ? condMap.get(node) : node.getStates().getFirst();
-  }
-
-  @Override
-  public Function<Node, boolean[]> buildEvidenceMaps() {
-    Set<Node> eventNodes = constraint.getEventNodes();
-    Set<NodeState> eventStates = constraint.getEventStates();
-    return ResetLogicUtils.updateEvidenceArrayFunction(eventNodes, eventStates);
   }
 
   protected static class Accumulators {

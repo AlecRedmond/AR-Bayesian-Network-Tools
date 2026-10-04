@@ -3,23 +3,23 @@ package io.github.alecredmond.internal.method.vectoriterator.misciterators;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
 import io.github.alecredmond.export.probabilitytables.ProbabilityTable;
-import io.github.alecredmond.internal.application.vectoriterator.VectorOdometer;
 import io.github.alecredmond.internal.method.vectoriterator.VectorIterator;
+import io.github.alecredmond.internal.method.vectoriterator.iteratorutils.UpdateStateArrayLogic;
 import io.github.alecredmond.internal.method.vectoriterator.iteratorutils.resetlogictypes.OdometerResetOnlyOnBuild;
 import io.github.alecredmond.internal.method.vectoriterator.iteratorutils.resetlogictypes.ResetLogicUtils;
-import io.github.alecredmond.internal.method.vectoriterator.iteratorutils.updatelogictypes.OdometerUpdateBlank;
+import io.github.alecredmond.internal.method.vectoriterator.standardtemplate.StandardIteratorFactory;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-public class TableNormalizer implements OdometerResetOnlyOnBuild, OdometerUpdateBlank {
+public class TableNormalizer implements OdometerResetOnlyOnBuild {
   private final ProbabilityTable table;
-  private final VectorIterator<VectorOdometer> iterator;
+  private final VectorIterator iterator;
   private final double[] adder = {0.0};
 
   public TableNormalizer(ProbabilityTable table) {
     this.table = table;
-    this.iterator = new VectorIterator<>(table.getVector(), this, VectorOdometer::new);
+    this.iterator = StandardIteratorFactory.create(this, table.getVector());
   }
 
   public void normalize() {
@@ -35,6 +35,11 @@ public class TableNormalizer implements OdometerResetOnlyOnBuild, OdometerUpdate
   }
 
   @Override
+  public Function<Node, NodeState> initialStatePositionSetter() {
+    return ResetLogicUtils.initializeToFirstNodeStates();
+  }
+
+  @Override
   public Predicate<Node> checkLockOuter() {
     Set<Node> events = table.getEvents();
     return events::contains;
@@ -47,7 +52,7 @@ public class TableNormalizer implements OdometerResetOnlyOnBuild, OdometerUpdate
   }
 
   @Override
-  public Function<Node, NodeState> initialStatePositionSetter() {
-    return ResetLogicUtils.initializeToFirstNodeStates();
+  public UpdateStateArrayLogic updateConsumerType() {
+    return UpdateStateArrayLogic.NO_UPDATE;
   }
 }

@@ -1,20 +1,19 @@
 package io.github.alecredmond.internal.method.vectoriterator.iteratorutils.resetlogictypes;
 
 import io.github.alecredmond.export.node.Node;
-import io.github.alecredmond.internal.application.vectoriterator.OdometerInitializer;
-import io.github.alecredmond.internal.application.vectoriterator.VectorOdometer;
-import io.github.alecredmond.internal.method.vectoriterator.iteratorutils.OdometerInitializerUtils;
+import io.github.alecredmond.internal.application.vectoriterator.CartesianIteratorLogic;
+import io.github.alecredmond.internal.method.vectoriterator.standardtemplate.StandardVectorIteratorTemplate;
+
 import java.util.function.Function;
 
-public interface OdometerResetDefault extends OdometerResetBase {
+public interface OdometerResetDefault extends StandardVectorIteratorTemplate {
 
-  @Override
-  default void updateInnerInitializer(
-      OdometerInitializer innerInitializer, VectorOdometer odometer, boolean[] positionLocks) {
-    OdometerInitializerUtils.resetInitializer(odometer, positionLocks, innerInitializer);
-  }
+    @Override
+    default CartesianIteratorLogic.ResetLogicType getResetLogicType() {
+        return CartesianIteratorLogic.ResetLogicType.VARIABLE;
+    }
 
-  default Function<Node, boolean[]> buildEvidenceMaps() {
+    default Function<Node, boolean[]> evidenceChecker() {
     return node -> null;
   }
 }

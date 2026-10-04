@@ -7,35 +7,37 @@ import io.github.alecredmond.export.probabilitytables.cptentry.CptEntry;
 import io.github.alecredmond.export.probabilitytables.cptentry.CptRow;
 import io.github.alecredmond.internal.application.vectoriterator.VectorOdometer;
 import io.github.alecredmond.internal.method.vectoriterator.VectorIterator;
+import io.github.alecredmond.internal.method.vectoriterator.iteratorutils.UpdateStateArrayLogic;
 import io.github.alecredmond.internal.method.vectoriterator.iteratorutils.resetlogictypes.OdometerResetDefault;
-import io.github.alecredmond.internal.method.vectoriterator.iteratorutils.updatelogictypes.OdometerUpdateWriteStatesToArray;
+import io.github.alecredmond.internal.method.vectoriterator.standardtemplate.StandardIteratorFactory;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-public class CptConditionIterator implements OdometerResetDefault, OdometerUpdateWriteStatesToArray {
+public class CptConditionIterator implements OdometerResetDefault {
   private final Node eventNode;
   private final Set<Node> conditionNodes;
-  private final VectorIterator<VectorOdometer> iterator;
+  private final VectorIterator iterator;
   private final Map<Node, NodeState> lockedPositionMap;
 
   public CptConditionIterator(NetworkTable networkTable) {
     this.eventNode = networkTable.getNetworkNode();
     this.conditionNodes = networkTable.getConditions();
     this.lockedPositionMap = new HashMap<>();
-    this.iterator = new VectorIterator<>(networkTable.getVector(), this, VectorOdometer::new);
+    this.iterator = StandardIteratorFactory.create(this, networkTable.getVector());
   }
 
   public void iterateConditions(Consumer<CptRow> rowConsumer, Collection<NodeState> lockedStates) {
     lockNodesAndReset(lockedStates);
     int eventIndexInStateArray = conditionNodes.size();
+    double[] probabilities = iterator.getOdometer().getProbabilities();
     iterator.iterateOuter(
         (odometer, rowStartIndex) ->
             consumeConditionRow(
                 rowConsumer,
                 eventIndexInStateArray,
-                odometer.getProbabilities(),
+                probabilities,
                 buildRowConditions(odometer, eventIndexInStateArray),
                 rowStartIndex));
   }
@@ -71,6 +73,14 @@ public class CptConditionIterator implements OdometerResetDefault, OdometerUpdat
   }
 
   @Override
+  public Function<Node, NodeState> initialStatePositionSetter() {
+    return node ->
+        lockedPositionMap.containsKey(node)
+            ? lockedPositionMap.get(node)
+            : node.getStates().getFirst();
+  }
+
+  @Override
   public Predicate<Node> checkLockOuter() {
     return node -> node.equals(eventNode) || lockedPositionMap.containsKey(node);
   }
@@ -81,10 +91,7 @@ public class CptConditionIterator implements OdometerResetDefault, OdometerUpdat
   }
 
   @Override
-  public Function<Node, NodeState> initialStatePositionSetter() {
-    return node ->
-        lockedPositionMap.containsKey(node)
-            ? lockedPositionMap.get(node)
-            : node.getStates().getFirst();
+  public UpdateStateArrayLogic updateConsumerType() {
+    return UpdateStateArrayLogic.WRITE_STATES_TO_ARRAY;
   }
 }

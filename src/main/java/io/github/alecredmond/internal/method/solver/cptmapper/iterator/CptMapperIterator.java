@@ -4,26 +4,28 @@ import io.github.alecredmond.export.constraints.ProbabilityConstraint;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
 import io.github.alecredmond.export.probabilitytables.NetworkTable;
+import io.github.alecredmond.internal.application.solver.CptMappingReport;
 import io.github.alecredmond.internal.application.vectoriterator.VectorOdometer;
 import io.github.alecredmond.internal.method.constraints.strategy.CPTConstraintValidator;
 import io.github.alecredmond.internal.method.constraints.strategy.ValidatedConstraint;
 import io.github.alecredmond.internal.method.solver.cptmapper.constraintsorter.CptConstraintSorter;
-import io.github.alecredmond.internal.application.solver.CptMappingReport;
 import io.github.alecredmond.internal.method.utils.DoublePrecision;
 import io.github.alecredmond.internal.method.vectoriterator.VectorIterator;
+import io.github.alecredmond.internal.method.vectoriterator.iteratorutils.UpdateStateArrayLogic;
 import io.github.alecredmond.internal.method.vectoriterator.iteratorutils.resetlogictypes.OdometerResetOnlyOnBuild;
 import io.github.alecredmond.internal.method.vectoriterator.iteratorutils.resetlogictypes.ResetLogicUtils;
-import io.github.alecredmond.internal.method.vectoriterator.iteratorutils.updatelogictypes.OdometerUpdateWriteStatesToArray;
+import io.github.alecredmond.internal.method.vectoriterator.standardtemplate.StandardIteratorFactory;
+
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
 public abstract class CptMapperIterator<T extends NetworkTable, P extends ProbabilityConstraint>
-    implements OdometerResetOnlyOnBuild, OdometerUpdateWriteStatesToArray {
+    implements OdometerResetOnlyOnBuild {
   protected final T networkTable;
   protected final List<P> constraints;
-  protected final VectorIterator<VectorOdometer> iterator;
+  protected final VectorIterator iterator;
   protected final CPTConstraintValidator<P, ?> validator;
   protected final CptMappingReport report;
 
@@ -35,13 +37,28 @@ public abstract class CptMapperIterator<T extends NetworkTable, P extends Probab
     this.networkTable = networkTable;
     this.validator = validator;
     this.constraints = sorter.sortConstraints(allConstraints);
-    this.iterator = new VectorIterator<>(new VectorOdometer(networkTable.getVector()), this);
+    this.iterator = StandardIteratorFactory.create(this,networkTable.getVector());
     this.report = new CptMappingReport(networkTable, constraints);
   }
 
   @Override
   public Function<Node, NodeState> initialStatePositionSetter() {
     return ResetLogicUtils.initializeToFirstNodeStates();
+  }
+
+  @Override
+  public Predicate<Node> checkLockOuter() {
+    return networkTable.getEvents()::contains;
+  }
+
+  @Override
+  public Predicate<Node> checkLockInner() {
+    return networkTable.getConditions()::contains;
+  }
+
+  @Override
+  public UpdateStateArrayLogic updateConsumerType() {
+    return UpdateStateArrayLogic.WRITE_STATES_TO_ARRAY;
   }
 
   public CptMappingReport directMapCPTs() {
@@ -162,16 +179,6 @@ public abstract class CptMapperIterator<T extends NetworkTable, P extends Probab
 
   private double getNormalizedRemainder(MissingEntryCheck entryCheck) {
     return entryCheck.remainder.doubleValue() / entryCheck.missingRowIndexes.size();
-  }
-
-  @Override
-  public Predicate<Node> checkLockOuter() {
-    return networkTable.getEvents()::contains;
-  }
-
-  @Override
-  public Predicate<Node> checkLockInner() {
-    return networkTable.getConditions()::contains;
   }
 
   protected class MissingEntryCheck {

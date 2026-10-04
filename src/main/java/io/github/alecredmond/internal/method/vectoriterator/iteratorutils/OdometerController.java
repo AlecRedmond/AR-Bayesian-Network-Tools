@@ -1,35 +1,30 @@
 package io.github.alecredmond.internal.method.vectoriterator.iteratorutils;
 
-import io.github.alecredmond.internal.application.vectoriterator.OdometerInitializer;
-import io.github.alecredmond.internal.application.vectoriterator.VectorOdometer;
+import io.github.alecredmond.export.cartesianvector.CartesianState;
+import io.github.alecredmond.export.cartesianvector.CartesianVariable;
+import io.github.alecredmond.internal.application.vectoriterator.CartesianIteratorLogic;
+import io.github.alecredmond.internal.application.vectoriterator.CartesianOdometer;
+import java.util.List;
 import java.util.function.ObjIntConsumer;
 import lombok.Data;
 
 @Data
-public class OdometerController<T extends VectorOdometer> {
+public class OdometerController<
+    N extends CartesianVariable, S extends CartesianState, T extends CartesianOdometer<N, S, ?>> {
   private T odometer;
-  private OdometerResetLogic<T> resetLogic;
+  private List<CartesianIteratorLogic<N, S, T>> resetLogic;
   private ObjIntConsumer<T> updateConsumer;
-  private OdometerInitializer initInner;
-  private OdometerInitializer initOuter;
 
   public OdometerController(
-      T odometer, OdometerResetLogic<T> resetLogic, OdometerUpdateLogic<T> updateLogic) {
+      T odometer,
+      ObjIntConsumer<T> updateConsumer,
+      List<CartesianIteratorLogic<N, S, T>> resetLogic) {
     this.odometer = odometer;
+    this.updateConsumer = updateConsumer;
     this.resetLogic = resetLogic;
-    this.updateConsumer = updateLogic.update();
-    this.initOuter = new OdometerInitializer(odometer);
-    this.initInner = new OdometerInitializer(odometer);
-  }
-
-  public OdometerInitializer getInitInner() {
-    resetLogic.updateInnerInitializer(initInner, odometer, odometer.getInnerIteratorLocks());
-    return initInner;
   }
 
   public void reset() {
-    resetLogic.resetOdometer(odometer);
-    OdometerInitializerUtils.resetInnerInitializer(odometer, initInner);
-    OdometerInitializerUtils.resetOuterInitializer(odometer, initOuter);
+    resetLogic.forEach(CartesianIteratorLogic::reset);
   }
 }

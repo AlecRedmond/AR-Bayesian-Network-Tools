@@ -1,29 +1,26 @@
 package io.github.alecredmond.internal.method.probabilitytables.tabletransfer.readwriters;
 
-import io.github.alecredmond.export.probabilitytables.ProbabilityVector;
-import io.github.alecredmond.internal.application.vectoriterator.VectorOdometer;
-import io.github.alecredmond.internal.method.probabilitytables.tabletransfer.factory.TransferWriterMessagePassFactory;
+import io.github.alecredmond.internal.application.vectoriterator.IteratorFactoryData;
 import io.github.alecredmond.internal.method.vectoriterator.VectorIterator;
 import java.util.stream.IntStream;
 import lombok.EqualsAndHashCode;
 
 @EqualsAndHashCode(callSuper = true)
-public class TransferWriterMessagePass extends VectorIterator<VectorOdometer>
-    implements TransferIterator {
+public class TransferWriterMessagePass extends VectorIterator implements TransferIterator {
   private final double[] transferArray;
   private final double[] ratioArray;
   private final double[] separatorProbs;
   private final int[] tIndex = {0};
 
   public TransferWriterMessagePass(
-      ProbabilityVector write,
+      IteratorFactoryData data,
       double[] transferArray,
-      TransferWriterMessagePassFactory logic,
-      ProbabilityVector separatorVector) {
-    super(write, logic, VectorOdometer::new);
+      double[] ratioArray,
+      double[] separatorProbs) {
+    super(data);
     this.transferArray = transferArray;
-    this.ratioArray = new double[transferArray.length];
-    this.separatorProbs = separatorVector.getProbabilities();
+    this.ratioArray = ratioArray;
+    this.separatorProbs = separatorProbs;
   }
 
   @Override

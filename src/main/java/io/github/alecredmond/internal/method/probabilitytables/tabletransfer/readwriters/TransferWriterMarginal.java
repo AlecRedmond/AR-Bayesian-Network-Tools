@@ -2,22 +2,18 @@ package io.github.alecredmond.internal.method.probabilitytables.tabletransfer.re
 
 import static io.github.alecredmond.internal.method.utils.DoublePrecision.fuzzyEquals;
 
-import io.github.alecredmond.export.probabilitytables.ProbabilityVector;
-import io.github.alecredmond.internal.application.vectoriterator.VectorOdometer;
-import io.github.alecredmond.internal.method.probabilitytables.tabletransfer.factory.TransferWriterMarginalFactory;
+import io.github.alecredmond.internal.application.vectoriterator.IteratorFactoryData;
 import io.github.alecredmond.internal.method.vectoriterator.VectorIterator;
 import lombok.EqualsAndHashCode;
 
 @EqualsAndHashCode(callSuper = true)
-public class TransferWriterMarginal extends VectorIterator<VectorOdometer>
-    implements TransferIterator {
+public class TransferWriterMarginal extends VectorIterator implements TransferIterator {
   private final double[] transferArray;
   private final double[] adder = {0.0};
   private final int[] tIndex = {0};
 
-  public TransferWriterMarginal(
-      ProbabilityVector write, double[] transferArray, TransferWriterMarginalFactory logic) {
-    super(write, logic, VectorOdometer::new);
+  public TransferWriterMarginal(IteratorFactoryData data, double[] transferArray) {
+    super(data);
     this.transferArray = transferArray;
   }
 

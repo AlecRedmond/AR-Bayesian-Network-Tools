@@ -11,9 +11,10 @@ import io.github.alecredmond.internal.application.vectoriterator.VectorOdometer;
 import io.github.alecredmond.internal.method.utils.CollectionToString;
 import io.github.alecredmond.internal.method.utils.DoublePrecision;
 import io.github.alecredmond.internal.method.vectoriterator.VectorIterator;
+import io.github.alecredmond.internal.method.vectoriterator.iteratorutils.UpdateStateArrayLogic;
 import io.github.alecredmond.internal.method.vectoriterator.iteratorutils.resetlogictypes.OdometerResetOnlyOnBuild;
 import io.github.alecredmond.internal.method.vectoriterator.iteratorutils.resetlogictypes.ResetLogicUtils;
-import io.github.alecredmond.internal.method.vectoriterator.iteratorutils.updatelogictypes.OdometerUpdateWriteStatesToArray;
+import io.github.alecredmond.internal.method.vectoriterator.standardtemplate.StandardIteratorFactory;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -21,17 +22,16 @@ import java.util.stream.Collectors;
 import lombok.Getter;
 
 @Getter
-public class ConstraintBuilderIterator
-    implements OdometerResetOnlyOnBuild, OdometerUpdateWriteStatesToArray {
-  private final VectorIterator<VectorOdometer> iterator;
+public class ConstraintBuilderIterator implements OdometerResetOnlyOnBuild {
+  private final VectorIterator iterator;
   private final Node event;
   private final VectorOdometer odometer;
   private List<ProbabilityConstraint> built;
 
   public ConstraintBuilderIterator(Node event, ProbabilityVector vector) {
     this.event = event;
-    this.odometer = new VectorOdometer(vector);
-    this.iterator = new VectorIterator<>(odometer, this);
+    this.iterator = StandardIteratorFactory.create(this, vector);
+    this.odometer = iterator.getOdometer();
   }
 
   public List<ProbabilityConstraint> buildConstraints() {
@@ -47,6 +47,11 @@ public class ConstraintBuilderIterator
   }
 
   @Override
+  public Function<Node, NodeState> initialStatePositionSetter() {
+    return ResetLogicUtils.initializeToFirstNodeStates();
+  }
+
+  @Override
   public Predicate<Node> checkLockOuter() {
     return event::equals;
   }
@@ -57,8 +62,8 @@ public class ConstraintBuilderIterator
   }
 
   @Override
-  public Function<Node, NodeState> initialStatePositionSetter() {
-    return ResetLogicUtils.initializeToFirstNodeStates();
+  public UpdateStateArrayLogic updateConsumerType() {
+    return UpdateStateArrayLogic.WRITE_STATES_TO_ARRAY;
   }
 
   private void createMarginals(double[] probabilities, NodeState[] states) {
@@ -115,7 +120,7 @@ public class ConstraintBuilderIterator
   private void assertSumEqualsOne(List<? extends ProbabilityConstraint> constraints, double sum) {
     if (DoublePrecision.fuzzyEquals(sum, 1.0)) return;
     Set<NodeState> condition = constraints.getFirst().getConditionStates();
-      throw new ConstraintValidationException(
+    throw new ConstraintValidationException(
         "Constraints on [%s] the condition [%s] do not sum to 1"
             .formatted(event.getId(), CollectionToString.apply(condition)));
   }
@@ -124,7 +129,7 @@ public class ConstraintBuilderIterator
       List<? extends ProbabilityConstraint> constraints, double sum) {
     if (sum < 1.0) return;
     Set<NodeState> condition = constraints.getFirst().getConditionStates();
-      throw new ConstraintValidationException(
+    throw new ConstraintValidationException(
         "Constraints on [%s] the condition [%s] would sum to > 1"
             .formatted(event.getId(), CollectionToString.apply(condition)));
   }

@@ -4,6 +4,7 @@ import io.github.alecredmond.export.cartesianvector.CartesianVector;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
 import java.util.Map;
+import java.util.function.ToIntFunction;
 import lombok.EqualsAndHashCode;
 
 /**
@@ -117,13 +118,13 @@ public class ProbabilityVector extends CartesianVector<Node, NodeState> {
   }
 
   @Override
-  public int getNodeOrderIndex(Node node) {
-    return nodeIndexMap.get(node);
+  public ToIntFunction<Node> orderedIndexOfNode() {
+    return nodeIndexMap::get;
   }
 
   @Override
-  public int getStatePositionIndex(NodeState nodeState) {
-    return nodeState.getPosition();
+  public ToIntFunction<NodeState> orderedPositionOfState() {
+    return NodeState::getPosition;
   }
 
   /**

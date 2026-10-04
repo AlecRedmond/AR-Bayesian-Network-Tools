@@ -5,8 +5,6 @@ import io.github.alecredmond.export.cartesianvector.CartesianVariable;
 import io.github.alecredmond.export.cartesianvector.CartesianVector;
 import io.github.alecredmond.internal.application.vectoriterator.CartesianOdometer;
 import io.github.alecredmond.internal.application.vectoriterator.OdometerInitializer;
-import io.github.alecredmond.internal.application.vectoriterator.VectorOdometer;
-import io.github.alecredmond.internal.application.vectoriterator.positionlocker.PositionLock;
 import lombok.Data;
 
 @Data
@@ -15,18 +13,15 @@ public class OdometerInitializerUtils {
   private OdometerInitializerUtils() {}
 
   public static <N extends CartesianVariable, S extends CartesianState> void resetInitializer(
-      CartesianOdometer<N, S, ?> odometer,
-      PositionLock<N, S> positionLock,
-      OdometerInitializer initializer) {
-    boolean[] lockedPositionArray = positionLock.getPositionLocked();
+      OdometerInitializer initializer,
+      boolean[] lockedPositionArray,
+      CartesianOdometer<N, S, ?> odometer) {
     int fastestPos = findFastestPosition(lockedPositionArray);
     boolean fireOnlyOnce = fastestPos < 0;
     int[] strideLengths = odometer.getStrideLengths();
-    int startIndex = computeStartIndex(odometer.getStatePositions(), strideLengths);
     int baseStride = fireOnlyOnce ? 0 : strideLengths[fastestPos];
 
     initializer.setLockedPositions(lockedPositionArray);
-    initializer.setInitialIndex(startIndex);
     initializer.setFastestPosition(fastestPos);
     initializer.setFireOnlyOnce(fireOnlyOnce);
     initializer.setBaseStride(baseStride);
@@ -43,35 +38,33 @@ public class OdometerInitializerUtils {
     return fastestPosition;
   }
 
-  private static int computeStartIndex(int[] odometerValues, int[] strideLengths) {
+  public static <S extends CartesianState, N extends CartesianVariable>
+      void setUnlockedToInitialPositions(
+          CartesianOdometer<N, S, ?> odometer, boolean[] positionLocked, int[] initialPositions) {
+    int[] statePositions = odometer.getStatePositions();
+    final int length = statePositions.length;
+    for (int i = 0; i < length; i++) {
+      if (positionLocked[i]) continue;
+      statePositions[i] = initialPositions[i];
+    }
+  }
+
+  public static <S extends CartesianState, N extends CartesianVariable> void updateStartIndex(
+      OdometerInitializer initializer, CartesianOdometer<N, S, ?> odometer) {
+    initializer.setInitialIndex(
+        computeStartIndex(odometer.getStatePositions(), odometer.getStrideLengths()));
+  }
+
+  private static int computeStartIndex(int[] statePositions, int[] strideLengths) {
     int index = 0;
-    for (int i = 0; i < odometerValues.length; i++) {
-      index += odometerValues[i] * strideLengths[i];
+    for (int i = 0; i < statePositions.length; i++) {
+      index += statePositions[i] * strideLengths[i];
     }
     return index;
   }
 
-  public static void resetInnerInitializer(VectorOdometer odometer, OdometerInitializer initInner) {
-    resetInitializer(odometer, odometer.getInnerIteratorLocks(), initInner);
-  }
-
-  public static void resetInitializer(
-      VectorOdometer odometer, boolean[] positionLocked, OdometerInitializer initializer) {
-    int fastestPos = findFastestPosition(positionLocked);
-    boolean fireOnlyOnce = fastestPos < 0;
-    int[] strideLengths = odometer.getStrideLengths();
-    int startIndex = computeStartIndex(odometer.getStatePositions(), strideLengths);
-    int baseStride = fireOnlyOnce ? 0 : strideLengths[fastestPos];
-
-    initializer.setLockedPositions(positionLocked);
-    initializer.setInitialIndex(startIndex);
-    initializer.setFastestPosition(fastestPos);
-    initializer.setFireOnlyOnce(fireOnlyOnce);
-    initializer.setBaseStride(baseStride);
-  }
-
-  public static int[] buildStrideIfLocked(VectorOdometer odometer) {
-    return getInts(odometer.getNumberOfStates(), odometer.getStrideLengths());
+  public static int[] buildStrideIfLocked(CartesianVector<?, ?> vector) {
+    return getInts(vector.getNumberOfStates(), vector.getStrideLengths());
   }
 
   private static int[] getInts(int[] numberOfStates, int[] strideLengths) {
@@ -80,18 +73,5 @@ public class OdometerInitializerUtils {
       strideIfLocked[i] = (numberOfStates[i] - 1) * strideLengths[i];
     }
     return strideIfLocked;
-  }
-
-  public static int[] buildStrideIfLocked(CartesianVector<?, ?> vector) {
-    return getInts(vector.getNumberOfStates(), vector.getStrideLengths());
-  }
-
-  public static void updateStartIndex(OdometerInitializer initializer, VectorOdometer odometer) {
-    initializer.setInitialIndex(
-        computeStartIndex(odometer.getStatePositions(), odometer.getStrideLengths()));
-  }
-
-  public static void resetOuterInitializer(VectorOdometer odometer, OdometerInitializer initOuter) {
-    resetInitializer(odometer, odometer.getOuterIteratorLocks(), initOuter);
   }
 }

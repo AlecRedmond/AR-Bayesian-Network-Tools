@@ -3,6 +3,8 @@ package io.github.alecredmond.export.cartesianvector;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
+import java.util.function.ToIntFunction;
+
 @AllArgsConstructor
 @Data
 public abstract class CartesianVector<N extends CartesianVariable, S extends CartesianState> {
@@ -12,8 +14,8 @@ public abstract class CartesianVector<N extends CartesianVariable, S extends Car
   protected final int[] strideLengths;
   protected final int rank;
 
-  public abstract int getNodeOrderIndex(N n);
+  public abstract ToIntFunction<N> orderedIndexOfNode();
 
-  public abstract int getStatePositionIndex(S s);
+  public abstract ToIntFunction<S> orderedPositionOfState();
 
 }

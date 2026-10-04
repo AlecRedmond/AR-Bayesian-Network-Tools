@@ -16,8 +16,8 @@ public class CartesianVectorUtils {
           N extends CartesianVariable, S extends CartesianState, V extends CartesianVector<N, S>>
       int[] getStatePositions(
           V cartesianVector, Collection<S> states, boolean performSafetyChecks) {
-    ToIntFunction<N> getNodeOrderIndex = cartesianVector::getNodeOrderIndex;
-    ToIntFunction<S> getStateOrderIndex = cartesianVector::getStatePositionIndex;
+    ToIntFunction<N> getNodeOrderIndex = cartesianVector.orderedIndexOfNode();
+    ToIntFunction<S> getStateOrderIndex = cartesianVector.orderedPositionOfState();
     N[] orderedNodes = cartesianVector.getOrderedNodes();
     if (performSafetyChecks) {
       performStateSafetyChecks(states, orderedNodes, getNodeOrderIndex);

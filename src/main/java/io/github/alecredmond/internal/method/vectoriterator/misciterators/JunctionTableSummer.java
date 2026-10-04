@@ -6,15 +6,19 @@ import io.github.alecredmond.internal.application.vectoriterator.VectorOdometer;
 import io.github.alecredmond.internal.method.node.NodeUtils;
 import io.github.alecredmond.internal.method.probabilitytables.JunctionTreeTable;
 import io.github.alecredmond.internal.method.vectoriterator.VectorIterator;
+import io.github.alecredmond.internal.method.vectoriterator.iteratorutils.UpdateStateArrayLogic;
 import io.github.alecredmond.internal.method.vectoriterator.iteratorutils.resetlogictypes.OdometerResetDefault;
 import io.github.alecredmond.internal.method.vectoriterator.iteratorutils.resetlogictypes.ResetLogicUtils;
-import io.github.alecredmond.internal.method.vectoriterator.iteratorutils.updatelogictypes.OdometerUpdateBlank;
+import io.github.alecredmond.internal.method.vectoriterator.standardtemplate.StandardIteratorFactory;
 import java.util.*;
+import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import lombok.extern.slf4j.Slf4j;
 
-public class JunctionTableSummer implements OdometerResetDefault, OdometerUpdateBlank {
-  private final VectorIterator<VectorOdometer> iterator;
+@Slf4j
+public class JunctionTableSummer implements OdometerResetDefault {
+  private final VectorIterator iterator;
   private final JunctionTreeTable table;
   private final double[] adder = {0.0};
   private final VectorOdometer odometer;
@@ -25,46 +29,35 @@ public class JunctionTableSummer implements OdometerResetDefault, OdometerUpdate
     this.table = table;
     this.requestNodes = new HashSet<>();
     this.requestStates = new HashSet<>();
-    this.odometer = new VectorOdometer(table.getVector());
-    this.iterator = new VectorIterator<>(odometer, this);
+    this.iterator = StandardIteratorFactory.create(this, table.getVector());
+    this.odometer = iterator.getOdometer();
   }
 
   public double sum(Collection<NodeState> states) {
-    this.requestStates = new HashSet<>(states);
-    this.requestNodes = NodeUtils.getNodes(states);
+    this.requestStates.clear();
+    this.requestNodes.clear();
+    this.requestStates.addAll(states);
+    this.requestNodes.addAll(NodeUtils.getNodes(states));
     iterator.reset();
 
     double[] p = table.getProbabilities();
-    int[] stateIndexes = odometer.getStatePositions();
-    boolean[][] stateIsEvent = odometer.getNodeStateEvidenceArray();
+    BooleanSupplier evidenceTest = iterator.getIsEvidenceCheck();
 
     adder[0] = 0.0;
     iterator.iterateOuter(
         () -> {
-          if (!checkIsEvidence(stateIndexes, stateIsEvent)) return;
+          if (!evidenceTest.getAsBoolean()) return;
           iterator.iterateInner((o, i) -> adder[0] += p[i]);
         });
     return adder[0];
-  }
-
-  protected boolean checkIsEvidence(int[] stateIndexes, boolean[][] stateIsEvent) {
-    return ResetLogicUtils.checkIsEvidence(stateIndexes, stateIsEvent);
   }
 
   @Override
   public Function<Node, NodeState> initialStatePositionSetter() {
     return node ->
         requestNodes.contains(node)
-            ? node.getStates().stream()
-                .filter(requestStates::contains)
-                .findFirst()
-                .orElseThrow()
+            ? node.getStates().stream().filter(requestStates::contains).findFirst().orElseThrow()
             : node.getStates().getFirst();
-  }
-
-  @Override
-  public Function<Node, boolean[]> buildEvidenceMaps() {
-    return ResetLogicUtils.updateEvidenceArrayFunction(requestNodes, requestStates);
   }
 
   @Override
@@ -75,5 +68,19 @@ public class JunctionTableSummer implements OdometerResetDefault, OdometerUpdate
   @Override
   public Predicate<Node> checkLockInner() {
     return requestNodes::contains;
+  }
+
+  @Override
+  public UpdateStateArrayLogic updateConsumerType() {
+    return UpdateStateArrayLogic.NO_UPDATE;
+  }
+
+  @Override
+  public Function<Node, boolean[]> evidenceChecker() {
+    return ResetLogicUtils.updateEvidenceArrayFunction(requestNodes, requestStates);
+  }
+
+  protected boolean checkIsEvidence(int[] stateIndexes, boolean[][] stateIsEvent) {
+    return ResetLogicUtils.checkIsEvidence(stateIndexes, stateIsEvent);
   }
 }

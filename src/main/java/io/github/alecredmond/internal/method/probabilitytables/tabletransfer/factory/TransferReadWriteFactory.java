@@ -5,15 +5,15 @@ import io.github.alecredmond.export.node.NodeState;
 import io.github.alecredmond.export.probabilitytables.ProbabilityTable;
 import io.github.alecredmond.internal.method.probabilitytables.TableUtils;
 import io.github.alecredmond.internal.method.probabilitytables.tabletransfer.readwriters.TransferIterator;
+import io.github.alecredmond.internal.method.vectoriterator.iteratorutils.UpdateStateArrayLogic;
 import io.github.alecredmond.internal.method.vectoriterator.iteratorutils.resetlogictypes.OdometerResetOnlyOnBuild;
 import io.github.alecredmond.internal.method.vectoriterator.iteratorutils.resetlogictypes.ResetLogicUtils;
-import io.github.alecredmond.internal.method.vectoriterator.iteratorutils.updatelogictypes.OdometerUpdateBlank;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
 public abstract class TransferReadWriteFactory<T extends TransferIterator>
-    implements OdometerResetOnlyOnBuild, OdometerUpdateBlank {
+    implements OdometerResetOnlyOnBuild {
   protected ProbabilityTable readTable;
   protected ProbabilityTable writeTable;
   protected double[] transferArray;
@@ -42,6 +42,11 @@ public abstract class TransferReadWriteFactory<T extends TransferIterator>
   public abstract T build();
 
   @Override
+  public Function<Node, NodeState> initialStatePositionSetter() {
+    return ResetLogicUtils.initializeToFirstNodeStates();
+  }
+
+  @Override
   public Predicate<Node> checkLockOuter() {
     return node -> !commonNodes.contains(node);
   }
@@ -52,7 +57,7 @@ public abstract class TransferReadWriteFactory<T extends TransferIterator>
   }
 
   @Override
-  public Function<Node, NodeState> initialStatePositionSetter() {
-    return ResetLogicUtils.initializeToFirstNodeStates();
+  public UpdateStateArrayLogic updateConsumerType() {
+    return UpdateStateArrayLogic.NO_UPDATE;
   }
 }

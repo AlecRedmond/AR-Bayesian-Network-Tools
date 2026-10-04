@@ -2,6 +2,7 @@ package io.github.alecredmond.internal.method.probabilitytables.tabletransfer.fa
 
 import io.github.alecredmond.export.probabilitytables.ProbabilityTable;
 import io.github.alecredmond.internal.method.probabilitytables.tabletransfer.readwriters.TransferReader;
+import io.github.alecredmond.internal.method.vectoriterator.standardtemplate.StandardIteratorFactory;
 
 public class TransferReaderFactory extends TransferReadWriteFactory<TransferReader> {
   protected TransferReaderFactory(ProbabilityTable readTable, ProbabilityTable writeTable) {
@@ -10,6 +11,7 @@ public class TransferReaderFactory extends TransferReadWriteFactory<TransferRead
 
   @Override
   public TransferReader build() {
-    return new TransferReader(readTable.getVector(), transferArray, this);
+    return new TransferReader(
+        StandardIteratorFactory.createFactoryData(this, readTable.getVector()), transferArray);
   }
 }
