@@ -15,7 +15,7 @@ public class OdometerInitializerUtils {
   public static <N extends CartesianVariable, S extends CartesianState> void resetInitializer(
       OdometerInitializer initializer,
       boolean[] lockedPositionArray,
-      CartesianOdometer<N, S, ?> odometer) {
+      CartesianOdometer<N, S> odometer) {
     int fastestPos = findFastestPosition(lockedPositionArray);
     boolean fireOnlyOnce = fastestPos < 0;
     int[] strideLengths = odometer.getStrideLengths();
@@ -38,19 +38,8 @@ public class OdometerInitializerUtils {
     return fastestPosition;
   }
 
-  public static <S extends CartesianState, N extends CartesianVariable>
-      void setUnlockedToInitialPositions(
-          CartesianOdometer<N, S, ?> odometer, boolean[] positionLocked, int[] initialPositions) {
-    int[] statePositions = odometer.getStatePositions();
-    final int length = statePositions.length;
-    for (int i = 0; i < length; i++) {
-      if (positionLocked[i]) continue;
-      statePositions[i] = initialPositions[i];
-    }
-  }
-
   public static <S extends CartesianState, N extends CartesianVariable> void updateStartIndex(
-      OdometerInitializer initializer, CartesianOdometer<N, S, ?> odometer) {
+      OdometerInitializer initializer, CartesianOdometer<N, S> odometer) {
     initializer.setInitialIndex(
         computeStartIndex(odometer.getStatePositions(), odometer.getStrideLengths()));
   }

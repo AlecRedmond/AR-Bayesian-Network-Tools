@@ -2,40 +2,41 @@ package io.github.alecredmond.internal.method.vectoriterator;
 
 import io.github.alecredmond.export.cartesianvector.CartesianState;
 import io.github.alecredmond.export.cartesianvector.CartesianVariable;
-import io.github.alecredmond.internal.application.vectoriterator.CartesianIteratorLogic;
 import io.github.alecredmond.internal.application.vectoriterator.CartesianOdometer;
 import io.github.alecredmond.internal.application.vectoriterator.OdometerInitializer;
-import io.github.alecredmond.internal.application.vectoriterator.VectorOdometer;
-import io.github.alecredmond.internal.application.vectoriterator.positionlocker.PositionLock;
-import io.github.alecredmond.internal.method.vectoriterator.iteratorutils.OdometerController;
-import io.github.alecredmond.internal.method.vectoriterator.iteratorutils.UpdateStateArrayLogic;
-import io.github.alecredmond.internal.method.vectoriterator.iteratorutils.resetlogictypes.ResetLogicUtils;
-import java.util.function.ObjIntConsumer;
+import io.github.alecredmond.internal.application.vectoriterator.ProbabilityVectorOdometer;
+import io.github.alecredmond.internal.method.vectoriterator.iteratorlogic.CartesianIteratorLogic;
+import io.github.alecredmond.internal.method.vectoriterator.iteratorlogic.PositionLock;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.IntConsumer;
 import lombok.Getter;
 
-public class CartesianVectorIterator<
-    N extends CartesianVariable, S extends CartesianState, T extends CartesianOdometer<N, S, ?>> {
-  @Getter protected final OdometerController<N, S, T> controller;
+public class CartesianVectorIterator<N extends CartesianVariable, S extends CartesianState> {
+  @Getter protected final CartesianOdometer<N, S> odometer;
+  protected final Consumer<CartesianOdometer<N, S>> updateConsumer;
+  protected final CartesianIteratorLogic[] resetLogic;
 
-  @SafeVarargs
   public CartesianVectorIterator(
-      T odometer,
-      UpdateStateArrayLogic stateUpdateLogic,
-      CartesianIteratorLogic<N, S, T>... logicArgs) {
-    this.controller =
-        new OdometerController<>(
-            odometer,
-            ResetLogicUtils.supplyUpdateLogic(stateUpdateLogic),
-            CartesianIteratorLogic.sort(logicArgs));
-    controller.reset();
+      CartesianOdometer<N, S> odometer,
+      Consumer<CartesianOdometer<N, S>> updateConsumer,
+      CartesianIteratorLogic... logicArgs) {
+    this.odometer = odometer;
+    this.updateConsumer = updateConsumer;
+    this.resetLogic = logicArgs;
+    reset();
   }
 
-  public void iterate(ObjIntConsumer<T> indexConsumer, PositionLock<N, S, T> positionLock) {
-    iterate(
-        controller.getOdometer(),
-        indexConsumer,
-        controller.getUpdateConsumer(),
-        positionLock.getInitializer());
+  public void reset() {
+    for (CartesianIteratorLogic logic : resetLogic) {
+      logic.reset();
+    }
+    updateConsumer.accept(odometer);
+  }
+
+  public void iterate(IntConsumer indexConsumer, PositionLock<N, S> positionLock) {
+    iterate(odometer, indexConsumer, updateConsumer, positionLock.getInitializer());
   }
 
   /**
@@ -65,7 +66,7 @@ public class CartesianVectorIterator<
    * be used e.g. for updating the NodeState[] array to be in-line with the given int[]
    * StateIndexes, but is unused in most cases to reduce compute time per iteration.
    *
-   * @param odometer a {@link VectorOdometer} to be iterated through
+   * @param odometer a {@link ProbabilityVectorOdometer} to be iterated through
    * @param indexConsumer a consumer supplied with both the odometer and the current probability
    *     array index at the beginning of each iteration cycle.
    * @param updateConsumer a consumer supplied with the odometer and the next array index at the end
@@ -75,14 +76,14 @@ public class CartesianVectorIterator<
    *     states, and whether the iterator is to fire only once.
    */
   protected void iterate(
-      T odometer,
-      ObjIntConsumer<T> indexConsumer,
-      ObjIntConsumer<T> updateConsumer,
+      CartesianOdometer<N, S> odometer,
+      IntConsumer indexConsumer,
+      Consumer<CartesianOdometer<N, S>> updateConsumer,
       OdometerInitializer initializer) {
     int currentIndex = initializer.getInitialIndex();
 
     if (initializer.isFireOnlyOnce()) {
-      indexConsumer.accept(odometer, currentIndex);
+      indexConsumer.accept(currentIndex);
       return;
     }
 
@@ -99,7 +100,7 @@ public class CartesianVectorIterator<
     /* While the overflow has not carried fully left... */
     while (!overflow) {
       /* Accept the active consumer and stride to the next probability index... */
-      indexConsumer.accept(odometer, currentIndex);
+      indexConsumer.accept(currentIndex);
       currentIndex += baseStride;
       /* Then, from the rightmost unlocked Node... */
       for (int position = fastestPosition; position >= 0; position--) {
@@ -118,23 +119,17 @@ public class CartesianVectorIterator<
         stateIndexes[position] = 0;
       }
       /* And notify the update consumer of the new state and probability indexes. */
-      updateConsumer.accept(odometer, currentIndex);
+      updateConsumer.accept(odometer);
     }
   }
 
-  public void iterateOuter(Runnable runnable, PositionLock<N, S, T> positionLock) {
-    iterate(
-        controller.getOdometer(),
-        (o, i) -> runnable.run(),
-        controller.getUpdateConsumer(),
-        positionLock.getInitializer());
+  public int[] cacheIndexes(PositionLock<N, S> positionLock) {
+    List<Integer> indexes = new ArrayList<>();
+    iterate(odometer, indexes::add, updateConsumer, positionLock.getInitializer());
+    return indexes.stream().mapToInt(Integer::intValue).toArray();
   }
 
-  public void reset() {
-    controller.reset();
-  }
-
-  public T getOdometer() {
-    return controller.getOdometer();
+  public void iterateOuter(Runnable runnable, PositionLock<N, S> positionLock) {
+    iterate(odometer, i -> runnable.run(), updateConsumer, positionLock.getInitializer());
   }
 }

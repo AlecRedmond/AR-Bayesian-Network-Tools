@@ -8,13 +8,10 @@ import lombok.EqualsAndHashCode;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class VectorOdometer extends CartesianOdometer<Node, NodeState, ProbabilityVector> {
+public class ProbabilityVectorOdometer extends CartesianOdometer<Node, NodeState> {
 
-  public VectorOdometer(ProbabilityVector vector) {
-    super(vector, NodeState[]::new);
+  public ProbabilityVectorOdometer(ProbabilityVector vector) {
+    super(vector);
   }
 
-  public double[] getProbabilities() {
-    return vector.getProbabilities();
-  }
 }

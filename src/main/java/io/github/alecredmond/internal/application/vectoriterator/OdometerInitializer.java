@@ -9,7 +9,4 @@ public class OdometerInitializer {
   private boolean fireOnlyOnce;
   private int baseStride;
   private int initialIndex;
-
-  public OdometerInitializer(){}
-
 }

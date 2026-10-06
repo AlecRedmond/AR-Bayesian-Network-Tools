@@ -3,25 +3,21 @@ package io.github.alecredmond.internal.method.vectoriterator.misciterators;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
 import io.github.alecredmond.export.probabilitytables.ProbabilityVector;
-import io.github.alecredmond.internal.application.vectoriterator.VectorOdometer;
+import io.github.alecredmond.internal.application.vectoriterator.ProbabilityVectorOdometer;
 import io.github.alecredmond.internal.method.node.NodeUtils;
 import io.github.alecredmond.internal.method.probabilitytables.JunctionTreeTable;
-import io.github.alecredmond.internal.method.vectoriterator.VectorIterator;
-import io.github.alecredmond.internal.method.vectoriterator.iteratorutils.UpdateStateArrayLogic;
-import io.github.alecredmond.internal.method.vectoriterator.iteratorutils.resetlogictypes.OdometerResetDefault;
-import io.github.alecredmond.internal.method.vectoriterator.iteratorutils.resetlogictypes.ResetLogicUtils;
-import io.github.alecredmond.internal.method.vectoriterator.standardtemplate.StandardIteratorFactory;
+import io.github.alecredmond.internal.method.vectoriterator.standardtemplate.*;
 import java.util.*;
 import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import lombok.Getter;
 
-public class ObservationCopier implements OdometerResetDefault {
+public class ObservationCopier implements ProbabilityIteratorTemplate {
   private final ProbabilityVector mainVector;
   private final ProbabilityVector backupVector;
-  private final VectorIterator iterator;
-  @Getter private final VectorOdometer odometer;
+  private final StandardCartesianIterator<Node, NodeState> iterator;
+  @Getter private final ProbabilityVectorOdometer odometer;
   private final Set<NodeState> requestStates;
   private final Set<Node> requestNodes;
 
@@ -30,8 +26,8 @@ public class ObservationCopier implements OdometerResetDefault {
     this.mainVector = table.getVector();
     this.requestNodes = new HashSet<>();
     this.requestStates = new HashSet<>();
-    this.iterator = StandardIteratorFactory.create(this, mainVector);
-    this.odometer = iterator.getOdometer();
+    this.iterator = StandardCartesianIterator.create(this, mainVector);
+    this.odometer = (ProbabilityVectorOdometer) iterator.getOdometer();
   }
 
   public void observeStates(Collection<NodeState> observedStates) {
@@ -59,7 +55,7 @@ public class ObservationCopier implements OdometerResetDefault {
     iterator.iterateOuter(
         () -> {
           if (evidenceCheck.getAsBoolean()) {
-            iterator.iterateInner((o, i) -> observed[i] = backup[i]);
+            iterator.iterateInner(i -> observed[i] = backup[i]);
           }
         });
   }
@@ -97,12 +93,7 @@ public class ObservationCopier implements OdometerResetDefault {
   }
 
   @Override
-  public UpdateStateArrayLogic updateConsumerType() {
-    return UpdateStateArrayLogic.NO_UPDATE;
-  }
-
-  @Override
-  public Function<Node, boolean[]> evidenceChecker() {
-    return ResetLogicUtils.updateEvidenceArrayFunction(requestNodes, requestStates);
+  public Function<Node, boolean[]> updateEvidenceArrays() {
+    return updateEvidenceArraysCommon(requestNodes, requestStates, Node::getStates);
   }
 }

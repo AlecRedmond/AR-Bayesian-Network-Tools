@@ -3,12 +3,7 @@ package io.github.alecredmond.internal.method.vectoriterator.misciterators;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
 import io.github.alecredmond.export.probabilitytables.ProbabilityVector;
-import io.github.alecredmond.internal.application.vectoriterator.VectorOdometer;
-import io.github.alecredmond.internal.method.vectoriterator.VectorIterator;
-import io.github.alecredmond.internal.method.vectoriterator.iteratorutils.UpdateStateArrayLogic;
-import io.github.alecredmond.internal.method.vectoriterator.iteratorutils.resetlogictypes.OdometerResetDefault;
-import io.github.alecredmond.internal.method.vectoriterator.iteratorutils.resetlogictypes.ResetLogicUtils;
-import io.github.alecredmond.internal.method.vectoriterator.standardtemplate.StandardIteratorFactory;
+import io.github.alecredmond.internal.method.vectoriterator.standardtemplate.*;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -16,26 +11,28 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public class StateCombinationGenerator implements OdometerResetDefault {
-  private final VectorIterator iterator;
-  private final VectorOdometer odometer;
-  private Set<Node> includedNodes;
+public class StateCombinationGenerator extends StateUpdateBase<Node, NodeState>
+    implements ProbabilityIteratorTemplate {
+  private final StandardCartesianIterator<Node, NodeState> iterator;
+  private final ProbabilityVector vector;
+  private final Set<Node> includedNodes;
 
   public StateCombinationGenerator(ProbabilityVector vector) {
+    super(vector, NodeState[]::new);
     this.includedNodes = new HashSet<>();
-    this.iterator = StandardIteratorFactory.create(this, vector);
-    this.odometer = iterator.getOdometer();
+      this.iterator = StandardCartesianIterator.create(this, vector);
+    this.vector = vector;
   }
 
   public <T extends Collection<NodeState>, R extends T> List<T> generateCombos(
       Set<Node> includedNodes, Supplier<R> supplier) {
-    this.includedNodes = includedNodes;
+    this.includedNodes.clear();
+    this.includedNodes.addAll(includedNodes);
     iterator.reset();
     int[] includedPositions = buildIncludedPositions(includedNodes);
-    NodeState[] states = odometer.getStates();
     List<T> stateCombinations = new ArrayList<>();
     iterator.iterateInner(
-        (o, i) ->
+        i ->
             stateCombinations.add(
                 Arrays.stream(includedPositions)
                     .mapToObj(x -> states[x])
@@ -44,7 +41,7 @@ public class StateCombinationGenerator implements OdometerResetDefault {
   }
 
   private int[] buildIncludedPositions(Set<Node> includedNodes) {
-    Node[] nodeArray = odometer.getOrderedNodes();
+    Node[] nodeArray = vector.getOrderedNodes();
     return IntStream.range(0, nodeArray.length)
         .filter(x -> includedNodes.contains(nodeArray[x]))
         .toArray();
@@ -52,7 +49,7 @@ public class StateCombinationGenerator implements OdometerResetDefault {
 
   @Override
   public Function<Node, NodeState> initialStatePositionSetter() {
-    return ResetLogicUtils.initializeToFirstNodeStates();
+      return node -> node.getStates().getFirst();
   }
 
   @Override
@@ -65,8 +62,7 @@ public class StateCombinationGenerator implements OdometerResetDefault {
     return node -> !includedNodes.contains(node);
   }
 
-  @Override
-  public UpdateStateArrayLogic updateConsumerType() {
-    return UpdateStateArrayLogic.WRITE_STATES_TO_ARRAY;
+  public Function<Node, boolean[]> updateEvidenceArrays() {
+    return node -> null;
   }
 }

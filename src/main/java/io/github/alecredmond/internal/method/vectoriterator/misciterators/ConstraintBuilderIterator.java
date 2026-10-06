@@ -7,14 +7,9 @@ import io.github.alecredmond.export.constraints.ProbabilityConstraint;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
 import io.github.alecredmond.export.probabilitytables.ProbabilityVector;
-import io.github.alecredmond.internal.application.vectoriterator.VectorOdometer;
 import io.github.alecredmond.internal.method.utils.CollectionToString;
 import io.github.alecredmond.internal.method.utils.DoublePrecision;
-import io.github.alecredmond.internal.method.vectoriterator.VectorIterator;
-import io.github.alecredmond.internal.method.vectoriterator.iteratorutils.UpdateStateArrayLogic;
-import io.github.alecredmond.internal.method.vectoriterator.iteratorutils.resetlogictypes.OdometerResetOnlyOnBuild;
-import io.github.alecredmond.internal.method.vectoriterator.iteratorutils.resetlogictypes.ResetLogicUtils;
-import io.github.alecredmond.internal.method.vectoriterator.standardtemplate.StandardIteratorFactory;
+import io.github.alecredmond.internal.method.vectoriterator.standardtemplate.*;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -22,22 +17,22 @@ import java.util.stream.Collectors;
 import lombok.Getter;
 
 @Getter
-public class ConstraintBuilderIterator implements OdometerResetOnlyOnBuild {
-  private final VectorIterator iterator;
+public class ConstraintBuilderIterator extends StateUpdateBase<Node, NodeState>
+    implements ProbabilityIteratorTemplate {
+  private final StandardCartesianIterator<Node, NodeState> iterator;
   private final Node event;
-  private final VectorOdometer odometer;
+  private final double[] probabilities;
   private List<ProbabilityConstraint> built;
 
   public ConstraintBuilderIterator(Node event, ProbabilityVector vector) {
+    super(vector, NodeState[]::new);
     this.event = event;
-    this.iterator = StandardIteratorFactory.create(this, vector);
-    this.odometer = iterator.getOdometer();
+      this.iterator = StandardCartesianIterator.create(this, vector);
+    this.probabilities = vector.getProbabilities();
   }
 
   public List<ProbabilityConstraint> buildConstraints() {
     built = new ArrayList<>();
-    double[] probabilities = odometer.getProbabilities();
-    NodeState[] states = odometer.getStates();
     if (states.length == 1) {
       createMarginals(probabilities, states);
     } else {
@@ -48,7 +43,7 @@ public class ConstraintBuilderIterator implements OdometerResetOnlyOnBuild {
 
   @Override
   public Function<Node, NodeState> initialStatePositionSetter() {
-    return ResetLogicUtils.initializeToFirstNodeStates();
+      return node -> node.getStates().getFirst();
   }
 
   @Override
@@ -61,12 +56,11 @@ public class ConstraintBuilderIterator implements OdometerResetOnlyOnBuild {
     return node -> !event.equals(node);
   }
 
-  @Override
-  public UpdateStateArrayLogic updateConsumerType() {
-    return UpdateStateArrayLogic.WRITE_STATES_TO_ARRAY;
+  public Function<Node, boolean[]> updateEvidenceArrays() {
+    return node -> null;
   }
 
-  private void createMarginals(double[] probabilities, NodeState[] states) {
+    private void createMarginals(double[] probabilities, NodeState[] states) {
     List<MarginalConstraint> constraints = new ArrayList<>();
     int[] count = {0};
     iterator.iterateOuter(
@@ -74,7 +68,7 @@ public class ConstraintBuilderIterator implements OdometerResetOnlyOnBuild {
           constraints.clear();
           count[0] = 0;
           iterator.iterateInner(
-              (o, i) -> {
+              i -> {
                 count[0]++;
                 double prob = probabilities[i];
                 if (prob > 1.0 || prob < 0.0) return;
@@ -95,7 +89,7 @@ public class ConstraintBuilderIterator implements OdometerResetOnlyOnBuild {
           count[0] = 0;
           Set<NodeState> conditionStates = getConditionStates(states);
           iterator.iterateInner(
-              (o, i) -> {
+              i -> {
                 count[0]++;
                 double prob = probabilities[i];
                 if (prob > 1.0 || prob < 0.0) return;

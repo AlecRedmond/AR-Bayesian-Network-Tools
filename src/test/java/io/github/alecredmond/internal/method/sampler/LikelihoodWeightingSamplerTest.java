@@ -21,6 +21,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 class LikelihoodWeightingSamplerTest {
   static final Set<NetworkScenario> EXCLUDED_IN_LONG_TESTS = Set.of(NetworkScenario.FANTASY_GRAPH);
+  static final boolean PRINT_DEBUG_OUTPUT = false;
 
   public static Stream<Arguments> allNetworkScenarios() {
     return Arrays.stream(NetworkScenario.values())
@@ -40,6 +41,10 @@ class LikelihoodWeightingSamplerTest {
             .toList();
     InferenceEngine engine = network.buildInferenceEngine();
     SampleCollection sampleCollection = sampler.generateSamples(NUMBER_OF_SAMPLES);
+    if (PRINT_DEBUG_OUTPUT) {
+      System.out.printf(
+          "Measuring for network %s%n".formatted(network.getNetworkData().getNetworkName()));
+    }
     constraints.forEach(c -> measureCount(sampleCollection, c, engine));
   }
 
@@ -61,10 +66,18 @@ class LikelihoodWeightingSamplerTest {
 
     int conditionSamples = sampleCollection.countSamplesIncludingStates(conditions);
     double expectedConditionProb = engine.getPosteriorProbability(conditions);
-    assertEquals(NUMBER_OF_SAMPLES * expectedConditionProb, conditionSamples, error);
+    double expectedConditional = NUMBER_OF_SAMPLES * expectedConditionProb;
+    if (PRINT_DEBUG_OUTPUT) {
+      System.out.printf("Constraint = %s%n".formatted(constraint));
+      System.out.printf("-- Cond  E/A = %d | %d%n", (int) expectedConditional, conditionSamples);
+    }
+    assertEquals(expectedConditional, conditionSamples, error);
 
     int counted = sampleCollection.countSamplesIncludingStates(allStates);
     double expected = probOfObserved * conditionSamples;
+    if (PRINT_DEBUG_OUTPUT) {
+      System.out.printf("-- Joint E/A = %d | %d %n", (int) expected, counted);
+    }
     assertEquals(expected, counted, error);
   }
 
