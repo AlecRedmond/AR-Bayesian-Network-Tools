@@ -10,7 +10,7 @@ import java.util.function.Predicate;
 
 public class TableNormalizer implements ProbabilityIteratorTemplate {
   private final ProbabilityTable table;
-  private final StandardCartesianIterator<Node, NodeState> iterator;
+  private final StandardCartesianIterator iterator;
   private final double[] adder = {0.0};
 
   public TableNormalizer(ProbabilityTable table) {

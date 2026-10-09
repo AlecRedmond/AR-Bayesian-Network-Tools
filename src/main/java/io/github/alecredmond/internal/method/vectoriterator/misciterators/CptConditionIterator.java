@@ -16,7 +16,7 @@ public class CptConditionIterator extends StateUpdateBase<Node, NodeState>
     implements ProbabilityIteratorTemplate {
   private final Node eventNode;
   private final Set<Node> conditionNodes;
-  private final StandardCartesianIterator<Node, NodeState> iterator;
+  private final StandardCartesianIterator iterator;
   private final Map<Node, NodeState> lockedPositionMap;
   private final double[] probabilities;
 

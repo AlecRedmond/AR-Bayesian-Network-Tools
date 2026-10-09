@@ -1,32 +1,22 @@
 package io.github.alecredmond.internal.application.vectoriterator;
 
-import io.github.alecredmond.export.cartesianvector.CartesianState;
-import io.github.alecredmond.export.cartesianvector.CartesianVariable;
 import io.github.alecredmond.export.cartesianvector.CartesianVector;
-import io.github.alecredmond.internal.method.vectoriterator.iteratorutils.OdometerInitializerUtils;
 import lombok.Data;
 
 @Data
-public class CartesianOdometer<N extends CartesianVariable, S extends CartesianState> {
-  protected final CartesianVector<N, S> vector;
+public class CartesianOdometer {
   protected final int[] statePositions;
   protected final int[] strideOverValues;
+  protected final int[] strideLengths;
+  protected final int[] numberOfStates;
 
-  public <V extends CartesianVector<N, S>> CartesianOdometer(V vector) {
-    this.vector = vector;
-    this.statePositions = new int[vector.getOrderedNodes().length];
-    this.strideOverValues = OdometerInitializerUtils.buildStrideIfLocked(vector);
-  }
-
-  public int[] getStrideLengths() {
-    return vector.getStrideLengths();
-  }
-
-  public N[] getOrderedNodes() {
-    return vector.getOrderedNodes();
-  }
-
-  public int[] getNumberOfStates() {
-    return vector.getNumberOfStates();
+  public CartesianOdometer(CartesianVector<?, ?> vector) {
+    this.strideLengths = vector.getStrideLengths();
+    this.numberOfStates = vector.getNumberOfStates();
+    this.statePositions = new int[numberOfStates.length];
+    this.strideOverValues = new int[numberOfStates.length];
+    for (int i = 0; i < numberOfStates.length; i++) {
+      strideOverValues[i] = (numberOfStates[i] - 1) * strideLengths[i];
+    }
   }
 }

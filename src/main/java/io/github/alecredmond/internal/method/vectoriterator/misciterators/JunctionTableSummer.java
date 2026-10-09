@@ -13,7 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class JunctionTableSummer implements ProbabilityIteratorTemplate {
-  private final StandardCartesianIterator<Node, NodeState> iterator;
+  private final StandardCartesianIterator iterator;
   private final JunctionTreeTable table;
   private final double[] adder = {0.0};
   private final Set<Node> requestNodes;

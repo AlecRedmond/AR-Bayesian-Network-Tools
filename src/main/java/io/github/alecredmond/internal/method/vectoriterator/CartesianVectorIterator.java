@@ -1,10 +1,7 @@
 package io.github.alecredmond.internal.method.vectoriterator;
 
-import io.github.alecredmond.export.cartesianvector.CartesianState;
-import io.github.alecredmond.export.cartesianvector.CartesianVariable;
 import io.github.alecredmond.internal.application.vectoriterator.CartesianOdometer;
 import io.github.alecredmond.internal.application.vectoriterator.OdometerInitializer;
-import io.github.alecredmond.internal.application.vectoriterator.ProbabilityVectorOdometer;
 import io.github.alecredmond.internal.method.vectoriterator.iteratorlogic.CartesianIteratorLogic;
 import io.github.alecredmond.internal.method.vectoriterator.iteratorlogic.PositionLock;
 import java.util.ArrayList;
@@ -13,14 +10,14 @@ import java.util.function.Consumer;
 import java.util.function.IntConsumer;
 import lombok.Getter;
 
-public class CartesianVectorIterator<N extends CartesianVariable, S extends CartesianState> {
-  @Getter protected final CartesianOdometer<N, S> odometer;
-  protected final Consumer<CartesianOdometer<N, S>> updateConsumer;
+public class CartesianVectorIterator {
+  @Getter protected final CartesianOdometer odometer;
+  protected final Consumer<CartesianOdometer> updateConsumer;
   protected final CartesianIteratorLogic[] resetLogic;
 
   public CartesianVectorIterator(
-      CartesianOdometer<N, S> odometer,
-      Consumer<CartesianOdometer<N, S>> updateConsumer,
+      CartesianOdometer odometer,
+      Consumer<CartesianOdometer> updateConsumer,
       CartesianIteratorLogic... logicArgs) {
     this.odometer = odometer;
     this.updateConsumer = updateConsumer;
@@ -35,7 +32,7 @@ public class CartesianVectorIterator<N extends CartesianVariable, S extends Cart
     updateConsumer.accept(odometer);
   }
 
-  public void iterate(IntConsumer indexConsumer, PositionLock<N, S> positionLock) {
+  public void iterate(IntConsumer indexConsumer, PositionLock positionLock) {
     iterate(odometer, indexConsumer, updateConsumer, positionLock.getInitializer());
   }
 
@@ -43,10 +40,8 @@ public class CartesianVectorIterator<N extends CartesianVariable, S extends Cart
    * This method exists to solve the problem of stepping iteratively through known combinations of
    * states while accessing associated array index of the vector's probability table.
    *
-   * <p>Both the Vector Odometer (which can be read for the current state values) and the
-   * probability index (the position in the vector's probability array of the combination) can be
-   * iterated through and processed sequentially with a BiConsumer, while locking specific NodeState
-   * values in place.
+   * <p>The flat index of the Cartesian product can be iterated through and processed sequentially
+   * with an IntConsumer, while locking specific Cartesian State values in place.
    *
    * <p>It achieves this by advancing the odometer's state index array, starting from the fastest
    * (rightmost) unlocked position and carrying left for every overflow encountered. An overflow
@@ -66,22 +61,23 @@ public class CartesianVectorIterator<N extends CartesianVariable, S extends Cart
    * be used e.g. for updating the NodeState[] array to be in-line with the given int[]
    * StateIndexes, but is unused in most cases to reduce compute time per iteration.
    *
-   * @param odometer a {@link ProbabilityVectorOdometer} to be iterated through
-   * @param indexConsumer a consumer supplied with both the odometer and the current probability
-   *     array index at the beginning of each iteration cycle.
-   * @param updateConsumer a consumer supplied with the odometer and the next array index at the end
-   *     of each iteration cycle. Useful for updating the Odometer state array to conform to the
-   *     state indexes.
+   * @param odometer a {@link CartesianOdometer} to be iterated through
+   * @param indexConsumer a consumer supplied the current probability array index at the beginning
+   *     of each iteration cycle.
+   * @param updateConsumer a consumer supplied with the odometer at the end of each iteration cycle.
+   *     This is typically used to write the newly calculated state positions {@code int[]} to state
+   *     arrays {@code CartesianState[]}.
    * @param initializer the initializer object that contains the pre-calculated starting index,
-   *     states, and whether the iterator is to fire only once.
+   *     state positions, and whether the iterator is to fire only once.
    */
   protected void iterate(
-      CartesianOdometer<N, S> odometer,
+      CartesianOdometer odometer,
       IntConsumer indexConsumer,
-      Consumer<CartesianOdometer<N, S>> updateConsumer,
+      Consumer<CartesianOdometer> updateConsumer,
       OdometerInitializer initializer) {
     int currentIndex = initializer.getInitialIndex();
 
+    /* Fire only once, if all positions are locked */
     if (initializer.isFireOnlyOnce()) {
       indexConsumer.accept(currentIndex);
       return;
@@ -118,18 +114,18 @@ public class CartesianVectorIterator<N extends CartesianVariable, S extends Cart
         /* Or carrying left if it overflows... */
         stateIndexes[position] = 0;
       }
-      /* And notify the update consumer of the new state and probability indexes. */
+      /* And notify the update consumer of the new state positions. */
       updateConsumer.accept(odometer);
     }
   }
 
-  public int[] cacheIndexes(PositionLock<N, S> positionLock) {
+  public int[] cacheIndexes(PositionLock positionLock) {
     List<Integer> indexes = new ArrayList<>();
     iterate(odometer, indexes::add, updateConsumer, positionLock.getInitializer());
     return indexes.stream().mapToInt(Integer::intValue).toArray();
   }
 
-  public void iterateOuter(Runnable runnable, PositionLock<N, S> positionLock) {
+  public void iterateOuter(Runnable runnable, PositionLock positionLock) {
     iterate(odometer, i -> runnable.run(), updateConsumer, positionLock.getInitializer());
   }
 }

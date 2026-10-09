@@ -19,7 +19,7 @@ public abstract class CptMapperIterator<T extends NetworkTable, P extends Probab
     extends StateUpdateBase<Node, NodeState> implements ProbabilityIteratorTemplate {
   protected final T networkTable;
   protected final List<P> constraints;
-  protected final StandardCartesianIterator<Node, NodeState> iterator;
+  protected final StandardCartesianIterator iterator;
   protected final CPTConstraintValidator<P, ?> validator;
   protected final CptMappingReport report;
 

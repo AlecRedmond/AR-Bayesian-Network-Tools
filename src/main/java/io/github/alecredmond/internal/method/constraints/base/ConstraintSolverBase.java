@@ -26,7 +26,7 @@ public class ConstraintSolverBase implements ConstraintSolver, ProbabilityIterat
 
   public ConstraintSolverBase(ProbabilityConstraint constraint, JunctionTreeTable table) {
     this.constraint = constraint;
-    StandardCartesianIterator<Node, NodeState> iterator =
+    StandardCartesianIterator iterator =
         StandardCartesianIterator.create(this, table.getVector());
     this.outerIterationIsEvidence = iterator.preBuildEvidenceArray();
     this.cachedIndexesPerRow = iterator.cacheIndexesOverOuterRuns();

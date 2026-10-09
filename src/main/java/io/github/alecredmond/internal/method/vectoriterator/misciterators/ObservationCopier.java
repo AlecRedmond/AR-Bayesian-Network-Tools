@@ -3,7 +3,7 @@ package io.github.alecredmond.internal.method.vectoriterator.misciterators;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
 import io.github.alecredmond.export.probabilitytables.ProbabilityVector;
-import io.github.alecredmond.internal.application.vectoriterator.ProbabilityVectorOdometer;
+import io.github.alecredmond.internal.application.vectoriterator.CartesianOdometer;
 import io.github.alecredmond.internal.method.node.NodeUtils;
 import io.github.alecredmond.internal.method.probabilitytables.JunctionTreeTable;
 import io.github.alecredmond.internal.method.vectoriterator.standardtemplate.*;
@@ -16,8 +16,8 @@ import lombok.Getter;
 public class ObservationCopier implements ProbabilityIteratorTemplate {
   private final ProbabilityVector mainVector;
   private final ProbabilityVector backupVector;
-  private final StandardCartesianIterator<Node, NodeState> iterator;
-  @Getter private final ProbabilityVectorOdometer odometer;
+  private final StandardCartesianIterator iterator;
+  @Getter private final CartesianOdometer odometer;
   private final Set<NodeState> requestStates;
   private final Set<Node> requestNodes;
 
@@ -27,7 +27,7 @@ public class ObservationCopier implements ProbabilityIteratorTemplate {
     this.requestNodes = new HashSet<>();
     this.requestStates = new HashSet<>();
     this.iterator = StandardCartesianIterator.create(this, mainVector);
-    this.odometer = (ProbabilityVectorOdometer) iterator.getOdometer();
+    this.odometer = iterator.getOdometer();
   }
 
   public void observeStates(Collection<NodeState> observedStates) {

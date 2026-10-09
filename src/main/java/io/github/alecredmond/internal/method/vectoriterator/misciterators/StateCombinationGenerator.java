@@ -13,7 +13,7 @@ import java.util.stream.IntStream;
 
 public class StateCombinationGenerator extends StateUpdateBase<Node, NodeState>
     implements ProbabilityIteratorTemplate {
-  private final StandardCartesianIterator<Node, NodeState> iterator;
+  private final StandardCartesianIterator iterator;
   private final ProbabilityVector vector;
   private final Set<Node> includedNodes;
 

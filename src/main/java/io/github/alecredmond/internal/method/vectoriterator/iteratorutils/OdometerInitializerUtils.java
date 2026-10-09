@@ -1,8 +1,5 @@
 package io.github.alecredmond.internal.method.vectoriterator.iteratorutils;
 
-import io.github.alecredmond.export.cartesianvector.CartesianState;
-import io.github.alecredmond.export.cartesianvector.CartesianVariable;
-import io.github.alecredmond.export.cartesianvector.CartesianVector;
 import io.github.alecredmond.internal.application.vectoriterator.CartesianOdometer;
 import io.github.alecredmond.internal.application.vectoriterator.OdometerInitializer;
 import lombok.Data;
@@ -12,10 +9,8 @@ public class OdometerInitializerUtils {
 
   private OdometerInitializerUtils() {}
 
-  public static <N extends CartesianVariable, S extends CartesianState> void resetInitializer(
-      OdometerInitializer initializer,
-      boolean[] lockedPositionArray,
-      CartesianOdometer<N, S> odometer) {
+  public static void resetInitializer(
+      OdometerInitializer initializer, boolean[] lockedPositionArray, CartesianOdometer odometer) {
     int fastestPos = findFastestPosition(lockedPositionArray);
     boolean fireOnlyOnce = fastestPos < 0;
     int[] strideLengths = odometer.getStrideLengths();
@@ -38,8 +33,7 @@ public class OdometerInitializerUtils {
     return fastestPosition;
   }
 
-  public static <S extends CartesianState, N extends CartesianVariable> void updateStartIndex(
-      OdometerInitializer initializer, CartesianOdometer<N, S> odometer) {
+  public static void updateStartIndex(OdometerInitializer initializer, CartesianOdometer odometer) {
     initializer.setInitialIndex(
         computeStartIndex(odometer.getStatePositions(), odometer.getStrideLengths()));
   }
@@ -50,17 +44,5 @@ public class OdometerInitializerUtils {
       index += statePositions[i] * strideLengths[i];
     }
     return index;
-  }
-
-  public static int[] buildStrideIfLocked(CartesianVector<?, ?> vector) {
-    return getInts(vector.getNumberOfStates(), vector.getStrideLengths());
-  }
-
-  private static int[] getInts(int[] numberOfStates, int[] strideLengths) {
-    int[] strideIfLocked = new int[numberOfStates.length];
-    for (int i = 0; i < numberOfStates.length; i++) {
-      strideIfLocked[i] = (numberOfStates[i] - 1) * strideLengths[i];
-    }
-    return strideIfLocked;
   }
 }

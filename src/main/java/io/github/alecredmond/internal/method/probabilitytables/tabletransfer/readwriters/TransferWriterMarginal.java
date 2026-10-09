@@ -22,7 +22,7 @@ public class TransferWriterMarginal extends TransferIterator implements Transfer
       }
       double expected = transferArray[transferIndex++];
       if (fuzzyEquals(expected, actual)) continue;
-      double ratio = actual == 0.0 ? 0.0 : expected / actual;
+      double ratio = ratioOrZero(expected, actual);
       for (int index : indexesToSum) {
         probabilities[index] *= ratio;
       }

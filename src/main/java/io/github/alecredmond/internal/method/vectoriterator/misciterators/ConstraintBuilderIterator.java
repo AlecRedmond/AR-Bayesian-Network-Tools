@@ -19,7 +19,7 @@ import lombok.Getter;
 @Getter
 public class ConstraintBuilderIterator extends StateUpdateBase<Node, NodeState>
     implements ProbabilityIteratorTemplate {
-  private final StandardCartesianIterator<Node, NodeState> iterator;
+  private final StandardCartesianIterator iterator;
   private final Node event;
   private final double[] probabilities;
   private List<ProbabilityConstraint> built;
@@ -27,7 +27,7 @@ public class ConstraintBuilderIterator extends StateUpdateBase<Node, NodeState>
   public ConstraintBuilderIterator(Node event, ProbabilityVector vector) {
     super(vector, NodeState[]::new);
     this.event = event;
-      this.iterator = StandardCartesianIterator.create(this, vector);
+    this.iterator = StandardCartesianIterator.create(this, vector);
     this.probabilities = vector.getProbabilities();
   }
 
@@ -43,7 +43,7 @@ public class ConstraintBuilderIterator extends StateUpdateBase<Node, NodeState>
 
   @Override
   public Function<Node, NodeState> initialStatePositionSetter() {
-      return node -> node.getStates().getFirst();
+    return node -> node.getStates().getFirst();
   }
 
   @Override
@@ -60,7 +60,7 @@ public class ConstraintBuilderIterator extends StateUpdateBase<Node, NodeState>
     return node -> null;
   }
 
-    private void createMarginals(double[] probabilities, NodeState[] states) {
+  private void createMarginals(double[] probabilities, NodeState[] states) {
     List<MarginalConstraint> constraints = new ArrayList<>();
     int[] count = {0};
     iterator.iterateOuter(

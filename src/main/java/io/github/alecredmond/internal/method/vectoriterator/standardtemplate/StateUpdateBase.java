@@ -17,7 +17,7 @@ public abstract class StateUpdateBase<N extends CartesianVariable, S extends Car
     this.states = Arrays.stream(stateArrays).map(arr -> arr[0]).toArray(stateArraySupplier);
   }
 
-  public Consumer<CartesianOdometer<N, S>> stateUpdateFunction() {
+  public Consumer<CartesianOdometer> stateUpdateFunction() {
     return odometer -> {
       int[] stateIndexes = odometer.getStatePositions();
       int length = states.length;

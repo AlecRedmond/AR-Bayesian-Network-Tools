@@ -10,8 +10,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-public interface CartesianIteratorTemplate<
-    N extends CartesianVariable, S extends CartesianState, V extends CartesianVector<N, S>> {
+public interface CartesianIteratorTemplate<N extends CartesianVariable, S extends CartesianState> {
   Function<N, S> initialStatePositionSetter();
 
   Predicate<N> checkLockOuter();
@@ -20,11 +19,11 @@ public interface CartesianIteratorTemplate<
 
   Function<N, boolean[]> updateEvidenceArrays();
 
-  default Consumer<CartesianOdometer<N, S>> stateUpdateFunction() {
+  default Consumer<CartesianOdometer> stateUpdateFunction() {
     return o -> {};
   }
 
-  default Function<V, CartesianOdometer<N, S>> createOdometer() {
+  default Function<CartesianVector<N, S>, CartesianOdometer> createOdometer() {
     return CartesianOdometer::new;
   }
 

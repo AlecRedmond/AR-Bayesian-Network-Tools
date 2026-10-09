@@ -4,13 +4,16 @@ import io.github.alecredmond.export.cartesianvector.CartesianState;
 import io.github.alecredmond.export.cartesianvector.CartesianVariable;
 import io.github.alecredmond.export.cartesianvector.CartesianVector;
 import io.github.alecredmond.internal.application.vectoriterator.CartesianOdometer;
+import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 
-public interface InitialPositionSetter extends CartesianIteratorLogic {
-  static <N extends CartesianVariable, S extends CartesianState> InitialPositionSetter create(
+public interface EvidenceTest extends CartesianIteratorLogic {
+  BooleanSupplier getTest();
+
+  static <N extends CartesianVariable, S extends CartesianState> EvidenceTest create(
       CartesianVector<N, S> vector,
       CartesianOdometer odometer,
-      Function<N, S> initialStateFunction) {
-    return new InitialPositionSetterImpl<>(vector, odometer, initialStateFunction);
+      Function<N, boolean[]> evidencePerNode) {
+    return new EvidenceTestImpl<>(vector, odometer, evidencePerNode);
   }
 }
