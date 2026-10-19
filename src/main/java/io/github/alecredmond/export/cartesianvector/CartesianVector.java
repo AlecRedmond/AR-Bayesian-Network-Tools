@@ -1,9 +1,8 @@
 package io.github.alecredmond.export.cartesianvector;
 
+import java.util.function.ToIntFunction;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-
-import java.util.function.ToIntFunction;
 
 @AllArgsConstructor
 @Data
@@ -17,5 +16,4 @@ public abstract class CartesianVector<N extends CartesianVariable, S extends Car
   public abstract ToIntFunction<N> orderedIndexOfNode();
 
   public abstract ToIntFunction<S> orderedPositionOfState();
-
 }

@@ -1,24 +1,29 @@
 package io.github.alecredmond.export.method.network;
 
+import static io.github.alecredmond.TestConfigs.RUN_J_FILE_CHOOSER_TESTS;
 import static io.github.alecredmond.internal.method.constraints.ConstraintType.*;
+import static io.github.alecredmond.internal.method.utils.AppProperty.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 import io.github.alecredmond.exceptions.BayesNetIDException;
 import io.github.alecredmond.exceptions.ConstraintValidationException;
 import io.github.alecredmond.exceptions.NetworkStructureException;
+import io.github.alecredmond.export.constraints.*;
+import io.github.alecredmond.export.inference.InferenceEngine;
 import io.github.alecredmond.export.network.BayesianNetwork;
 import io.github.alecredmond.export.network.BayesianNetworkData;
+import io.github.alecredmond.export.network.serialized.SerializedBayesianNetwork;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
-import io.github.alecredmond.export.constraints.*;
 import io.github.alecredmond.export.solver.BayesSolver;
-import io.github.alecredmond.export.inference.InferenceEngine;
 import io.github.alecredmond.internal.method.constraints.ConstraintRegistry;
 import io.github.alecredmond.internal.method.constraints.ConstraintType;
 import io.github.alecredmond.internal.method.constraints.strategy.ConstraintStrategy;
 import io.github.alecredmond.internal.method.network.BayesianNetworkImpl;
 import io.github.alecredmond.internal.method.network.changehandlers.CollectionChangeAnalyzer;
+import io.github.alecredmond.internal.method.utils.PropertiesLoader;
 import java.beans.PropertyChangeListener;
+import java.io.File;
 import java.io.Serializable;
 import java.util.*;
 import java.util.function.BiConsumer;
@@ -27,16 +32,14 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import lombok.NoArgsConstructor;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 class NewBayesianNetworkTest {
   static final List<Serializable> NODE_IDS = List.of("A", "B", "C", "D");
+  static final String NET_NAME = "TestNetwork";
   BayesianNetwork test;
 
   static List<Serializable> listWithNull(List<Serializable> list) {
@@ -48,7 +51,7 @@ class NewBayesianNetworkTest {
 
   @BeforeEach
   void setUp() {
-    test = BayesianNetwork.newNetwork("TestNetwork");
+    test = BayesianNetwork.newNetwork(NET_NAME);
     NODE_IDS.forEach(id -> test.addNewNode(id, List.of(id + "+", id + "-", id + "x")));
   }
 
@@ -723,6 +726,99 @@ class NewBayesianNetworkTest {
       engine.setObservedById(conditions);
       assertTrue(test.isSolved());
       assertEquals(probability, engine.getPosteriorProbabilityById(events), 1e-6);
+    }
+  }
+
+  @Nested
+  class NetworkSaveLoadTests {
+    static final String FILE_PATH = createFileName();
+
+    private static String createFileName() {
+      PropertiesLoader loader = new PropertiesLoader();
+      return loader.loadDirectory(DIRECTORY_ROOT, DIRECTORY_SAVE)
+          + NET_NAME
+          + loader.loadString(EXTENSION_FILE_TYPE);
+    }
+
+    @BeforeEach
+    void setUpToSolve() {
+      test.addParents("B", "A")
+          .addParents("C", "B")
+          .addParents("D", "C")
+          .addConstraint("A+", 0.4)
+          .addConstraint("A-", 0.2)
+          // B
+          .addConstraint("B+", "A+", 0.25)
+          .addConstraint("B-", "A+", 0.30)
+          .addConstraint("B+", "A-", 0.35)
+          .addConstraint("B-", "A-", 0.40)
+          .addConstraint("B+", "Ax", 0.45)
+          .addConstraint("B-", "Ax", 0.50)
+          // C
+          .addConstraint("C+", "B+", 0.25)
+          .addConstraint("C-", "B+", 0.30)
+          .addConstraint("C+", "B-", 0.35)
+          .addConstraint("C-", "B-", 0.40)
+          .addConstraint("C+", "Bx", 0.45)
+          .addConstraint("C-", "Bx", 0.50)
+          // D
+          .addConstraint("D+", "C+", 0.25)
+          .addConstraint("D-", "C+", 0.30)
+          .addConstraint("D+", "C-", 0.35)
+          .addConstraint("D-", "C-", 0.40)
+          .addConstraint("D+", "Cx", 0.45)
+          .addConstraint("D-", "Cx", 0.50)
+          .solveNetwork();
+    }
+
+    @Test
+    void serializeNetwork_ShouldSucceed() {
+      SerializedBayesianNetwork sbn = test.serializeNetwork();
+      BayesianNetwork loadedTest = BayesianNetwork.loadNetwork(sbn);
+      assertEquals(test.getNetworkData(), loadedTest.getNetworkData());
+    }
+
+    @Test
+    void wipeNetworkThenSerialize_ShouldSucceed() {
+      test.resetAllData();
+      SerializedBayesianNetwork sbn = test.serializeNetwork();
+      BayesianNetwork loadedTest = BayesianNetwork.loadNetwork(sbn);
+      assertEquals(test.getNetworkData(), loadedTest.getNetworkData());
+      assertTrue(test.getNetworkTables().isEmpty());
+      assertTrue(test.getNetworkData().getConstraints().isEmpty());
+    }
+
+    @Test
+    void wipeConstraintsThenSerialize_ShouldSucceed() {
+      test.removeAllConstraints();
+      SerializedBayesianNetwork sbn = test.serializeNetwork();
+      BayesianNetwork loadedTest = BayesianNetwork.loadNetwork(sbn);
+      assertEquals(test.getNetworkData(), loadedTest.getNetworkData());
+      assertFalse(test.getNetworkTables().isEmpty());
+      assertTrue(test.getNetworkData().getConstraints().isEmpty());
+    }
+
+    @Test
+    void saveNetworkToFile_ByFilePath_ShouldSucceed() {
+      assertDoesNotThrow(() -> test.saveNetworkToFile(FILE_PATH));
+      BayesianNetwork loadedTest = BayesianNetwork.loadNetworkFromFile(FILE_PATH);
+      assertEquals(test.getNetworkData(), loadedTest.getNetworkData());
+    }
+
+    @Test
+    void saveNetworkToFile_AsFile_ShouldSucceed() {
+      File file = new File(FILE_PATH);
+      assertDoesNotThrow(() -> test.saveNetworkToFile(file));
+      BayesianNetwork loadedTest = BayesianNetwork.loadNetworkFromFile(file);
+      assertEquals(test.getNetworkData(), loadedTest.getNetworkData());
+    }
+
+    @Test
+    void saveNetworkToFile_JFileChooser_ShouldSucceed() {
+      if (!RUN_J_FILE_CHOOSER_TESTS) return;
+      assertDoesNotThrow(() -> test.saveNetworkToFile());
+      BayesianNetwork loadedTest = BayesianNetwork.loadNetworkFromFile();
+      assertEquals(test.getNetworkData(), loadedTest.getNetworkData());
     }
   }
 }

@@ -2,12 +2,11 @@ package io.github.alecredmond.export.network;
 
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
+import io.github.alecredmond.internal.method.utils.CollectionToString;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-
-import io.github.alecredmond.internal.method.utils.CollectionToString;
 import lombok.Data;
 import lombok.NonNull;
 

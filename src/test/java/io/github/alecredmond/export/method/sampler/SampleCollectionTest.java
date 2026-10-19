@@ -337,13 +337,17 @@ class SampleCollectionTest {
       SampleCollection test = samplePackage.getTest();
       Set<Node> exportNodes = samplePackage.getExportNodes();
       test.setDisplayedNodes(exportNodes);
+      Set<NodeState> observedStates = samplePackage.getObservedStates();
       test.getSamples()
           .forEach(
-              sample ->
-                  assertTrue(
-                      Arrays.stream(sample.getDisplayedStates())
-                          .map(NodeState::getNode)
-                          .allMatch(exportNodes::contains)));
+              sample -> {
+                assertTrue(
+                    Arrays.stream(sample.getDisplayedStates())
+                        .map(NodeState::getNode)
+                        .allMatch(exportNodes::contains));
+
+                assertTrue(sample.containsAll(observedStates));
+              });
     }
   }
 }

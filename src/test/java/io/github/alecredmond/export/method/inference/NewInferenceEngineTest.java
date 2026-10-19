@@ -3,19 +3,19 @@ package io.github.alecredmond.export.method.inference;
 import static io.github.alecredmond.export.method.network.NetworkScenario.RAIN_NETWORK;
 import static org.junit.jupiter.api.Assertions.*;
 
-import io.github.alecredmond.export.solver.BayesSolver;
 import io.github.alecredmond.export.inference.InferenceEngine;
-import io.github.alecredmond.export.solver.SolverAlgorithm;
-import io.github.alecredmond.export.solver.SolverResults;
-import io.github.alecredmond.export.network.BayesianNetwork;
 import io.github.alecredmond.export.method.network.NetworkScenario;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import io.github.alecredmond.export.network.BayesianNetwork;
+import io.github.alecredmond.export.solver.BayesSolver;
+import io.github.alecredmond.export.solver.SolverAlgorithm;
+import io.github.alecredmond.export.solver.SolverConstraintResult;
+import io.github.alecredmond.export.solver.SolverResults;
+import io.github.alecredmond.internal.method.utils.DoublePrecision;
+import java.util.*;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 import lombok.AllArgsConstructor;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -35,6 +35,7 @@ public class NewInferenceEngineTest {
   @Nested
   class ObservationTests {
     static final double DELTA = 1e-3;
+    static final boolean DEBUG_LOG_LOSSES = false;
 
     public static Stream<Arguments> allObservations() {
       return scenarios.stream().flatMap(ObservationTests::getDirectCptEntryAndIPFP);
@@ -67,10 +68,26 @@ public class NewInferenceEngineTest {
                 test.setObserved(constraint.getConditionStates());
                 double expected = constraint.getProbability();
                 double actual = test.getPosteriorProbability(constraint.getEventStates());
-                if (results != null) {
-                  assertTrue(results.getResult(constraint).lastError() < DELTA);
-                }
                 assertEquals(expected, actual, DELTA);
+                if (results == null) {
+                  return;
+                }
+
+                // TEST ERROR DECREASES OVER TIME
+                SolverConstraintResult result = results.getResult(constraint);
+                double lastError = result.lastError();
+                assertTrue(lastError < DELTA);
+                Arrays.stream(result.errors())
+                    .mapToObj(
+                        error ->
+                            error >= lastError || DoublePrecision.fuzzyEquals(error, lastError))
+                    .forEach(Assertions::assertTrue);
+
+                // LOG ERROR & LOSS OVER TIME
+                if (!DEBUG_LOG_LOSSES) return;
+                System.out.println(constraint);
+                System.out.println(Arrays.toString(result.errors()));
+                System.out.println(Arrays.toString(result.losses()));
               });
     }
   }

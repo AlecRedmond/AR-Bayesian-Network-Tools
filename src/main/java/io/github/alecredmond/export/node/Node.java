@@ -84,8 +84,8 @@ public class Node implements CartesianVariable {
   }
 
   /**
-   * Sets the position in each {@link NodeState} to equal its index in {@link #getStates()}.
-   * This method runs internally whenever {@link #states} is updated.
+   * Sets the position in each {@link NodeState} to equal its index in {@link #getStates()}. This
+   * method runs internally whenever {@link #states} is updated.
    */
   void writeStatePositions() {
     int position = 0;

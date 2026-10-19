@@ -25,7 +25,8 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 public class JointProbabilityConstraint extends ProbabilityConstraint {
   /**
-   * Constructs a {@code JointProbabilityConstraint} representing the intersection of multiple events.
+   * Constructs a {@code JointProbabilityConstraint} representing the intersection of multiple
+   * events.
    *
    * @param eventStates A collection of concurrent {@link NodeState} values across different nodes.
    * @param conditionStates A collection of conditioning {@link NodeState} values.

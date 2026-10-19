@@ -8,7 +8,6 @@ import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
 import io.github.alecredmond.internal.method.node.NodeUtils;
 import io.github.alecredmond.internal.method.utils.CollectionToString;
-
 import java.util.*;
 
 /**
@@ -197,10 +196,10 @@ public class NodeObservation {
     String stringStates;
     if (observedStates.size() >= eliminatedStates.size()) {
       format = "%s!={%s}";
-        stringStates = CollectionToString.apply(eliminatedStates);
+      stringStates = CollectionToString.apply(eliminatedStates);
     } else {
       format = "%s=={%s}";
-        stringStates = CollectionToString.apply(observedStates);
+      stringStates = CollectionToString.apply(observedStates);
     }
     return format.formatted(node, stringStates);
   }

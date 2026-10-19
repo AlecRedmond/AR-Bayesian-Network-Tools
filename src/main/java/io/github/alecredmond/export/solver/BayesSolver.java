@@ -3,11 +3,11 @@ package io.github.alecredmond.export.solver;
 import io.github.alecredmond.export.constraints.ConditionalConstraint;
 import io.github.alecredmond.export.constraints.MarginalConstraint;
 import io.github.alecredmond.export.constraints.ProbabilityConstraint;
+import io.github.alecredmond.export.network.BayesianNetwork;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
 import io.github.alecredmond.export.probabilitytables.ConditionalTable;
 import io.github.alecredmond.export.probabilitytables.RootNodeTable;
-import io.github.alecredmond.export.network.BayesianNetwork;
 import io.github.alecredmond.internal.method.solver.BayesSolverImpl;
 
 /**

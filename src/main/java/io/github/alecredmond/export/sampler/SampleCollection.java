@@ -1,9 +1,9 @@
 package io.github.alecredmond.export.sampler;
 
 import io.github.alecredmond.export.inference.NodeObservation;
+import io.github.alecredmond.export.network.BayesianNetwork;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
-import io.github.alecredmond.export.network.BayesianNetwork;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
