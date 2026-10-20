@@ -1,8 +1,8 @@
 package io.github.alecredmond.internal.method.junctiontree.treebuilding;
 
 import io.github.alecredmond.exceptions.TreewidthException;
-import io.github.alecredmond.export.cartesianvector.CartesianVariable;
 import io.github.alecredmond.export.node.Node;
+import io.github.alecredmond.internal.application.cartesianvector.CartesianVariable;
 import io.github.alecredmond.internal.application.junctiontree.JunctionTreeData;
 import java.util.Collection;
 import java.util.Set;

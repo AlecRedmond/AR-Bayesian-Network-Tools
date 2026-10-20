@@ -49,8 +49,7 @@ public abstract class CptConstraintSorter<P extends ProbabilityConstraint, T ext
     return constraints.stream().distinct().sorted(comparator).toList();
   }
 
-  private Comparator<P> compareByStateIndexInNode(
-      Node node) {
+  private Comparator<P> compareByStateIndexInNode(Node node) {
     return Comparator.comparingInt(
         (P constraint) ->
             constraint.getAllStates().stream()

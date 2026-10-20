@@ -1,11 +1,9 @@
-package io.github.alecredmond.export.method.inference;
+package io.github.alecredmond.export.solver;
 
 import static io.github.alecredmond.export.solver.SolverAlgorithm.*;
 
-import io.github.alecredmond.export.solver.BayesSolver;
-import io.github.alecredmond.export.solver.SolverAlgorithm;
-import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.network.BayesianNetwork;
+import io.github.alecredmond.export.node.Node;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;

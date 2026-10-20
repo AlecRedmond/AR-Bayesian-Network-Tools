@@ -1,6 +1,6 @@
 package io.github.alecredmond.export.node;
 
-import io.github.alecredmond.export.cartesianvector.CartesianState;
+import io.github.alecredmond.internal.application.cartesianvector.CartesianState;
 import java.io.Serializable;
 import lombok.Data;
 import lombok.EqualsAndHashCode;

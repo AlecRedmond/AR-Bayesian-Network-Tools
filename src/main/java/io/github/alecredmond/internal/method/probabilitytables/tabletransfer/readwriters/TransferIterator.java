@@ -13,6 +13,6 @@ public abstract class TransferIterator {
   }
 
   protected final double ratioOrZero(double numerator, double divisor) {
-      return divisor == 0.0 ? 0.0 : numerator / divisor;
+    return divisor == 0.0 ? 0.0 : numerator / divisor;
   }
 }

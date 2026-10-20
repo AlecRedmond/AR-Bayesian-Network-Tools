@@ -3,10 +3,10 @@ package io.github.alecredmond.internal.method.inference;
 import static io.github.alecredmond.internal.method.utils.AppProperty.INFERENCE_ALGORITHM;
 
 import io.github.alecredmond.exceptions.PropertiesLoaderException;
-import io.github.alecredmond.export.solver.BayesSolver;
 import io.github.alecredmond.export.inference.InferenceAlgorithm;
 import io.github.alecredmond.export.inference.InferenceEngine;
 import io.github.alecredmond.export.network.BayesianNetwork;
+import io.github.alecredmond.export.solver.BayesSolver;
 import io.github.alecredmond.internal.method.junctiontree.JunctionTreeAlgorithm;
 import io.github.alecredmond.internal.method.utils.PropertiesLoader;
 import java.util.Arrays;
@@ -37,10 +37,7 @@ public class InferenceEngineFactory {
 
   private InferenceAlgorithm getInferenceAlgorithm() {
     String inferenceTypeString =
-        new PropertiesLoader()
-                .loadString(INFERENCE_ALGORITHM)
-                .toUpperCase()
-                .replaceAll("\\s+", "");
+        new PropertiesLoader().loadString(INFERENCE_ALGORITHM).toUpperCase().replaceAll("\\s+", "");
     try {
       return InferenceAlgorithm.valueOf(inferenceTypeString);
     } catch (IllegalArgumentException e) {

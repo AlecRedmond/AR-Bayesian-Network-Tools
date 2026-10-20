@@ -7,12 +7,12 @@ import io.github.alecredmond.export.network.BayesianNetworkData;
 import io.github.alecredmond.export.probabilitytables.ConditionalTable;
 import io.github.alecredmond.export.probabilitytables.NetworkTable;
 import io.github.alecredmond.export.probabilitytables.RootNodeTable;
+import io.github.alecredmond.internal.application.solver.CptMappingReport;
 import io.github.alecredmond.internal.method.constraints.types.conditionalconstraint.ConditionalConstraintValidator;
 import io.github.alecredmond.internal.method.constraints.types.marginalconstraint.MarginalConstraintValidator;
 import io.github.alecredmond.internal.method.solver.cptmapper.iterator.ConditionalCPTMapperIterator;
 import io.github.alecredmond.internal.method.solver.cptmapper.iterator.CptMapperIterator;
 import io.github.alecredmond.internal.method.solver.cptmapper.iterator.RootCPTMapperIterator;
-import io.github.alecredmond.internal.application.solver.CptMappingReport;
 import java.util.*;
 import lombok.extern.slf4j.Slf4j;
 

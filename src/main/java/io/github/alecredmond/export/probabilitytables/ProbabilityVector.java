@@ -1,11 +1,12 @@
 package io.github.alecredmond.export.probabilitytables;
 
-import io.github.alecredmond.export.cartesianvector.CartesianVector;
+import io.github.alecredmond.exceptions.ProbabilityTableRequestException;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
+import io.github.alecredmond.internal.application.cartesianvector.CartesianVector;
 import java.util.Map;
-import java.util.function.ToIntFunction;
 import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 /**
  * Stores the flat probability values for a {@link ProbabilityTable}, mapping the Cartesian product
@@ -27,6 +28,7 @@ import lombok.EqualsAndHashCode;
  */
 @SuppressWarnings("LombokGetterMayBeUsed")
 @EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
 public class ProbabilityVector extends CartesianVector<Node, NodeState> {
 
   /**
@@ -48,6 +50,7 @@ public class ProbabilityVector extends CartesianVector<Node, NodeState> {
    * @param strideLengths the stride values used to compute the probability index.
    * @param probabilities the flat double array containing probability entries.
    * @param nodeIndexMap a look-up map pointing from nodes to their structural array indexes.
+   * @param rank the length of the probabilities array.
    */
   public ProbabilityVector(
       Node[] orderedNodes,
@@ -117,14 +120,35 @@ public class ProbabilityVector extends CartesianVector<Node, NodeState> {
     return this.stateArrays;
   }
 
+  /**
+   * Returns the length of the probability array in this {@code ProbabilityVector}. Equal to the
+   * size of the Cartesian Product of all {@link Node}s declared in {@link #orderedNodes}.
+   *
+   * @return the rank of this {@code ProbabilityVector}.
+   */
   @Override
-  public ToIntFunction<Node> orderedIndexOfNode() {
-    return nodeIndexMap::get;
+  public int getRank() {
+    return rank;
   }
 
   @Override
-  public ToIntFunction<NodeState> orderedPositionOfState() {
-    return NodeState::getPosition;
+  public int getStatePosition(NodeState state) {
+    if (nodeIndexMap.containsKey(state.getNode())) {
+      return state.getPosition();
+    }
+    throw new ProbabilityTableRequestException(
+        "Node %s is not within the scope of vector %s".formatted(state.getNode(), this));
+  }
+
+  /**
+   * Returns the ordinal of the given {@link NodeState} within its parent {@link Node}'s list.
+   *
+   * @param node a {@link Node} within the scope of this {@link ProbabilityVector}.
+   * @return the index of the node within the {@link #orderedNodes} array.
+   */
+  @Override
+  public int getNodeIndex(Node node) {
+    return nodeIndexMap.get(node);
   }
 
   /**

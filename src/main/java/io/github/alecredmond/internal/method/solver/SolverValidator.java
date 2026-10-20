@@ -1,11 +1,11 @@
 package io.github.alecredmond.internal.method.solver;
 
+import io.github.alecredmond.export.network.BayesianNetwork;
 import io.github.alecredmond.export.network.BayesianNetworkData;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
 import io.github.alecredmond.export.probabilitytables.NetworkTable;
 import io.github.alecredmond.export.probabilitytables.ProbabilityVector;
-import io.github.alecredmond.export.network.BayesianNetwork;
 import io.github.alecredmond.internal.method.constraints.strategy.ValidatedConstraint;
 import java.util.Arrays;
 import java.util.HashSet;

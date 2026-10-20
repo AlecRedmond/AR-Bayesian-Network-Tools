@@ -1,6 +1,6 @@
-package io.github.alecredmond.export.method.network;
+package io.github.alecredmond.export.network;
 
-import static io.github.alecredmond.export.method.network.NetworkScenario.RAIN_NETWORK;
+import static io.github.alecredmond.scenarios.NetworkScenario.RAIN_NETWORK;
 import static org.junit.jupiter.api.Assertions.*;
 
 import io.github.alecredmond.exceptions.BayesNetIDException;
@@ -9,11 +9,8 @@ import io.github.alecredmond.exceptions.NetworkStructureException;
 import io.github.alecredmond.export.constraints.ConditionalConstraint;
 import io.github.alecredmond.export.constraints.MarginalConstraint;
 import io.github.alecredmond.export.constraints.ProbabilityConstraint;
-import io.github.alecredmond.export.network.BayesianNetwork;
-import io.github.alecredmond.export.network.BayesianNetworkData;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
-
 import java.io.Serializable;
 import java.util.*;
 import org.junit.jupiter.api.BeforeEach;
@@ -398,10 +395,11 @@ class BayesianNetworkTest {
               });
     }
 
-    void assertConstraintsAreEqual(ProbabilityConstraint constraintA,ProbabilityConstraint constraintB){
-        assertEquals(constraintA.getProbability(),constraintB.getProbability());
-        assertEquals(constraintA.getEventStates(),constraintB.getEventStates());
-        assertEquals(constraintA.getConditionStates(),constraintB.getConditionStates());
+    void assertConstraintsAreEqual(
+        ProbabilityConstraint constraintA, ProbabilityConstraint constraintB) {
+      assertEquals(constraintA.getProbability(), constraintB.getProbability());
+      assertEquals(constraintA.getEventStates(), constraintB.getEventStates());
+      assertEquals(constraintA.getConditionStates(), constraintB.getConditionStates());
     }
   }
 

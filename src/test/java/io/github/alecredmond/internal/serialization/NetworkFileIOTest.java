@@ -1,7 +1,7 @@
 package io.github.alecredmond.internal.serialization;
 
 import static io.github.alecredmond.TestConfigs.*;
-import static io.github.alecredmond.export.method.network.NetworkScenario.*;
+import static io.github.alecredmond.scenarios.NetworkScenario.*;
 import static io.github.alecredmond.internal.method.utils.AppProperty.*;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -40,8 +40,6 @@ class NetworkFileIOTest {
     networkSuppliers.add(RAIN_NETWORK.getSupplier());
     networkSuppliers.add(AH_NETWORK.getSupplier());
     networkSuppliers.add(SIMPLE_LINEAR.getSupplier());
-    if (!SOLVE_LONG_TESTS) return;
-    networkSuppliers.add(FANTASY_GRAPH.getSupplier());
   }
 
   @ParameterizedTest

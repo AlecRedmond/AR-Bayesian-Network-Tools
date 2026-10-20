@@ -32,8 +32,7 @@ public class JointConstraintSerializer
   }
 
   @Override
-  public SerializedJointProbabilityConstraint safeCast(
-      SerializedProbabilityConstraint serialized) {
+  public SerializedJointProbabilityConstraint safeCast(SerializedProbabilityConstraint serialized) {
     return serialized instanceof SerializedJointProbabilityConstraint cast ? cast : null;
   }
 }

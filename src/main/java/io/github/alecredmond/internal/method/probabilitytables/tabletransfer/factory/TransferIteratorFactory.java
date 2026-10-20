@@ -7,7 +7,6 @@ import io.github.alecredmond.internal.method.probabilitytables.TableUtils;
 import io.github.alecredmond.internal.method.probabilitytables.tabletransfer.TableTransfer;
 import io.github.alecredmond.internal.method.probabilitytables.tabletransfer.readwriters.*;
 import io.github.alecredmond.internal.method.vectoriterator.standardtemplate.*;
-
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -65,12 +64,12 @@ public class TransferIteratorFactory {
     }
 
     public int[][] cache(ProbabilityTable table) {
-        return StandardCartesianIterator.create(this, table.getVector()).cacheIndexesOverOuterRuns();
+      return StandardCartesianIterator.create(this, table.getVector()).cacheIndexesOverOuterRuns();
     }
 
     @Override
     public Function<Node, NodeState> initialStatePositionSetter() {
-        return node -> node.getStates().getFirst();
+      return node -> node.getStates().getFirst();
     }
 
     @Override
@@ -86,6 +85,5 @@ public class TransferIteratorFactory {
     public Function<Node, boolean[]> updateEvidenceArrays() {
       return node -> null;
     }
-
   }
 }

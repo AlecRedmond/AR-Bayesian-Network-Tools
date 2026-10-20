@@ -1,7 +1,7 @@
-package io.github.alecredmond.export.method.sampler;
+package io.github.alecredmond.export.sampler;
 
 import static io.github.alecredmond.TestConfigs.*;
-import static io.github.alecredmond.export.method.network.NetworkScenario.*;
+import static io.github.alecredmond.scenarios.NetworkScenario.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 import io.github.alecredmond.export.inference.InferenceEngine;
@@ -10,9 +10,6 @@ import io.github.alecredmond.export.inference.ObservationStatus;
 import io.github.alecredmond.export.network.BayesianNetwork;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
-import io.github.alecredmond.export.sampler.MonteCarloSampler;
-import io.github.alecredmond.export.sampler.Sample;
-import io.github.alecredmond.export.sampler.SampleCollection;
 import io.github.alecredmond.internal.method.node.NodeUtils;
 import java.io.Serializable;
 import java.util.*;
@@ -61,15 +58,6 @@ class SampleCollectionTest {
             Set.of("SPRINKLER"),
             Set.of("RAIN:TRUE"),
             false));
-    if (!SOLVE_LONG_TESTS) return;
-    packages.add(
-        new SamplePackage(
-            FANTASY_GRAPH.get(),
-            NUMBER_OF_SAMPLES,
-            Set.of("DISTRICT:OTHER"),
-            Set.of("RACE", "WEALTH"),
-            Set.of("OUTLOOK:REVOLUTIONARY"),
-            true));
   }
 
   @Nested

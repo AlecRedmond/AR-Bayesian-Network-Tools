@@ -1,14 +1,11 @@
-package io.github.alecredmond.export.method.inference;
+package io.github.alecredmond.export.solver;
 
 import static io.github.alecredmond.TestConfigs.DOUBLE_EQUALITY;
-import static io.github.alecredmond.TestConfigs.SOLVE_LONG_TESTS;
 import static org.junit.jupiter.api.Assertions.*;
 
-import io.github.alecredmond.export.solver.BayesSolver;
-import io.github.alecredmond.export.solver.SolverAlgorithm;
-import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.network.BayesianNetwork;
-import io.github.alecredmond.export.method.network.NetworkScenario;
+import io.github.alecredmond.export.node.Node;
+import io.github.alecredmond.scenarios.NetworkScenario;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
@@ -20,7 +17,6 @@ class BayesSolverTest {
 
   public static Stream<Arguments> streamScenarios() {
     return Arrays.stream(NetworkScenario.values())
-        .filter(scenario -> SOLVE_LONG_TESTS || !scenario.equals(NetworkScenario.FANTASY_GRAPH))
         .map(NetworkScenario::get)
         .map(Arguments::of);
   }

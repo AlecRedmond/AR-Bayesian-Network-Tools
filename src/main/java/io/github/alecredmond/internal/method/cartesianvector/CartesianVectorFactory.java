@@ -1,9 +1,9 @@
 package io.github.alecredmond.internal.method.cartesianvector;
 
 import io.github.alecredmond.exceptions.ProbabilityVectorFactoryException;
-import io.github.alecredmond.export.cartesianvector.CartesianState;
-import io.github.alecredmond.export.cartesianvector.CartesianVariable;
-import io.github.alecredmond.export.cartesianvector.CartesianVector;
+import io.github.alecredmond.internal.application.cartesianvector.CartesianState;
+import io.github.alecredmond.internal.application.cartesianvector.CartesianVariable;
+import io.github.alecredmond.internal.application.cartesianvector.CartesianVector;
 import io.github.alecredmond.internal.method.junctiontree.treebuilding.TreewidthValidator;
 import io.github.alecredmond.internal.method.utils.CollectionToString;
 import java.util.List;
@@ -20,7 +20,7 @@ public abstract class CartesianVectorFactory<
     S[][] stateArrays = state2DArraySupplier().apply(nodeArray.length);
     int[] numberOfStates = new int[nodeArray.length];
     int[] strideLengths = new int[nodeArray.length];
-    int rank = fillDataAndReturnRank(numberOfStates, strideLengths, nodeArray,stateArrays);
+    int rank = fillDataAndReturnRank(numberOfStates, strideLengths, nodeArray, stateArrays);
 
     return instanceSpecificBuildLogic(nodeArray, stateArrays, numberOfStates, strideLengths, rank);
   }
@@ -49,7 +49,7 @@ public abstract class CartesianVectorFactory<
 
   protected abstract IntFunction<S[][]> state2DArraySupplier();
 
-    private int fillDataAndReturnRank(
+  private int fillDataAndReturnRank(
       int[] numberOfStates, int[] strideLengths, N[] nodes, S[][] stateArray) {
     IntFunction<S[]> stateArraySupplier = stateArraySupplier();
     int strideLength = 1;

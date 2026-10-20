@@ -1,10 +1,12 @@
-package io.github.alecredmond.export.cartesianvector;
+package io.github.alecredmond.internal.application.cartesianvector;
 
 import io.github.alecredmond.exceptions.ProbabilityTableRequestException;
+import io.github.alecredmond.internal.method.utils.CollectionToString;
 import java.util.Collection;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
-import java.util.function.ToIntFunction;
+import java.util.stream.IntStream;
 
 public class CartesianVectorUtils {
   private CartesianVectorUtils() {
@@ -14,50 +16,51 @@ public class CartesianVectorUtils {
   @SuppressWarnings("unchecked")
   public static <
           N extends CartesianVariable, S extends CartesianState, V extends CartesianVector<N, S>>
-      int[] getStatePositions(
-          V cartesianVector, Collection<S> states, boolean performSafetyChecks) {
-    ToIntFunction<N> getNodeOrderIndex = cartesianVector.orderedIndexOfNode();
-    ToIntFunction<S> getStateOrderIndex = cartesianVector.orderedPositionOfState();
-    N[] orderedNodes = cartesianVector.getOrderedNodes();
+      int[] getStatePositions(V vector, Collection<S> states, boolean performSafetyChecks) {
     if (performSafetyChecks) {
-      performStateSafetyChecks(states, orderedNodes, getNodeOrderIndex);
+      performStateSafetyChecks(states, vector);
     }
-    int[] statePositions = new int[orderedNodes.length];
+    int[] statePositions = new int[vector.getOrderedNodes().length];
     for (S state : states) {
-
-      statePositions[getNodeOrderIndex.applyAsInt((N) state.getNode())] =
-          getStateOrderIndex.applyAsInt(state);
+      statePositions[vector.getNodeIndex((N) state.getNode())] = vector.getStatePosition(state);
     }
     return statePositions;
   }
 
   @SuppressWarnings("unchecked")
   private static <N extends CartesianVariable, S extends CartesianState>
-      void performStateSafetyChecks(
-          Collection<S> states, N[] orderedNodes, ToIntFunction<N> getNodeOrderIndex) {
-    final int length = orderedNodes.length;
+      void performStateSafetyChecks(Collection<S> states, CartesianVector<N, S> vector) {
+    N[] orderedNodes = vector.getOrderedNodes();
+    int length = orderedNodes.length;
     boolean[] nodeProcessed = new boolean[length];
+    int statesChecked = 0;
     for (S state : states) {
       N node = (N) state.getNode();
-      int nodeIdx = getNodeOrderIndex.applyAsInt(node);
-      boolean firstTimeProcessed = (nodeProcessed[nodeIdx] = !nodeProcessed[nodeIdx]);
+      int idx = vector.getNodeIndex(node);
+      boolean firstTimeProcessed = (nodeProcessed[idx] = !nodeProcessed[idx]);
       if (!firstTimeProcessed) {
         throw new ProbabilityTableRequestException(
             "Node %s was processed twice during safety checks".formatted(node));
       }
+      statesChecked++;
     }
-    for (int i = 0; i < length; i++) {
-      if (!nodeProcessed[i]) {
-        throw new ProbabilityTableRequestException(
-            "Node %s had no associated state in request %s".formatted(orderedNodes[i], states));
-      }
+    if (statesChecked == length) {
+      return;
     }
+    List<N> unassociated =
+        IntStream.range(0, length)
+            .filter(i -> !nodeProcessed[i])
+            .mapToObj(i -> orderedNodes[i])
+            .toList();
+    throw new ProbabilityTableRequestException(
+        "Node %s had no associated state in request %s"
+            .formatted(CollectionToString.apply(unassociated), CollectionToString.apply(states)));
   }
 
   public static <
           N extends CartesianVariable, S extends CartesianState, V extends CartesianVector<N, S>>
       int getIndexFromPositions(V cartesianVector, int[] statePositions) {
-    final int length = checkStatePositionLength(cartesianVector, statePositions);
+    int length = checkStatePositionLength(cartesianVector, statePositions);
     int[] numberOfStates = cartesianVector.getNumberOfStates();
     int[] strideLengths = cartesianVector.getStrideLengths();
     int idx = 0;

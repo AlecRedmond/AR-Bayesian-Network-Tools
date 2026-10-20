@@ -12,8 +12,7 @@ import lombok.EqualsAndHashCode;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
-public abstract class SingleEventTableData
-        extends ProbabilityTableData {
+public abstract class SingleEventTableData extends ProbabilityTableData {
   protected final Node eventNode;
 
   protected SingleEventTableData(TableBuilderData tableBuilderData) {

@@ -3,7 +3,6 @@ package io.github.alecredmond.internal.method.solver;
 import io.github.alecredmond.export.constraints.ProbabilityConstraint;
 import io.github.alecredmond.export.solver.SolverConstraintResult;
 import io.github.alecredmond.export.solver.SolverResults;
-
 import java.time.Duration;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
@@ -13,7 +12,8 @@ import java.util.stream.IntStream;
 
 public class SolverResultsBuilder {
 
-  public SolverResults buildResults(int cycle, Map<ProbabilityConstraint, double[]> resultsMap, Duration duration) {
+  public SolverResults buildResults(
+      int cycle, Map<ProbabilityConstraint, double[]> resultsMap, Duration duration) {
     Map<ProbabilityConstraint, SolverConstraintResult> solverResultMap =
         resultsMap.entrySet().stream()
             .map(e -> Map.entry(e.getKey(), buildConstraintResult(e)))

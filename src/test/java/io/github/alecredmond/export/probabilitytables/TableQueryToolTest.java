@@ -1,22 +1,17 @@
-package io.github.alecredmond.export.method.probabilitytables;
+package io.github.alecredmond.export.probabilitytables;
 
 import static io.github.alecredmond.TestConfigs.DOUBLE_EQUALITY;
-import static io.github.alecredmond.TestConfigs.SOLVE_LONG_TESTS;
-import static io.github.alecredmond.export.method.network.NetworkScenario.FANTASY_GRAPH;
 import static org.junit.jupiter.api.Assertions.*;
 
 import io.github.alecredmond.export.constraints.ProbabilityConstraint;
-import io.github.alecredmond.export.method.network.NetworkScenario;
 import io.github.alecredmond.export.network.BayesianNetwork;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
-import io.github.alecredmond.export.probabilitytables.ConditionalTable;
-import io.github.alecredmond.export.probabilitytables.NetworkTable;
-import io.github.alecredmond.export.probabilitytables.ProbabilityVector;
 import io.github.alecredmond.export.probabilitytables.cptentry.CptEntry;
 import io.github.alecredmond.internal.method.node.NodeUtils;
 import io.github.alecredmond.internal.method.probabilitytables.probabilityvector.ProbabilityVectorFactory;
 import io.github.alecredmond.internal.method.vectoriterator.misciterators.StateCombinationGenerator;
+import io.github.alecredmond.scenarios.NetworkScenario;
 import java.io.Serializable;
 import java.util.*;
 import java.util.function.BiFunction;
@@ -54,7 +49,6 @@ class TableQueryToolTest {
   private static Stream<BayesianNetwork> getBayesianNetworkStream(
       Function<NetworkScenario, BayesianNetwork> networkInit) {
     return Arrays.stream(NetworkScenario.values())
-        .filter(networkScenario -> !FANTASY_GRAPH.equals(networkScenario) || SOLVE_LONG_TESTS)
         .map(networkInit);
   }
 

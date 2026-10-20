@@ -1,6 +1,6 @@
 package io.github.alecredmond.internal.application.vectoriterator;
 
-import io.github.alecredmond.export.cartesianvector.CartesianVector;
+import io.github.alecredmond.internal.application.cartesianvector.CartesianVector;
 import lombok.Data;
 
 @Data

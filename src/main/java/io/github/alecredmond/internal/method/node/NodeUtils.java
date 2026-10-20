@@ -1,9 +1,9 @@
 package io.github.alecredmond.internal.method.node;
 
 import io.github.alecredmond.exceptions.NodeStateConflictException;
-import io.github.alecredmond.export.cartesianvector.CartesianVariable;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
+import io.github.alecredmond.internal.application.cartesianvector.CartesianVariable;
 import java.io.Serializable;
 import java.util.*;
 import java.util.function.Predicate;

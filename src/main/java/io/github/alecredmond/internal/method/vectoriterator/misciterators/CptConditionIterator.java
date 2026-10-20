@@ -6,7 +6,6 @@ import io.github.alecredmond.export.probabilitytables.NetworkTable;
 import io.github.alecredmond.export.probabilitytables.cptentry.CptEntry;
 import io.github.alecredmond.export.probabilitytables.cptentry.CptRow;
 import io.github.alecredmond.internal.method.vectoriterator.standardtemplate.*;
-
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -25,7 +24,7 @@ public class CptConditionIterator extends StateUpdateBase<Node, NodeState>
     this.eventNode = networkTable.getNetworkNode();
     this.conditionNodes = networkTable.getConditions();
     this.lockedPositionMap = new HashMap<>();
-      this.iterator = StandardCartesianIterator.create(this, networkTable.getVector());
+    this.iterator = StandardCartesianIterator.create(this, networkTable.getVector());
     this.probabilities = networkTable.getProbabilities();
   }
 
@@ -92,5 +91,4 @@ public class CptConditionIterator extends StateUpdateBase<Node, NodeState>
   public Function<Node, boolean[]> updateEvidenceArrays() {
     return node -> null;
   }
-
 }

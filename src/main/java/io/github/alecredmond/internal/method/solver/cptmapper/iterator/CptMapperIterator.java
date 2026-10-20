@@ -32,13 +32,13 @@ public abstract class CptMapperIterator<T extends NetworkTable, P extends Probab
     this.networkTable = networkTable;
     this.validator = validator;
     this.constraints = sorter.sortConstraints(allConstraints);
-      this.iterator = StandardCartesianIterator.create(this, networkTable.getVector());
+    this.iterator = StandardCartesianIterator.create(this, networkTable.getVector());
     this.report = new CptMappingReport(networkTable, constraints);
   }
 
   @Override
   public Function<Node, NodeState> initialStatePositionSetter() {
-      return node -> node.getStates().getFirst();
+    return node -> node.getStates().getFirst();
   }
 
   @Override
@@ -55,7 +55,7 @@ public abstract class CptMapperIterator<T extends NetworkTable, P extends Probab
     return node -> null;
   }
 
-    public CptMappingReport directMapCPTs() {
+  public CptMappingReport directMapCPTs() {
     MissingEntryCheck entryCheck = new MissingEntryCheck(constraints, buildRowConstraintsArray());
     List<P> addedConstraints = new ArrayList<>();
     iterator.iterateOuter(

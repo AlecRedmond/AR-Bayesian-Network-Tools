@@ -19,9 +19,7 @@ public class RemovedNodeChangeHandler implements NetworkChangeHandler {
     networkData.getNodeIDsMap().remove(toRemove.getId());
     networkData.getNodes().remove(toRemove);
 
-    toRemove
-        .getStates()
-        .forEach(state -> networkData.getNodeStateIDsMap().remove(state.getId()));
+    toRemove.getStates().forEach(state -> networkData.getNodeStateIDsMap().remove(state.getId()));
 
     networkData
         .getNodeIDsMap()

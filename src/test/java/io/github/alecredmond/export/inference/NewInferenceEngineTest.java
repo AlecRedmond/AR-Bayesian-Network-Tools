@@ -1,11 +1,10 @@
-package io.github.alecredmond.export.method.inference;
+package io.github.alecredmond.export.inference;
 
-import static io.github.alecredmond.export.method.network.NetworkScenario.RAIN_NETWORK;
+import static io.github.alecredmond.scenarios.NetworkScenario.RAIN_NETWORK;
 import static org.junit.jupiter.api.Assertions.*;
 
-import io.github.alecredmond.export.inference.InferenceEngine;
-import io.github.alecredmond.export.method.network.NetworkScenario;
 import io.github.alecredmond.export.network.BayesianNetwork;
+import io.github.alecredmond.scenarios.NetworkScenario;
 import io.github.alecredmond.export.solver.BayesSolver;
 import io.github.alecredmond.export.solver.SolverAlgorithm;
 import io.github.alecredmond.export.solver.SolverConstraintResult;
@@ -27,9 +26,7 @@ public class NewInferenceEngineTest {
   InferenceEngine test;
 
   private static List<NetworkScenario> provideScenarios() {
-    return Arrays.stream(NetworkScenario.values())
-        .filter(scenario -> !scenario.equals(NetworkScenario.FANTASY_GRAPH))
-        .toList();
+    return Arrays.stream(NetworkScenario.values()).toList();
   }
 
   @Nested

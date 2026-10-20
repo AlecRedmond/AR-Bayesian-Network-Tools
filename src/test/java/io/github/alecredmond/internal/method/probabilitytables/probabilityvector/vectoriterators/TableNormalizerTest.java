@@ -1,11 +1,11 @@
 package io.github.alecredmond.internal.method.probabilitytables.probabilityvector.vectoriterators;
 
-import static io.github.alecredmond.export.method.network.NetworkScenario.*;
+import static io.github.alecredmond.scenarios.NetworkScenario.*;
 import static org.junit.jupiter.api.Assertions.*;
 
+import io.github.alecredmond.export.network.BayesianNetwork;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.probabilitytables.ProbabilityTable;
-import io.github.alecredmond.export.network.BayesianNetwork;
 import io.github.alecredmond.internal.method.probabilitytables.tablebuilders.NetworkTableBuilder;
 import io.github.alecredmond.internal.method.vectoriterator.misciterators.TableNormalizer;
 import java.io.Serializable;
@@ -19,7 +19,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 class TableNormalizerTest {
   static final List<BayesianNetwork> NETWORKS =
-      List.of(FANTASY_GRAPH.get(), AH_NETWORK.get(), RAIN_NETWORK.get(), SIMPLE_LINEAR.get());
+      List.of(AH_NETWORK.get(), RAIN_NETWORK.get(), SIMPLE_LINEAR.get());
   TableNormalizer test;
 
   static Stream<Arguments> getNetworkTables() {

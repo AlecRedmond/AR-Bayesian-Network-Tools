@@ -1,4 +1,4 @@
-package io.github.alecredmond.export.method.network;
+package io.github.alecredmond.export.network;
 
 import static io.github.alecredmond.TestConfigs.RUN_J_FILE_CHOOSER_TESTS;
 import static io.github.alecredmond.internal.method.constraints.ConstraintType.*;
@@ -10,8 +10,6 @@ import io.github.alecredmond.exceptions.ConstraintValidationException;
 import io.github.alecredmond.exceptions.NetworkStructureException;
 import io.github.alecredmond.export.constraints.*;
 import io.github.alecredmond.export.inference.InferenceEngine;
-import io.github.alecredmond.export.network.BayesianNetwork;
-import io.github.alecredmond.export.network.BayesianNetworkData;
 import io.github.alecredmond.export.network.serialized.SerializedBayesianNetwork;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;

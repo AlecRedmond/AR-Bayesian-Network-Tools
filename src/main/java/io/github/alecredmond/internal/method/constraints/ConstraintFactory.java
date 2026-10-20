@@ -8,7 +8,6 @@ import io.github.alecredmond.internal.application.constraint.ConstraintBuilderDa
 import io.github.alecredmond.internal.application.constraint.ConstraintFactoryOutput;
 import io.github.alecredmond.internal.method.constraints.strategy.ConstraintValidator;
 import io.github.alecredmond.internal.method.utils.CollectionToString;
-
 import java.util.*;
 
 public class ConstraintFactory {
@@ -37,12 +36,12 @@ public class ConstraintFactory {
   }
 
   private void addValidatorRefusedException(ConstraintBuilderData cbd) {
-      cbd.setException(
+    cbd.setException(
         new ConstraintValidationException(
             "Could not match inputs P(%s|%s) to any ProbabilityConstraint type!"
                 .formatted(
-                        CollectionToString.apply(cbd.getEventStates()),
-                        CollectionToString.apply(cbd.getConditionStates()))));
+                    CollectionToString.apply(cbd.getEventStates()),
+                    CollectionToString.apply(cbd.getConditionStates()))));
   }
 
   public <T extends ProbabilityConstraint> ConstraintFactoryOutput verifyConstraint(T constraint) {

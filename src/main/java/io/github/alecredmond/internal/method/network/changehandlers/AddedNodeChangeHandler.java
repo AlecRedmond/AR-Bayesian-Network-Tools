@@ -13,7 +13,6 @@ public class AddedNodeChangeHandler implements NetworkChangeHandler {
     Node node = (Node) evt.getNewValue();
 
     networkData.getNodeIDsMap().put(node.getId(), node);
-    node.getStates()
-        .forEach(state -> networkData.getNodeStateIDsMap().put(state.getId(), state));
+    node.getStates().forEach(state -> networkData.getNodeStateIDsMap().put(state.getId(), state));
   }
 }

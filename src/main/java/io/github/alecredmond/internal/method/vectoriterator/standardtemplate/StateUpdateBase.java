@@ -1,8 +1,8 @@
 package io.github.alecredmond.internal.method.vectoriterator.standardtemplate;
 
-import io.github.alecredmond.export.cartesianvector.CartesianState;
-import io.github.alecredmond.export.cartesianvector.CartesianVariable;
-import io.github.alecredmond.export.cartesianvector.CartesianVector;
+import io.github.alecredmond.internal.application.cartesianvector.CartesianState;
+import io.github.alecredmond.internal.application.cartesianvector.CartesianVariable;
+import io.github.alecredmond.internal.application.cartesianvector.CartesianVector;
 import io.github.alecredmond.internal.application.vectoriterator.CartesianOdometer;
 import java.util.Arrays;
 import java.util.function.Consumer;

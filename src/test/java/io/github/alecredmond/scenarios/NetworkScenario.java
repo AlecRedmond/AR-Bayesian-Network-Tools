@@ -1,17 +1,15 @@
-package io.github.alecredmond.export.method.network;
+package io.github.alecredmond.scenarios;
 
-import static io.github.alecredmond.export.method.network.NetworkScenarioBuilder.*;
-
-import java.util.function.Supplier;
+import static io.github.alecredmond.scenarios.NetworkScenarioBuilder.*;
 
 import io.github.alecredmond.export.network.BayesianNetwork;
+import java.util.function.Supplier;
 import lombok.Getter;
 
 @Getter
 public enum NetworkScenario {
   RAIN_NETWORK(buildRainNetwork()),
   AH_NETWORK(buildAhNetwork()),
-  FANTASY_GRAPH(buildFantasyGraph()),
   SIMPLE_LINEAR(buildSimpleLinearGraph()),
   DIAMOND_NET(buildDiamondNetwork()),
   WEATHER_NETWORK(buildWeatherNetwork()),

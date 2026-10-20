@@ -20,7 +20,7 @@ public class StateCombinationGenerator extends StateUpdateBase<Node, NodeState>
   public StateCombinationGenerator(ProbabilityVector vector) {
     super(vector, NodeState[]::new);
     this.includedNodes = new HashSet<>();
-      this.iterator = StandardCartesianIterator.create(this, vector);
+    this.iterator = StandardCartesianIterator.create(this, vector);
     this.vector = vector;
   }
 
@@ -49,7 +49,7 @@ public class StateCombinationGenerator extends StateUpdateBase<Node, NodeState>
 
   @Override
   public Function<Node, NodeState> initialStatePositionSetter() {
-      return node -> node.getStates().getFirst();
+    return node -> node.getStates().getFirst();
   }
 
   @Override
