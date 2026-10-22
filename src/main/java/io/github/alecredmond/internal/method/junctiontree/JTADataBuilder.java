@@ -14,7 +14,7 @@ import io.github.alecredmond.internal.method.constraints.ConstraintRegistry;
 import io.github.alecredmond.internal.method.constraints.strategy.ConstraintSolver;
 import io.github.alecredmond.internal.method.junctiontree.treebuilding.CliqueBuilder;
 import io.github.alecredmond.internal.method.probabilitytables.JunctionTreeTable;
-import io.github.alecredmond.internal.method.probabilitytables.tablebuilders.ObservedTableBuilder;
+import io.github.alecredmond.internal.method.probabilitytables.tablefactory.ObservedTableFactory;
 import io.github.alecredmond.internal.method.probabilitytables.tabletransfer.factory.TransferIteratorFactory;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -137,7 +137,7 @@ public class JTADataBuilder {
   }
 
   private void buildObserved(JunctionTreeData jtd, BayesianNetworkData bnd) {
-    ObservedTableBuilder builder = new ObservedTableBuilder();
+    ObservedTableFactory builder = new ObservedTableFactory();
     jtd.setObservedTablesMap(
         bnd.getNodes().stream()
             .map(node -> Map.entry(node, builder.buildTable(node)))

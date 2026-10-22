@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import io.github.alecredmond.export.network.BayesianNetwork;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.probabilitytables.ProbabilityTable;
-import io.github.alecredmond.internal.method.probabilitytables.tablebuilders.NetworkTableBuilder;
+import io.github.alecredmond.internal.method.probabilitytables.tablefactory.NetworkTableFactory;
 import io.github.alecredmond.internal.method.vectoriterator.misciterators.TableNormalizer;
 import java.io.Serializable;
 import java.util.Arrays;
@@ -33,7 +33,7 @@ class TableNormalizerTest {
   @ParameterizedTest
   @MethodSource("getNetworkTables")
   void normalize(BayesianNetwork network, Serializable nodeId) {
-    NetworkTableBuilder builder = new NetworkTableBuilder();
+    NetworkTableFactory builder = new NetworkTableFactory();
     Node node = network.getNode(nodeId);
     ProbabilityTable table = builder.buildTable(List.of(node), node.getParents());
     double[] probs = table.getVector().getProbabilities();

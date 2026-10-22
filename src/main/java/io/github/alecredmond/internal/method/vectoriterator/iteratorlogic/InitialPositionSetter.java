@@ -5,12 +5,15 @@ import io.github.alecredmond.internal.application.cartesianvector.CartesianVaria
 import io.github.alecredmond.internal.application.cartesianvector.CartesianVector;
 import io.github.alecredmond.internal.application.vectoriterator.CartesianOdometer;
 import java.util.function.Function;
+import java.util.function.ToIntFunction;
 
 public interface InitialPositionSetter extends CartesianIteratorLogic {
   static <N extends CartesianVariable, S extends CartesianState> InitialPositionSetter create(
       CartesianVector<N, S> vector,
       CartesianOdometer odometer,
-      Function<N, S> initialStateFunction) {
-    return new InitialPositionSetterImpl<>(vector, odometer, initialStateFunction);
+      Function<N, S> initialStateFunction,
+      ToIntFunction<S> statePositionFinder) {
+    return new InitialPositionSetterImpl<>(
+        vector, odometer, initialStateFunction, statePositionFinder);
   }
 }

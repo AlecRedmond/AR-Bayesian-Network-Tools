@@ -45,7 +45,7 @@ class NodeObservationFactory {
   }
 
   private void throwTooManyStatesError(Set<NodeState> observed, Node node) {
-      throw new IllegalStateException(
+    throw new IllegalStateException(
         "Attempted to observe %d states, which is more than exists in Node %s. States Observed = %s."
             .formatted(observed.size(), node, CollectionToString.apply(observed)));
   }

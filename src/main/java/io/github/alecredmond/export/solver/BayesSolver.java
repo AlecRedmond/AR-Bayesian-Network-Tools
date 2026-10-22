@@ -45,8 +45,8 @@ public interface BayesSolver {
   /**
    * Runs the solver using the IPFP variant configured in {@code app.properties}, unless the network
    * has already been solved. The active variant is controlled by {@code
-   * app.bayes.solver.defaultSolverAlgorithm} (default: {@code JUNCTION_TREE_IPFP}). Any exception thrown
-   * during the process is caught and logged rather than propagated.
+   * app.bayes.solver.defaultSolverAlgorithm} (default: {@code JUNCTION_TREE_IPFP}). Any exception
+   * thrown during the process is caught and logged rather than propagated.
    *
    * <p><i>Note: This method will first call {@link #writeCPTsFromConstraints()}, which will run in
    * place of the IPFP algorithm in cases where all constraints can be mapped directly to the
@@ -71,8 +71,8 @@ public interface BayesSolver {
   /**
    * Runs the solver using the IPFP variant configured in {@code app.properties}, regardless of
    * whether the network has already been solved. The active variant is controlled by {@code
-   * app.bayes.solver.defaultSolverAlgorithm} (default: {@code JUNCTION_TREE_IPFP}). Any exception thrown
-   * during the solving process is caught and logged rather than propagated.
+   * app.bayes.solver.defaultSolverAlgorithm} (default: {@code JUNCTION_TREE_IPFP}). Any exception
+   * thrown during the solving process is caught and logged rather than propagated.
    *
    * <p><i>Note: This method will first call {@link #writeCPTsFromConstraints()}, which will run in
    * place of the IPFP algorithm in cases where all constraints can be mapped directly to the

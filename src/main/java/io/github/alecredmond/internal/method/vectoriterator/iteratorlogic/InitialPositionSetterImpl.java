@@ -5,6 +5,7 @@ import io.github.alecredmond.internal.application.cartesianvector.CartesianVaria
 import io.github.alecredmond.internal.application.cartesianvector.CartesianVector;
 import io.github.alecredmond.internal.application.vectoriterator.CartesianOdometer;
 import java.util.function.Function;
+import java.util.function.ToIntFunction;
 
 class InitialPositionSetterImpl<N extends CartesianVariable, S extends CartesianState>
     implements InitialPositionSetter {
@@ -12,15 +13,18 @@ class InitialPositionSetterImpl<N extends CartesianVariable, S extends Cartesian
   protected final CartesianOdometer odometer;
   protected final int[] initialPosition;
   protected final Function<N, S> initialStateFunction;
+  protected final ToIntFunction<S> statePositionFinder;
 
   public InitialPositionSetterImpl(
       CartesianVector<N, S> vector,
       CartesianOdometer odometer,
-      Function<N, S> initialStateFunction) {
+      Function<N, S> initialStateFunction,
+      ToIntFunction<S> statePositionFinder) {
     this.vector = vector;
     this.odometer = odometer;
     this.initialPosition = new int[vector.getOrderedNodes().length];
     this.initialStateFunction = initialStateFunction;
+    this.statePositionFinder = statePositionFinder;
   }
 
   @Override
@@ -31,7 +35,7 @@ class InitialPositionSetterImpl<N extends CartesianVariable, S extends Cartesian
     for (int i = 0; i < length; i++) {
       N node = orderedNodes[i];
       S initialState = initialStateFunction.apply(node);
-      int position = vector.getStatePosition(initialState);
+      int position = statePositionFinder.applyAsInt(initialState);
       initialPosition[i] = position;
       statePositions[i] = position;
     }

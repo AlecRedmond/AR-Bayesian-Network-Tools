@@ -173,7 +173,6 @@ public class NetworkScenarioBuilder {
             .addConstraint(List.of("6x MANUAL", "3x AUTO"), List.of("GT"), 1.0)
             .addConstraint(
                 List.of("6x MANUAL", "3x AUTO", "6x DCT"), List.of("2.0 DIESEL", "3.0 V6"), 1.0)
-            // .addConstraint(List.of("6x MANUAL", "3x AUTO", "6x DCT"), List.of("3.0 V6"), 1.0)
             .addConstraint(List.of("6x MANUAL", "5x MANUAL", "1.6 TURBO"), List.of("SPORT"), 1.0)
             .addConstraint("£40k", "SPORT", 1.0)
             .addConstraint("£80k", "GT", 0.6)
@@ -244,9 +243,8 @@ public class NetworkScenarioBuilder {
         new BayesianNetworkBuilder("ASIA VISIT")
             .addNode(a, statesOf.apply(a), new double[] {0.01, 0.99})
             .addNode(s, statesOf.apply(s), new double[] {0.50, 0.50})
-            .addNode(t, statesOf.apply(t), List.of(a, t), new double[] {0.05, 0.95, 0.01, 1 - 0.01})
-            .addNode(
-                l, statesOf.apply(l), List.of(s, l), new double[] {0.1, 1 - 0.1, 0.01, 1 - 0.01})
+            .addNode(t, statesOf.apply(t), List.of(a, t), new double[] {0.05, 0.95, 0.01, 0.99})
+            .addNode(l, statesOf.apply(l), List.of(s, l), new double[] {0.1, 0.9, 0.01, 0.99})
             .addNode(b, statesOf.apply(b), List.of(s, b), new double[] {0.6, -1, 0.3, -1})
             .addNode(
                 e,

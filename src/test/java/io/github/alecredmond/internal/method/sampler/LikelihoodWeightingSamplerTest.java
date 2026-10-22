@@ -6,12 +6,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import io.github.alecredmond.export.constraints.MarginalConstraint;
 import io.github.alecredmond.export.constraints.ProbabilityConstraint;
 import io.github.alecredmond.export.inference.InferenceEngine;
-import io.github.alecredmond.scenarios.NetworkScenario;
 import io.github.alecredmond.export.network.BayesianNetwork;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
 import io.github.alecredmond.export.sampler.MonteCarloSampler;
 import io.github.alecredmond.export.sampler.SampleCollection;
+import io.github.alecredmond.scenarios.NetworkScenario;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -20,12 +20,10 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 class LikelihoodWeightingSamplerTest {
-  static final Set<NetworkScenario> EXCLUDED_IN_LONG_TESTS = Set.of();
   static final boolean PRINT_DEBUG_OUTPUT = false;
 
   public static Stream<Arguments> allNetworkScenarios() {
     return Arrays.stream(NetworkScenario.values())
-        .filter(scenario -> !EXCLUDED_IN_LONG_TESTS.contains(scenario) || SOLVE_LONG_TESTS)
         .map(NetworkScenario::get)
         .map(BayesianNetwork::solveNetwork)
         .map(Arguments::of);

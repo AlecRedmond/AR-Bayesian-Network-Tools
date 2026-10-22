@@ -42,7 +42,11 @@ public class StandardCartesianIterator extends CartesianVectorIterator {
     return new StandardCartesianIterator(
         odometer,
         template.stateUpdateFunction(),
-        InitialPositionSetter.create(vector, odometer, template.initialStatePositionSetter()),
+        InitialPositionSetter.create(
+            vector,
+            odometer,
+            template.initialStatePositionSetter(),
+            template.statePositionFinder()),
         PositionLock.create(vector, odometer, template.checkLockOuter()),
         PositionLock.create(vector, odometer, template.checkLockInner()),
         EvidenceTest.create(vector, odometer, template.updateEvidenceArrays()));

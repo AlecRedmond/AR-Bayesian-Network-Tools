@@ -10,10 +10,10 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * A container for the {@link Sample} objects generated during a Monte Carlo {@link MonteCarloSampler} run. A
- * {@code SampleCollection} holds the complete set of distinct samples produced by the run, along
- * with the observations that were applied, and provides methods for querying sample frequencies and
- * filtering results by {@link NodeState}.
+ * A container for the {@link Sample} objects generated during a Monte Carlo {@link
+ * MonteCarloSampler} run. A {@code SampleCollection} holds the complete set of distinct samples
+ * produced by the run, along with the observations that were applied, and provides methods for
+ * querying sample frequencies and filtering results by {@link NodeState}.
  *
  * <p>Instances of this interface are created by the {@code generateSamples} methods on {@link
  * MonteCarloSampler}.
@@ -60,8 +60,8 @@ public interface SampleCollection {
    * Returns the combined frequency of all {@link Sample}s in this {@code SampleCollection} that
    * contain every {@link NodeState} in the given collection. This is equivalent to {@code P(X|obs)
    * * n}, where {@code X} is the set of queried {@link NodeState} values, {@code obs} is the set of
-   * observations used during the {@link MonteCarloSampler} run, and {@code n} is the total number of samples
-   * generated.
+   * observations used during the {@link MonteCarloSampler} run, and {@code n} is the total number
+   * of samples generated.
    *
    * @param states the {@link NodeState} values to query.
    * @return the combined frequency of all {@link Sample}s containing every specified state.
@@ -83,8 +83,8 @@ public interface SampleCollection {
    * Returns the combined frequency of all {@link Sample}s in this {@code SampleCollection} that
    * contain every {@link NodeState} identified by the given identifiers. This is equivalent to
    * {@code P(X|obs) * n}, where {@code X} is the set of queried {@link NodeState} values, {@code
-   * obs} is the set of observations used during the {@link MonteCarloSampler} run, and {@code n} is the total
-   * number of samples generated.
+   * obs} is the set of observations used during the {@link MonteCarloSampler} run, and {@code n} is
+   * the total number of samples generated.
    *
    * @param stateIds the identifiers of the {@link NodeState} values to query.
    * @param <T> the type of the {@link NodeState} identifiers.
@@ -96,8 +96,8 @@ public interface SampleCollection {
    * Returns the combined frequency of all {@link Sample}s in this {@code SampleCollection} that
    * contain the {@link NodeState} identified by the given identifier. This is equivalent to {@code
    * P(x|obs) * n}, where {@code x} is the queried {@link NodeState}, {@code obs} is the set of
-   * observations used during the {@link MonteCarloSampler} run, and {@code n} is the total number of samples
-   * generated.
+   * observations used during the {@link MonteCarloSampler} run, and {@code n} is the total number
+   * of samples generated.
    *
    * @param stateId the identifier of the {@link NodeState} value to query.
    * @param <T> the type of the {@link NodeState} identifier.

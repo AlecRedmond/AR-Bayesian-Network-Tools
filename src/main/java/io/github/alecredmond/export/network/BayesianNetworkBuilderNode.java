@@ -191,7 +191,7 @@ public class BayesianNetworkBuilderNode<T extends Serializable> {
     if (parents.remove(id)) {
       return parents.isEmpty() ? null : parents;
     }
-      throw new IllegalArgumentException(
+    throw new IllegalArgumentException(
         "cptNodeOrder list {%s} does not contain node id {%s}!"
             .formatted(CollectionToString.apply(cptStrideOrderDesc), id));
   }

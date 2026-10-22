@@ -1,4 +1,4 @@
-package io.github.alecredmond.internal.method.probabilitytables.tablebuilders;
+package io.github.alecredmond.internal.method.probabilitytables.tablefactory;
 
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.probabilitytables.ConditionalTable;
@@ -9,9 +9,9 @@ import java.util.List;
 import lombok.NoArgsConstructor;
 
 @NoArgsConstructor
-public class NetworkTableBuilder implements TableBuilder<NetworkTable> {
-  private final RootNodeTableBuilder rootNodeTableBuilder = new RootNodeTableBuilder();
-  private final ConditionalTableBuilder conditionalTableBuilder = new ConditionalTableBuilder();
+public class NetworkTableFactory implements TableFactory<NetworkTable> {
+  private final RootNodeTableFactory rootNodeTableBuilder = new RootNodeTableFactory();
+  private final ConditionalTableFactory conditionalTableBuilder = new ConditionalTableFactory();
 
   @Override
   public NetworkTable buildTable(List<Node> events, List<Node> conditions) {

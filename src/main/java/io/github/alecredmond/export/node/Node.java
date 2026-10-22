@@ -3,10 +3,10 @@ package io.github.alecredmond.export.node;
 import static io.github.alecredmond.internal.method.network.changehandlers.NetworkPropertyChangeEvent.*;
 
 import io.github.alecredmond.exceptions.BayesNetIDException;
-import io.github.alecredmond.internal.application.cartesianvector.CartesianVariable;
 import io.github.alecredmond.export.constraints.ProbabilityConstraint;
 import io.github.alecredmond.export.network.BayesianNetwork;
 import io.github.alecredmond.export.network.BayesianNetworkBuilder;
+import io.github.alecredmond.internal.application.cartesianvector.CartesianVariable;
 import io.github.alecredmond.internal.method.node.NodeUtils;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;

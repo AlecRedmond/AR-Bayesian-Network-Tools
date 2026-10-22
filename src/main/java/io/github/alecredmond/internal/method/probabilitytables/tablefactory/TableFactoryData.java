@@ -1,4 +1,4 @@
-package io.github.alecredmond.internal.method.probabilitytables.tablebuilders;
+package io.github.alecredmond.internal.method.probabilitytables.tablefactory;
 
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
@@ -9,7 +9,7 @@ import java.util.Set;
 import lombok.Data;
 
 @Data
-public class TableBuilderData {
+public class TableFactoryData {
   protected Map<Serializable, NodeState> nodeStateIDMap;
   protected Map<Serializable, Node> nodeIDMap;
   protected ProbabilityVector vector;

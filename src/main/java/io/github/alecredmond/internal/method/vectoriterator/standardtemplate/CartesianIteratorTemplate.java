@@ -9,9 +9,12 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.ToIntFunction;
 
 public interface CartesianIteratorTemplate<N extends CartesianVariable, S extends CartesianState> {
   Function<N, S> initialStatePositionSetter();
+
+  ToIntFunction<S> statePositionFinder();
 
   Predicate<N> checkLockOuter();
 

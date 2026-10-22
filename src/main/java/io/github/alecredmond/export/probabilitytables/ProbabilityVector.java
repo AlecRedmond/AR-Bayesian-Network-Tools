@@ -1,6 +1,5 @@
 package io.github.alecredmond.export.probabilitytables;
 
-import io.github.alecredmond.exceptions.ProbabilityTableRequestException;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
 import io.github.alecredmond.internal.application.cartesianvector.CartesianVector;
@@ -129,26 +128,6 @@ public class ProbabilityVector extends CartesianVector<Node, NodeState> {
   @Override
   public int getRank() {
     return rank;
-  }
-
-  @Override
-  public int getStatePosition(NodeState state) {
-    if (nodeIndexMap.containsKey(state.getNode())) {
-      return state.getPosition();
-    }
-    throw new ProbabilityTableRequestException(
-        "Node %s is not within the scope of vector %s".formatted(state.getNode(), this));
-  }
-
-  /**
-   * Returns the ordinal of the given {@link NodeState} within its parent {@link Node}'s list.
-   *
-   * @param node a {@link Node} within the scope of this {@link ProbabilityVector}.
-   * @return the index of the node within the {@link #orderedNodes} array.
-   */
-  @Override
-  public int getNodeIndex(Node node) {
-    return nodeIndexMap.get(node);
   }
 
   /**
