@@ -3,7 +3,7 @@ package io.github.alecredmond.internal.application.probabilitytables.base;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
 import io.github.alecredmond.export.probabilitytables.ProbabilityVector;
-import io.github.alecredmond.internal.method.probabilitytables.tablebuilders.TableBuilderData;
+import io.github.alecredmond.internal.method.probabilitytables.tablefactory.TableFactoryData;
 import java.io.Serializable;
 import java.util.Map;
 import java.util.Set;
@@ -22,29 +22,14 @@ public abstract class ProbabilityTableData {
   protected final Set<Node> conditions;
   @EqualsAndHashCode.Exclude protected Serializable tableName;
 
-  protected ProbabilityTableData(
-      Map<Serializable, NodeState> nodeStateIDMap,
-      Map<Serializable, Node> nodeIDMap,
-      ProbabilityVector vector,
-      Set<Node> nodes,
-      Set<Node> events,
-      Set<Node> conditions) {
-    this.nodeStateIDMap = nodeStateIDMap;
-    this.nodeIDMap = nodeIDMap;
-    this.vector = vector;
-    this.nodes = nodes;
-    this.events = events;
-    this.conditions = conditions;
-  }
-
-  protected ProbabilityTableData(TableBuilderData tableBuilderData) {
-    this.nodeStateIDMap = tableBuilderData.getNodeStateIDMap();
-    this.nodeIDMap = tableBuilderData.getNodeIDMap();
-    this.vector = tableBuilderData.getVector();
-    this.nodes = tableBuilderData.getNodes();
-    this.events = tableBuilderData.getEvents();
-    this.conditions = tableBuilderData.getConditions();
-    this.tableName = tableBuilderData.getTableName();
+  protected ProbabilityTableData(TableFactoryData tableFactoryData) {
+    this.nodeStateIDMap = tableFactoryData.getNodeStateIDMap();
+    this.nodeIDMap = tableFactoryData.getNodeIDMap();
+    this.vector = tableFactoryData.getVector();
+    this.nodes = tableFactoryData.getNodes();
+    this.events = tableFactoryData.getEvents();
+    this.conditions = tableFactoryData.getConditions();
+    this.tableName = tableFactoryData.getTableName();
   }
 
   public double[] getProbabilities() {

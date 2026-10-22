@@ -5,7 +5,7 @@ import io.github.alecredmond.export.probabilitytables.RootNodeTable;
 import io.github.alecredmond.internal.application.probabilitytables.RootNodeTableData;
 import io.github.alecredmond.internal.method.probabilitytables.printerformat.PrinterMatrixGeneratorBase;
 import io.github.alecredmond.internal.method.probabilitytables.printerformat.UnconditionalMatrixGenerator;
-import io.github.alecredmond.internal.method.probabilitytables.tablebuilders.RootNodeTableBuilder;
+import io.github.alecredmond.internal.method.probabilitytables.tablefactory.RootNodeTableFactory;
 import io.github.alecredmond.internal.method.vectoriterator.misciterators.CptConditionIterator;
 import java.io.Serializable;
 import java.util.*;
@@ -42,7 +42,7 @@ public class RootNodeTableImpl extends NetworkTableBase<RootNodeTableData>
 
   @Override
   public RootNodeTable copyTable() {
-    return new RootNodeTableBuilder().copyTable(this);
+    return new RootNodeTableFactory().copyTable(this);
   }
 
   @Override

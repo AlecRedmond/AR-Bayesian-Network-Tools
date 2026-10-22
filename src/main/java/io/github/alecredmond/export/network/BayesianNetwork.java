@@ -59,7 +59,7 @@ import javax.swing.JFileChooser;
  * Node#setParents(List)}, care should be taken to ensure all associated nodes already exist in the
  * {@code BayesianNetwork}.
  *
- * <p>Instances of this interface are not thread-safe. External synchronisation is required for
+ * <p>Instances of this interface are not thread-safe. External synchronization is required for
  * concurrent access.
  *
  * @see BayesianNetworkBuilder
@@ -70,7 +70,7 @@ import javax.swing.JFileChooser;
  * @author Alec Redmond
  * @version 1.0.0 RELEASE
  */
-@SuppressWarnings("unused")
+@SuppressWarnings({"UnusedReturnValue"})
 public interface BayesianNetwork {
 
   // ----------------------------------------------------------------------------------------------

@@ -7,13 +7,9 @@ import io.github.alecredmond.export.constraints.ProbabilityConstraint;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
 import io.github.alecredmond.export.probabilitytables.ProbabilityVector;
-import io.github.alecredmond.internal.application.vectoriterator.VectorOdometer;
-import io.github.alecredmond.internal.method.node.NodeUtils;
+import io.github.alecredmond.internal.method.utils.CollectionToString;
 import io.github.alecredmond.internal.method.utils.DoublePrecision;
-import io.github.alecredmond.internal.method.vectoriterator.VectorIterator;
-import io.github.alecredmond.internal.method.vectoriterator.iteratorutils.resetlogictypes.OdometerResetOnlyOnBuild;
-import io.github.alecredmond.internal.method.vectoriterator.iteratorutils.resetlogictypes.ResetLogicUtils;
-import io.github.alecredmond.internal.method.vectoriterator.iteratorutils.updatelogictypes.OdometerUpdateWriteStatesToArray;
+import io.github.alecredmond.internal.method.vectoriterator.standardtemplate.*;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -21,29 +17,33 @@ import java.util.stream.Collectors;
 import lombok.Getter;
 
 @Getter
-public class ConstraintBuilderIterator
-    implements OdometerResetOnlyOnBuild, OdometerUpdateWriteStatesToArray {
-  private final VectorIterator<VectorOdometer> iterator;
+public class ConstraintBuilderIterator extends StateUpdateBase<Node, NodeState>
+    implements ProbabilityIteratorTemplate {
+  private final StandardCartesianIterator iterator;
   private final Node event;
-  private final VectorOdometer odometer;
+  private final double[] probabilities;
   private List<ProbabilityConstraint> built;
 
   public ConstraintBuilderIterator(Node event, ProbabilityVector vector) {
+    super(vector, NodeState[]::new);
     this.event = event;
-    this.odometer = new VectorOdometer(vector);
-    this.iterator = new VectorIterator<>(odometer, this);
+    this.iterator = StandardCartesianIterator.create(this, vector);
+    this.probabilities = vector.getProbabilities();
   }
 
   public List<ProbabilityConstraint> buildConstraints() {
     built = new ArrayList<>();
-    double[] probabilities = odometer.getProbabilities();
-    NodeState[] states = odometer.getStates();
     if (states.length == 1) {
       createMarginals(probabilities, states);
     } else {
       createConditionals(probabilities, states);
     }
     return built;
+  }
+
+  @Override
+  public Function<Node, NodeState> initialStatePositionSetter() {
+    return node -> node.getStates().getFirst();
   }
 
   @Override
@@ -56,9 +56,8 @@ public class ConstraintBuilderIterator
     return node -> !event.equals(node);
   }
 
-  @Override
-  public Function<Node, NodeState> initialStatePositionSetter() {
-    return ResetLogicUtils.initializeToFirstNodeStates();
+  public Function<Node, boolean[]> updateEvidenceArrays() {
+    return node -> null;
   }
 
   private void createMarginals(double[] probabilities, NodeState[] states) {
@@ -69,7 +68,7 @@ public class ConstraintBuilderIterator
           constraints.clear();
           count[0] = 0;
           iterator.iterateInner(
-              (o, i) -> {
+              i -> {
                 count[0]++;
                 double prob = probabilities[i];
                 if (prob > 1.0 || prob < 0.0) return;
@@ -90,7 +89,7 @@ public class ConstraintBuilderIterator
           count[0] = 0;
           Set<NodeState> conditionStates = getConditionStates(states);
           iterator.iterateInner(
-              (o, i) -> {
+              i -> {
                 count[0]++;
                 double prob = probabilities[i];
                 if (prob > 1.0 || prob < 0.0) return;
@@ -117,7 +116,7 @@ public class ConstraintBuilderIterator
     Set<NodeState> condition = constraints.getFirst().getConditionStates();
     throw new ConstraintValidationException(
         "Constraints on [%s] the condition [%s] do not sum to 1"
-            .formatted(event.getId(), NodeUtils.formatStatesToString(condition)));
+            .formatted(event.getId(), CollectionToString.apply(condition)));
   }
 
   private void assertSumWouldNotExceedOne(
@@ -126,7 +125,7 @@ public class ConstraintBuilderIterator
     Set<NodeState> condition = constraints.getFirst().getConditionStates();
     throw new ConstraintValidationException(
         "Constraints on [%s] the condition [%s] would sum to > 1"
-            .formatted(event.getId(), NodeUtils.formatStatesToString(condition)));
+            .formatted(event.getId(), CollectionToString.apply(condition)));
   }
 
   private Set<NodeState> getConditionStates(NodeState[] states) {

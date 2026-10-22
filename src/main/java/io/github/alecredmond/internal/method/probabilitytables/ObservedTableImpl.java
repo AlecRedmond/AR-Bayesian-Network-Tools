@@ -9,7 +9,7 @@ import io.github.alecredmond.export.probabilitytables.ObservedTable;
 import io.github.alecredmond.internal.application.probabilitytables.ObservedTableData;
 import io.github.alecredmond.internal.method.probabilitytables.printerformat.PrinterMatrixGeneratorBase;
 import io.github.alecredmond.internal.method.probabilitytables.printerformat.UnconditionalMatrixGenerator;
-import io.github.alecredmond.internal.method.probabilitytables.tablebuilders.ObservedTableBuilder;
+import io.github.alecredmond.internal.method.probabilitytables.tablefactory.ObservedTableFactory;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
@@ -44,7 +44,7 @@ public class ObservedTableImpl extends ProbabilityTableBase<ObservedTableData>
 
   @Override
   public ObservedTable copyTable() {
-    return new ObservedTableBuilder().copyTable(this);
+    return new ObservedTableFactory().copyTable(this);
   }
 
   @Override

@@ -5,7 +5,7 @@ import io.github.alecredmond.internal.application.junctiontree.Clique;
 import io.github.alecredmond.internal.application.junctiontree.JunctionTreeData;
 import io.github.alecredmond.internal.application.junctiontree.Separator;
 import io.github.alecredmond.internal.method.probabilitytables.TableUtils;
-import io.github.alecredmond.internal.method.probabilitytables.tablebuilders.JunctionTreeTableBuilder;
+import io.github.alecredmond.internal.method.probabilitytables.tablefactory.JunctionTreeTableFactory;
 import io.github.alecredmond.internal.method.probabilitytables.tabletransfer.TableTransfer;
 import io.github.alecredmond.internal.method.probabilitytables.tabletransfer.factory.TransferIteratorFactory;
 import java.util.HashMap;
@@ -13,7 +13,7 @@ import java.util.Map;
 
 public class SeparatorFactory {
   private final TransferIteratorFactory iteratorFactory = new TransferIteratorFactory();
-  private final JunctionTreeTableBuilder tableBuilder = new JunctionTreeTableBuilder();
+  private final JunctionTreeTableFactory tableBuilder = new JunctionTreeTableFactory();
   private final JunctionTreeData jtd;
 
   public SeparatorFactory(JunctionTreeData jtd) {

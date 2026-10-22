@@ -1,12 +1,12 @@
 package io.github.alecredmond.internal.method.network;
 
 import io.github.alecredmond.exceptions.ConstraintValidationException;
+import io.github.alecredmond.export.network.BayesianNetwork;
 import io.github.alecredmond.export.network.BayesianNetworkBuilderNode;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.probabilitytables.ProbabilityVector;
-import io.github.alecredmond.export.network.BayesianNetwork;
-import io.github.alecredmond.internal.method.node.NodeUtils;
 import io.github.alecredmond.internal.method.probabilitytables.probabilityvector.ProbabilityVectorFactory;
+import io.github.alecredmond.internal.method.utils.CollectionToString;
 import io.github.alecredmond.internal.method.vectoriterator.misciterators.ConstraintBuilderIterator;
 import java.util.*;
 import lombok.extern.slf4j.Slf4j;
@@ -17,7 +17,8 @@ public class NetworkInputBuilder {
   private List<BayesianNetworkBuilderNode<?>> nodeInputs;
   private BayesianNetwork bayesianNetwork;
 
-  public BayesianNetwork buildNetwork(String networkName, List<BayesianNetworkBuilderNode<?>> nodeInputs) {
+  public BayesianNetwork buildNetwork(
+      String networkName, List<BayesianNetworkBuilderNode<?>> nodeInputs) {
     this.nodeInputs = nodeInputs;
     this.bayesianNetwork = BayesianNetwork.newNetwork(networkName);
     addAllNodes();
@@ -72,7 +73,7 @@ public class NetworkInputBuilder {
       throw new ConstraintValidationException(
           "CPT input for Nodes [%s] requires array length %d, but was length %d."
               .formatted(
-                  NodeUtils.formatNodesToString(Arrays.asList(vector.getNodeArray())),
+                  CollectionToString.apply(vector.getOrderedNodes()),
                   vectorLength,
                   cptValues.length));
     }

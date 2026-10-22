@@ -1,11 +1,11 @@
 package io.github.alecredmond.internal.method.solver;
 
+import io.github.alecredmond.export.network.BayesianNetwork;
 import io.github.alecredmond.export.network.BayesianNetworkData;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
 import io.github.alecredmond.export.probabilitytables.NetworkTable;
 import io.github.alecredmond.export.probabilitytables.ProbabilityVector;
-import io.github.alecredmond.export.network.BayesianNetwork;
 import io.github.alecredmond.internal.method.constraints.strategy.ValidatedConstraint;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -58,10 +58,10 @@ public class SolverValidator {
 
   private boolean tableSizeIsCorrect(NetworkTable table) {
     ProbabilityVector vector = table.getVector();
-    Node[] nodes = vector.getNodeArray();
+    Node[] nodes = vector.getOrderedNodes();
     NodeState[][] states = vector.getStateArrays();
     for (int i = 0; i < nodes.length; i++) {
-      if (states[i].length != nodes[i].getNodeStates().size()) return false;
+      if (states[i].length != nodes[i].getStates().size()) return false;
     }
     return true;
   }

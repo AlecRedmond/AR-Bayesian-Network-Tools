@@ -5,9 +5,9 @@ import io.github.alecredmond.export.network.serialized.SerializedBayesianNetwork
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.probabilitytables.NetworkTable;
 import io.github.alecredmond.export.probabilitytables.serialized.SerializedNetworkTable;
-import io.github.alecredmond.internal.method.probabilitytables.tablebuilders.ConditionalTableBuilder;
-import io.github.alecredmond.internal.method.probabilitytables.tablebuilders.RootNodeTableBuilder;
-import io.github.alecredmond.internal.method.probabilitytables.tablebuilders.TableBuilder;
+import io.github.alecredmond.internal.method.probabilitytables.tablefactory.ConditionalTableFactory;
+import io.github.alecredmond.internal.method.probabilitytables.tablefactory.RootNodeTableFactory;
+import io.github.alecredmond.internal.method.probabilitytables.tablefactory.TableFactory;
 import io.github.alecredmond.internal.serialization.SerializationData;
 import io.github.alecredmond.internal.serialization.SerializerUtils;
 import java.io.Serializable;
@@ -55,8 +55,8 @@ public class NetworkTableSerializer {
     return SerializerUtils.deSerializeNodes(ids, ArrayList::new, data);
   }
 
-  private static TableBuilder<? extends NetworkTable> selectBuilder(List<Node> conditionNodes) {
-    return conditionNodes.isEmpty() ? new RootNodeTableBuilder() : new ConditionalTableBuilder();
+  private static TableFactory<? extends NetworkTable> selectBuilder(List<Node> conditionNodes) {
+    return conditionNodes.isEmpty() ? new RootNodeTableFactory() : new ConditionalTableFactory();
   }
 
   private void deSerializeProbabilities(NetworkTable table, SerializedNetworkTable serialized) {

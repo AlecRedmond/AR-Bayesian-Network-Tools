@@ -1,32 +1,25 @@
 package io.github.alecredmond.internal.method.probabilitytables.tabletransfer.readwriters;
 
-import io.github.alecredmond.export.probabilitytables.ProbabilityVector;
-import io.github.alecredmond.internal.application.vectoriterator.VectorOdometer;
-import io.github.alecredmond.internal.method.probabilitytables.tabletransfer.factory.TransferWriterMultiplyInFactory;
-import io.github.alecredmond.internal.method.vectoriterator.VectorIterator;
 import lombok.EqualsAndHashCode;
+import lombok.NonNull;
 
 @EqualsAndHashCode(callSuper = true)
-public class TransferWriterMultiplyIn extends VectorIterator<VectorOdometer>
-    implements TransferIterator {
-  private final double[] transferArray;
-  private final int[] tIndex = {0};
+public class TransferWriterMultiplyIn extends TransferIterator implements TransferWriter {
 
+  @NonNull
   public TransferWriterMultiplyIn(
-      ProbabilityVector write, double[] transferArray, TransferWriterMultiplyInFactory logic) {
-    super(write, logic, VectorOdometer::new);
-    this.transferArray = transferArray;
+      double[] probabilities, double[] transferArray, int[][] cachedIndexesPerCondition) {
+    super(probabilities, transferArray, cachedIndexesPerCondition);
   }
 
   @Override
-  public void performRun() {
-    tIndex[0] = 0;
-    double[] probabilities = controller.getOdometer().getProbabilities();
-    iterateOuter(
-        () -> {
-          double ratio = transferArray[tIndex[0]];
-          iterateInner((o, i) -> probabilities[i] *= ratio);
-          tIndex[0]++;
-        });
+  public void writeTable() {
+    int transferIndex = 0;
+    for (int[] indexesToAdjust : cachedIndexesPerCondition) {
+      double ratio = transferArray[transferIndex++];
+      for (int index : indexesToAdjust) {
+        probabilities[index] *= ratio;
+      }
+    }
   }
 }

@@ -40,7 +40,7 @@ public class SamplePickerFactory {
   }
 
   private SamplePicker buildUnobservedSamplePicker(SamplePickerFactoryData factoryData) {
-    List<NodeState> states = factoryData.getNode().getNodeStates();
+    List<NodeState> states = factoryData.getNode().getStates();
 
     factoryData.setEventCptSteps(IntStream.range(0, states.size()).toArray());
     factoryData.setEventStates(states.toArray(NodeState[]::new));

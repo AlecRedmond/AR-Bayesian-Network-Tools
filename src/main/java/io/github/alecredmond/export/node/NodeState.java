@@ -1,5 +1,6 @@
 package io.github.alecredmond.export.node;
 
+import io.github.alecredmond.internal.application.cartesianvector.CartesianState;
 import io.github.alecredmond.export.nodedef.StateDef;
 import java.io.Serializable;
 import lombok.Data;
@@ -30,7 +31,7 @@ import lombok.NonNull;
 @SuppressWarnings({"LombokGetterMayBeUsed"})
 @Data
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-public class NodeState {
+public class NodeState implements CartesianState {
 
   /** The unique identifier for this state. */
   @EqualsAndHashCode.Include private final Serializable id;
