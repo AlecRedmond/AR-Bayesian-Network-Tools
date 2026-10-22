@@ -31,10 +31,11 @@ import java.util.List;
 @SuppressWarnings({"LombokGetterMayBeUsed", "LombokSetterMayBeUsed", "unused"})
 public class BayesianNetworkBuilder {
   /**
-   * A list of {@link BayesianNetworkBuilderNode} objects, each containing the information for a {@link
-   * Node} to be built in the new {@link BayesianNetwork}.
+   * A list of {@link BayesianNetworkBuilderNode} objects, each containing the information for a
+   * {@link Node} to be built in the new {@link BayesianNetwork}.
    */
   private final List<BayesianNetworkBuilderNode<?>> nodeInputs = new ArrayList<>();
+
   /** The name of the new {@link BayesianNetwork} to be built. */
   private String networkName;
 
@@ -210,8 +211,8 @@ public class BayesianNetworkBuilder {
 
   /**
    * Returns the list of node builder objects in this {@code BayesianNetworkBuilder}. Each {@link
-   * BayesianNetworkBuilderNode} contains all the information required to construct a single {@link Node}
-   * within the new {@link BayesianNetwork}.
+   * BayesianNetworkBuilderNode} contains all the information required to construct a single {@link
+   * Node} within the new {@link BayesianNetwork}.
    *
    * @return the current list of {@link BayesianNetworkBuilderNode}s.
    */

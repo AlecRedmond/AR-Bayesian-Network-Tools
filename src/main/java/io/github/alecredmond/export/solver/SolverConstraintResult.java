@@ -1,7 +1,6 @@
 package io.github.alecredmond.export.solver;
 
 import io.github.alecredmond.export.constraints.ProbabilityConstraint;
-
 import java.util.Arrays;
 import java.util.Objects;
 

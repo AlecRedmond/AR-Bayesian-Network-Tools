@@ -7,7 +7,7 @@ import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
 import io.github.alecredmond.internal.application.constraint.ConstraintBuilderData;
 import io.github.alecredmond.internal.method.constraints.strategy.ValidatedConstraint;
-import io.github.alecredmond.internal.method.node.NodeUtils;
+import io.github.alecredmond.internal.method.utils.CollectionToString;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -98,7 +98,7 @@ public abstract class ConstraintValidatorBase<
     }
     throw new ConstraintValidationException(
         "NodeStates %s in %s are not defined in the network!"
-            .formatted(NodeUtils.formatStatesToString(states), constraint));
+            .formatted(CollectionToString.apply(states), constraint));
   }
 
   protected void noIdenticalConstraintsInNetwork(ConstraintBuilderData data) {
@@ -116,8 +116,7 @@ public abstract class ConstraintValidatorBase<
     throw new ConstraintValidationException(
         String.format(
             "Attempted to add a probabilityConstraint C(%s | %s), which already exists!",
-            NodeUtils.formatStatesToString(eventStates),
-            NodeUtils.formatStatesToString(conditionStates)));
+            CollectionToString.apply(eventStates), CollectionToString.apply(conditionStates)));
   }
 
   protected abstract P safeCastConstraint(ProbabilityConstraint constraint);
@@ -131,13 +130,10 @@ public abstract class ConstraintValidatorBase<
     Set<NodeState> conditions = data.getConditionStates();
     double prob = data.getProbability();
     if (conditions.isEmpty()) {
-      return "P(%s) == %.3f".formatted(NodeUtils.formatStatesToString(events), prob);
+      return "P(%s) == %.3f".formatted(CollectionToString.apply(events), prob);
     }
     return "P(%s|%s) == %.3f"
-        .formatted(
-            NodeUtils.formatStatesToString(events),
-            NodeUtils.formatStatesToString(conditions),
-            prob);
+        .formatted(CollectionToString.apply(events), CollectionToString.apply(conditions), prob);
   }
 
   public boolean checkInputsValid(ConstraintBuilderData data) {

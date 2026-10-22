@@ -84,23 +84,22 @@ public class InferenceEngineImpl implements InferenceEngine {
     log.error("Could not solve network {}!", network.getNetworkData().getNetworkName());
     return false;
   }
-@Override
+
+  @Override
   public InferenceEngine setObserved(NodeState observedState) {
     return this.setObserved(List.of(observedState));
-  }@Override
+  }
+
+  @Override
   public <T extends Serializable> InferenceEngine setObservedById(T observedStateId) {
     return setObservedById(List.of(observedStateId));
   }
 
-    @Override
+  @Override
   public <T extends Serializable> InferenceEngine setObservedById(Collection<T> observedStateIDs) {
     return this.setObserved(
         NetworkDataUtils.getStatesByID(observedStateIDs, network.getNetworkData()));
   }
-
-
-
-
 
   @Override
   public Map<Node, NodeObservation> getCurrentObservations() {

@@ -1,17 +1,17 @@
 package io.github.alecredmond.export.sampler;
 
+import io.github.alecredmond.export.network.BayesianNetwork;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
-import io.github.alecredmond.export.network.BayesianNetwork;
 import java.util.Collection;
 import java.util.function.Supplier;
 
 /**
- * A container for a unique sample generated during a {@link MonteCarloSampler} run. Each {@code Sample}
- * represents a particular combination of {@link NodeState} values (one per {@link Node} in a {@link
- * BayesianNetwork}) and the frequency with which that combination occurred during sampling. Each
- * {@code Sample} belongs to a specific {@link SampleCollection}, which aggregates the results of a
- * sampling run.
+ * A container for a unique sample generated during a {@link MonteCarloSampler} run. Each {@code
+ * Sample} represents a particular combination of {@link NodeState} values (one per {@link Node} in
+ * a {@link BayesianNetwork}) and the frequency with which that combination occurred during
+ * sampling. Each {@code Sample} belongs to a specific {@link SampleCollection}, which aggregates
+ * the results of a sampling run.
  *
  * @see SampleCollection
  * @see MonteCarloSampler

@@ -22,7 +22,7 @@ public class NodeSerializer {
   public SerializedNode serialize(Node node) {
     return new SerializedNode(
         node.getId(),
-        SerializerUtils.serializeNodeStates(node.getNodeStates()),
+        SerializerUtils.serializeNodeStates(node.getStates()),
         SerializerUtils.serializeNodes(node.getParents()),
         SerializerUtils.serializeNodes(node.getChildren()));
   }

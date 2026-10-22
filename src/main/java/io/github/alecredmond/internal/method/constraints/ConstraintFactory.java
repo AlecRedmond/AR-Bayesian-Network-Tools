@@ -7,7 +7,7 @@ import io.github.alecredmond.export.node.NodeState;
 import io.github.alecredmond.internal.application.constraint.ConstraintBuilderData;
 import io.github.alecredmond.internal.application.constraint.ConstraintFactoryOutput;
 import io.github.alecredmond.internal.method.constraints.strategy.ConstraintValidator;
-import io.github.alecredmond.internal.method.node.NodeUtils;
+import io.github.alecredmond.internal.method.utils.CollectionToString;
 import java.util.*;
 
 public class ConstraintFactory {
@@ -40,8 +40,8 @@ public class ConstraintFactory {
         new ConstraintValidationException(
             "Could not match inputs P(%s|%s) to any ProbabilityConstraint type!"
                 .formatted(
-                    NodeUtils.formatStatesToString(cbd.getEventStates()),
-                    NodeUtils.formatStatesToString(cbd.getConditionStates()))));
+                    CollectionToString.apply(cbd.getEventStates()),
+                    CollectionToString.apply(cbd.getConditionStates()))));
   }
 
   public <T extends ProbabilityConstraint> ConstraintFactoryOutput verifyConstraint(T constraint) {

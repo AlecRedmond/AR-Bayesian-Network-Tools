@@ -5,7 +5,7 @@ import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
 import io.github.alecredmond.export.probabilitytables.NetworkTable;
 import io.github.alecredmond.internal.method.network.validator.ValidatorType;
-import io.github.alecredmond.internal.method.probabilitytables.tablebuilders.NetworkTableBuilder;
+import io.github.alecredmond.internal.method.probabilitytables.tablefactory.NetworkTableFactory;
 import java.io.Serializable;
 import java.util.*;
 import java.util.function.Supplier;
@@ -14,7 +14,7 @@ import lombok.Data;
 @Data
 public class NetworkDataBuilder {
   private final BayesianNetworkData networkData;
-  private final NetworkTableBuilder tableBuilder = new NetworkTableBuilder();
+  private final NetworkTableFactory tableBuilder = new NetworkTableFactory();
 
   public void build() {
     validateData();
@@ -42,7 +42,7 @@ public class NetworkDataBuilder {
 
     nodes.forEach(n -> nodeIdMap.put(n.getId(), n));
     nodes.stream()
-        .map(Node::getNodeStates)
+        .map(Node::getStates)
         .flatMap(Collection::stream)
         .forEach(nodeState -> stateIdMap.put(nodeState.getId(), nodeState));
   }

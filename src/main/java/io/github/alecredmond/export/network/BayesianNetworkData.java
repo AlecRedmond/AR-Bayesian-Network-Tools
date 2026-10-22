@@ -7,7 +7,6 @@ import io.github.alecredmond.export.probabilitytables.ConditionalTable;
 import io.github.alecredmond.export.probabilitytables.NetworkTable;
 import io.github.alecredmond.export.probabilitytables.RootNodeTable;
 import io.github.alecredmond.export.solver.BayesSolver;
-
 import java.io.Serializable;
 import java.util.*;
 import lombok.Data;

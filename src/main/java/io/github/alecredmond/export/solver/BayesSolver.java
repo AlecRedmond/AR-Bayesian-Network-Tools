@@ -3,11 +3,11 @@ package io.github.alecredmond.export.solver;
 import io.github.alecredmond.export.constraints.ConditionalConstraint;
 import io.github.alecredmond.export.constraints.MarginalConstraint;
 import io.github.alecredmond.export.constraints.ProbabilityConstraint;
+import io.github.alecredmond.export.network.BayesianNetwork;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
 import io.github.alecredmond.export.probabilitytables.ConditionalTable;
 import io.github.alecredmond.export.probabilitytables.RootNodeTable;
-import io.github.alecredmond.export.network.BayesianNetwork;
 import io.github.alecredmond.internal.method.solver.BayesSolverImpl;
 
 /**
@@ -45,8 +45,8 @@ public interface BayesSolver {
   /**
    * Runs the solver using the IPFP variant configured in {@code app.properties}, unless the network
    * has already been solved. The active variant is controlled by {@code
-   * app.bayes.solver.defaultSolverAlgorithm} (default: {@code JUNCTION_TREE_IPFP}). Any exception thrown
-   * during the process is caught and logged rather than propagated.
+   * app.bayes.solver.defaultSolverAlgorithm} (default: {@code JUNCTION_TREE_IPFP}). Any exception
+   * thrown during the process is caught and logged rather than propagated.
    *
    * <p><i>Note: This method will first call {@link #writeCPTsFromConstraints()}, which will run in
    * place of the IPFP algorithm in cases where all constraints can be mapped directly to the
@@ -71,8 +71,8 @@ public interface BayesSolver {
   /**
    * Runs the solver using the IPFP variant configured in {@code app.properties}, regardless of
    * whether the network has already been solved. The active variant is controlled by {@code
-   * app.bayes.solver.defaultSolverAlgorithm} (default: {@code JUNCTION_TREE_IPFP}). Any exception thrown
-   * during the solving process is caught and logged rather than propagated.
+   * app.bayes.solver.defaultSolverAlgorithm} (default: {@code JUNCTION_TREE_IPFP}). Any exception
+   * thrown during the solving process is caught and logged rather than propagated.
    *
    * <p><i>Note: This method will first call {@link #writeCPTsFromConstraints()}, which will run in
    * place of the IPFP algorithm in cases where all constraints can be mapped directly to the

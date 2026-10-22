@@ -5,7 +5,7 @@ import io.github.alecredmond.export.probabilitytables.ProbabilityTable;
 import io.github.alecredmond.export.probabilitytables.ProbabilityVector;
 import io.github.alecredmond.internal.application.probabilitytables.JunctionTreeTableData;
 import io.github.alecredmond.internal.method.probabilitytables.printerformat.PrinterMatrixGeneratorBase;
-import io.github.alecredmond.internal.method.probabilitytables.tablebuilders.JunctionTreeTableBuilder;
+import io.github.alecredmond.internal.method.probabilitytables.tablefactory.JunctionTreeTableFactory;
 import io.github.alecredmond.internal.method.vectoriterator.misciterators.JunctionTableSummer;
 import io.github.alecredmond.internal.method.vectoriterator.misciterators.ObservationCopier;
 import java.util.Collection;
@@ -47,7 +47,7 @@ public class JunctionTreeTableImpl extends ProbabilityTableBase<JunctionTreeTabl
 
   @Override
   public ProbabilityTable copyTable() {
-    return new JunctionTreeTableBuilder().copyTable(this);
+    return new JunctionTreeTableFactory().copyTable(this);
   }
 
   @Override

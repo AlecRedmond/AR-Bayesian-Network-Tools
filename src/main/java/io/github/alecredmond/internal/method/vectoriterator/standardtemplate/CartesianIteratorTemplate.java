@@ -1,0 +1,48 @@
+package io.github.alecredmond.internal.method.vectoriterator.standardtemplate;
+
+import io.github.alecredmond.internal.application.cartesianvector.CartesianState;
+import io.github.alecredmond.internal.application.cartesianvector.CartesianVariable;
+import io.github.alecredmond.internal.application.cartesianvector.CartesianVector;
+import io.github.alecredmond.internal.application.vectoriterator.CartesianOdometer;
+import java.util.List;
+import java.util.Set;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.function.ToIntFunction;
+
+public interface CartesianIteratorTemplate<N extends CartesianVariable, S extends CartesianState> {
+  Function<N, S> initialStatePositionSetter();
+
+  ToIntFunction<S> statePositionFinder();
+
+  Predicate<N> checkLockOuter();
+
+  Predicate<N> checkLockInner();
+
+  Function<N, boolean[]> updateEvidenceArrays();
+
+  default Consumer<CartesianOdometer> stateUpdateFunction() {
+    return o -> {};
+  }
+
+  default Function<CartesianVector<N, S>, CartesianOdometer> createOdometer() {
+    return CartesianOdometer::new;
+  }
+
+  default Function<N, boolean[]> updateEvidenceArraysCommon(
+      Set<N> evidenceNodes, Set<S> evidenceStates, Function<N, List<S>> getStateFn) {
+    return node -> {
+      if (!evidenceNodes.contains(node)) {
+        return new boolean[0];
+      }
+      List<S> states = getStateFn.apply(node);
+      boolean[] isEvidence = new boolean[states.size()];
+      int bound = states.size();
+      for (int y = 0; y < bound; y++) {
+        isEvidence[y] = evidenceStates.contains(states.get(y));
+      }
+      return isEvidence;
+    };
+  }
+}

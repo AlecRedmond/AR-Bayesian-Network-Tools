@@ -19,7 +19,7 @@ public class NetworkIdValidator implements NetworkValidator {
       throw new BayesNetIDException("Attempted to pass a null value as a Node");
     }
     Serializable nodeId = node.getId();
-    List<Serializable> stateIds = node.getNodeStates().stream().map(NodeState::getId).toList();
+    List<Serializable> stateIds = node.getStates().stream().map(NodeState::getId).toList();
     validateNewIds(nodeId, stateIds, data);
   }
 

@@ -1,32 +1,16 @@
 package io.github.alecredmond.internal.application.probabilitytables;
 
 import io.github.alecredmond.export.node.Node;
-import io.github.alecredmond.export.node.NodeState;
-import io.github.alecredmond.export.probabilitytables.ProbabilityVector;
 import io.github.alecredmond.internal.application.probabilitytables.base.SingleEventTableData;
-import io.github.alecredmond.internal.method.probabilitytables.tablebuilders.TableBuilderData;
-import java.io.Serializable;
-import java.util.Map;
-import java.util.Set;
+import io.github.alecredmond.internal.method.probabilitytables.tablefactory.TableFactoryData;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
 public class RootNodeTableData extends SingleEventTableData {
-  public RootNodeTableData(TableBuilderData tableBuilderData) {
-    super(tableBuilderData);
-  }
-
-  public RootNodeTableData(
-      Map<Serializable, NodeState> nodeStateIDMap,
-      Map<Serializable, Node> nodeIDMap,
-      ProbabilityVector vector,
-      Set<Node> nodes,
-      Set<Node> events,
-      Set<Node> conditions,
-      Node eventNode) {
-    super(nodeStateIDMap, nodeIDMap, vector, nodes, events, conditions, eventNode);
+  public RootNodeTableData(TableFactoryData tableFactoryData) {
+    super(tableFactoryData);
   }
 
   public Node getNetworkNode() {

@@ -4,8 +4,8 @@ import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
 
 /**
- * The Observation status of a single {@link Node} within an {@link Observable}. There are 4
- * {@code ObservationStatus} elements:
+ * The Observation status of a single {@link Node} within an {@link Observable}. There are 4 {@code
+ * ObservationStatus} elements:
  *
  * <ul>
  *   <li>{@code UNOBSERVED}: All {@link NodeState}s associated with the {@link Node} are active

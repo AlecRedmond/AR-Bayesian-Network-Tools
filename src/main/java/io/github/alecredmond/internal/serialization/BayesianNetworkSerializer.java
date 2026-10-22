@@ -38,7 +38,7 @@ public class BayesianNetworkSerializer {
             serializedNode -> {
               Node node = serializer.createNewBase(serializedNode);
               serializationData.getNodeIdMap().put(node.getId(), node);
-              node.getNodeStates()
+              node.getStates()
                   .forEach(
                       state -> serializationData.getNodeStateIdMap().put(state.getId(), state));
             });

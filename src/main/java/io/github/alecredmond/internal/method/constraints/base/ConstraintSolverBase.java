@@ -6,50 +6,56 @@ import io.github.alecredmond.export.constraints.ProbabilityConstraint;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
 import io.github.alecredmond.internal.application.junctiontree.Clique;
-import io.github.alecredmond.internal.method.probabilitytables.JunctionTreeTable;
-import io.github.alecredmond.internal.application.vectoriterator.VectorOdometer;
 import io.github.alecredmond.internal.method.constraints.strategy.ConstraintSolver;
 import io.github.alecredmond.internal.method.node.NodeUtils;
-import io.github.alecredmond.internal.method.vectoriterator.VectorIterator;
-import io.github.alecredmond.internal.method.vectoriterator.iteratorutils.resetlogictypes.OdometerResetOnlyOnBuild;
-import io.github.alecredmond.internal.method.vectoriterator.iteratorutils.resetlogictypes.ResetLogicUtils;
-import io.github.alecredmond.internal.method.vectoriterator.iteratorutils.updatelogictypes.OdometerUpdateBlank;
+import io.github.alecredmond.internal.method.probabilitytables.JunctionTreeTable;
+import io.github.alecredmond.internal.method.vectoriterator.standardtemplate.*;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class ConstraintSolverBase
-    implements OdometerResetOnlyOnBuild, OdometerUpdateBlank, ConstraintSolver {
-  protected final VectorIterator<VectorOdometer> iterator;
+public class ConstraintSolverBase implements ConstraintSolver, ProbabilityIteratorTemplate {
   protected final ProbabilityConstraint constraint;
   protected final List<Double> errors = new ArrayList<>();
   protected final boolean[] outerIterationIsEvidence;
   protected final Accumulators acm = new Accumulators();
+  protected final int[][] cachedIndexesPerRow;
+  protected final double[] probabilities;
 
   public ConstraintSolverBase(ProbabilityConstraint constraint, JunctionTreeTable table) {
     this.constraint = constraint;
-    this.iterator = new VectorIterator<>(table.getVector(), this, VectorOdometer::new);
-    this.outerIterationIsEvidence = ResetLogicUtils.preBuildEvidenceCheckArray(iterator);
+    StandardCartesianIterator iterator = StandardCartesianIterator.create(this, table.getVector());
+    this.outerIterationIsEvidence = iterator.preBuildEvidenceArray();
+    this.cachedIndexesPerRow = iterator.cacheIndexesOverOuterRuns();
+    this.probabilities = table.getProbabilities();
   }
 
-  @Override
+  public Function<Node, NodeState> initialStatePositionSetter() {
+    Map<Node, NodeState> condMap = NodeUtils.generateRequest(constraint.getConditionStates());
+    return node -> condMap.containsKey(node) ? condMap.get(node) : node.getStates().getFirst();
+  }
+
   public Predicate<Node> checkLockOuter() {
     Set<Node> events = constraint.getEventNodes();
     return node -> !events.contains(node);
   }
 
-  @Override
   public Predicate<Node> checkLockInner() {
     Set<Node> allNodes = constraint.getAllNodes();
     return allNodes::contains;
   }
 
+  @Override
+  public Function<Node, boolean[]> updateEvidenceArrays() {
+    Set<Node> requestNodes = constraint.getEventNodes();
+    Set<NodeState> evidenceStates = constraint.getEventStates();
+    return updateEvidenceArraysCommon(requestNodes, evidenceStates, Node::getStates);
+  }
+
   public double adjustAndReturnError() {
     acm.resetAccumulators();
-    VectorOdometer vectorOdometer = iterator.getController().getOdometer();
-    double[] probabilities = vectorOdometer.getProbabilities();
     calculateProbability(probabilities);
 
     double expectedProb = constraint.getProbability();
@@ -96,12 +102,13 @@ public class ConstraintSolverBase
 
   private void calculateProbability(double[] probabilities) {
     acm.resetIndex();
-    iterator.iterateOuter(
-        () -> {
-          acm.partialSum = 0;
-          iterator.iterateInner((o, i) -> acm.partialSum += probabilities[i]);
-          addToCorrectAccumulators(acm.partialSum);
-        });
+    for (int[] cachedSubIndex : cachedIndexesPerRow) {
+      double partialSum = 0;
+      for (int index : cachedSubIndex) {
+        partialSum += probabilities[index];
+      }
+      addToCorrectAccumulators(partialSum);
+    }
   }
 
   protected double getRatio(double targetProb, double actualProb) {
@@ -115,12 +122,13 @@ public class ConstraintSolverBase
 
   protected void adjustToRatio(double ratioIfEvent, double ratioOtherwise, double[] probabilities) {
     acm.resetIndex();
-    iterator.iterateOuter(
-        () -> {
-          boolean isEventPosition = outerIterationIsEvidence[acm.outerIterationIndex++];
-          double ratio = isEventPosition ? ratioIfEvent : ratioOtherwise;
-          iterator.iterateInner((o, i) -> probabilities[i] *= ratio);
-        });
+    for (int[] cachedSubIndex : cachedIndexesPerRow) {
+      boolean isEventPosition = outerIterationIsEvidence[acm.outerIterationIndex++];
+      double ratio = isEventPosition ? ratioIfEvent : ratioOtherwise;
+      for (int index : cachedSubIndex) {
+        probabilities[index] *= ratio;
+      }
+    }
   }
 
   protected void addToCorrectAccumulators(double partialSum) {
@@ -133,31 +141,16 @@ public class ConstraintSolverBase
     }
   }
 
-  @Override
-  public Function<Node, NodeState> initialStatePositionSetter() {
-    Map<Node, NodeState> condMap = NodeUtils.generateRequest(constraint.getConditionStates());
-    return node -> condMap.containsKey(node) ? condMap.get(node) : node.getNodeStates().getFirst();
-  }
-
-  @Override
-  public Function<Node, boolean[]> buildEvidenceMaps() {
-    Set<Node> eventNodes = constraint.getEventNodes();
-    Set<NodeState> eventStates = constraint.getEventStates();
-    return ResetLogicUtils.updateEvidenceArrayFunction(eventNodes, eventStates);
-  }
-
   protected static class Accumulators {
     protected double eventJointProb = 0;
     protected double conditionJointProb = 0;
     protected double complementJointProb = 0;
-    protected double partialSum = 0;
     protected int outerIterationIndex = 0;
 
     protected void resetAccumulators() {
       eventJointProb = 0;
       conditionJointProb = 0;
       complementJointProb = 0;
-      partialSum = 0;
     }
 
     protected void resetIndex() {
