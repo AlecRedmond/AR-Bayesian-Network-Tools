@@ -17,4 +17,13 @@ public class NodeStateConflictException extends IllegalStateException {
   public NodeStateConflictException(String message, Throwable cause) {
     super(message, cause);
   }
+
+  /**
+   * Constructs a {@code NodeStateConflictException} with the specified detail message.
+   *
+   * @param message the detail message.
+   */
+  public NodeStateConflictException(String message) {
+    super(message);
+  }
 }

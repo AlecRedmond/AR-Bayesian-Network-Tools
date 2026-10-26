@@ -15,11 +15,11 @@ public class BayesSolverImpl extends JTASolver implements BayesSolver {
   private final SolverValidator validator;
   private SolverResults results;
 
-  public BayesSolverImpl(BayesianNetwork network) {
-    super(network, new SolverConfigs());
+  public BayesSolverImpl(BayesianNetworkData networkData) {
+    super(networkData, new SolverConfigs());
     this.results = null;
-    this.directCptMapper = new DirectCptMapper(network.getNetworkData());
-    this.validator = new SolverValidator(network);
+    this.directCptMapper = new DirectCptMapper(networkData);
+    this.validator = new SolverValidator(networkData);
   }
 
   @Override
@@ -51,7 +51,7 @@ public class BayesSolverImpl extends JTASolver implements BayesSolver {
 
   @Override
   public boolean isSolved() {
-    return network.isSolved();
+    return networkData.isSolved();
   }
 
   @Override
@@ -71,16 +71,15 @@ public class BayesSolverImpl extends JTASolver implements BayesSolver {
   private boolean tryDirectCPTInput() {
     boolean mapped = directCptMapper.tryDirectImpute();
     if (mapped) {
-      network.getNetworkData().setSolved(true);
+      networkData.setSolved(true);
     }
     return mapped;
   }
 
   private boolean forceSolveCommon() {
-    BayesianNetworkData data = network.getNetworkData();
-    data.setSolved(false);
+    networkData.setSolved(false);
     results = solveNetwork();
-    data.setSolved(true);
+    networkData.setSolved(true);
     return true;
   }
 

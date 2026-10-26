@@ -19,6 +19,11 @@ public class ConstraintFactory {
     this.registry = new ConstraintRegistry();
   }
 
+  public ConstraintFactory() {
+    this.networkData = null;
+    this.registry = new ConstraintRegistry();
+  }
+
   public ConstraintFactoryOutput buildConstraint(
       Set<NodeState> eventStates, Set<NodeState> conditionStates, double probability) {
     ConstraintBuilderData cbd =

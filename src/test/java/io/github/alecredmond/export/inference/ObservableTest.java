@@ -10,7 +10,7 @@ import io.github.alecredmond.export.network.BayesianNetwork;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
 import io.github.alecredmond.export.probabilitytables.ObservedTable;
-import io.github.alecredmond.scenarios.NetworkScenario;
+import io.github.alecredmond.networkscenario.NetworkScenarioType;
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
@@ -30,8 +30,8 @@ class ObservableTest {
   }
 
   static Stream<Arguments> supplyNetworks() {
-    return Arrays.stream(NetworkScenario.values())
-        .map(NetworkScenario::get)
+    return Arrays.stream(NetworkScenarioType.values())
+        .map(NetworkScenarioType::get)
         .filter(ObservableTest::suitableTreeWidth)
         .map(BayesianNetwork::solveNetwork)
         .map(Arguments::of);
@@ -101,7 +101,7 @@ class ObservableTest {
     InferenceEngine observedEngine = network.buildInferenceEngine();
     InferenceEngine unobservedEngine = network.buildInferenceEngine();
     Map<Node, NodeObservation> defaultObsMap = NodeObservation.createUnobservedMap(network);
-    List<Node> nodes = new ArrayList<>(network.getNodes());
+    List<Node> nodes = new ArrayList<>(network.getAllNodes());
     Map<Node, List<ObservationRecord>> recordMap = new LinkedHashMap<>();
     nodes.forEach(node -> recordMap.put(node, recursiveObservationFinder(node)));
     recursivelyCheckElimination(

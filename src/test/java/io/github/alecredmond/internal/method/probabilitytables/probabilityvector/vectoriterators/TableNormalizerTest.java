@@ -1,6 +1,6 @@
 package io.github.alecredmond.internal.method.probabilitytables.probabilityvector.vectoriterators;
 
-import static io.github.alecredmond.scenarios.NetworkScenario.*;
+import static io.github.alecredmond.networkscenario.NetworkScenarioType.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 import io.github.alecredmond.export.network.BayesianNetwork;
@@ -34,7 +34,7 @@ class TableNormalizerTest {
   @MethodSource("getNetworkTables")
   void normalize(BayesianNetwork network, Serializable nodeId) {
     NetworkTableFactory builder = new NetworkTableFactory();
-    Node node = network.getNode(nodeId);
+    Node node = network.getNodeById(nodeId);
     ProbabilityTable table = builder.buildTable(List.of(node), node.getParents());
     double[] probs = table.getVector().getProbabilities();
     assertTrue(Arrays.stream(probs).allMatch(p -> p == 1.0));

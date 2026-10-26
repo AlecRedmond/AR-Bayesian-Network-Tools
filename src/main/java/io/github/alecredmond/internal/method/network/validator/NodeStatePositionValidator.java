@@ -7,7 +7,7 @@ import io.github.alecredmond.export.node.NodeState;
 public class NodeStatePositionValidator implements NetworkValidator {
   @Override
   public void validateData(BayesianNetworkData networkData) {
-    networkData.getNodeIDsMap().values().parallelStream().forEach(this::checkPositionsCorrect);
+    networkData.getNodes().forEach(this::checkPositionsCorrect);
   }
 
   private void checkPositionsCorrect(Node node) {

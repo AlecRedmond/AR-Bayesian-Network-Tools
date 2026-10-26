@@ -1,7 +1,7 @@
 package io.github.alecredmond.internal.serialization;
 
 import static io.github.alecredmond.TestConfigs.*;
-import static io.github.alecredmond.scenarios.NetworkScenario.*;
+import static io.github.alecredmond.networkscenario.NetworkScenarioType.*;
 import static io.github.alecredmond.internal.method.utils.AppProperty.*;
 import static org.junit.jupiter.api.Assertions.*;
 

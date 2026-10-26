@@ -1,11 +1,9 @@
 package io.github.alecredmond.export.node;
 
+import io.github.alecredmond.export.node.newnode.DefaultNodeState;
 import io.github.alecredmond.internal.application.cartesianvector.CartesianState;
-import io.github.alecredmond.export.nodedef.StateDef;
 import java.io.Serializable;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NonNull;
+import java.util.*;
 
 /**
  * Represents a single state that a {@link Node} variable can exhibit.
@@ -28,80 +26,41 @@ import lombok.NonNull;
  * @author Alec Redmond
  * @see Node
  */
-@SuppressWarnings({"LombokGetterMayBeUsed"})
-@Data
-@EqualsAndHashCode(onlyExplicitlyIncluded = true)
-public class NodeState implements CartesianState {
-
-  /** The unique identifier for this state. */
-  @EqualsAndHashCode.Include private final Serializable id;
-
-  /** The parent {@link Node} that exhibits this state. */
-  private final Node node;
-
-  private StateDef stateDef;
-
-  private String name;
-
-  private int position;
-
-  /**
-   * Constructs a new {@code NodeState} with a unique identifier and its associated {@link Node}.
-   *
-   * @param id the {@link Serializable} unique identifier for this state
-   * @param node the {@link Node} that this state belongs to
-   * @param <T> the type of the state identifier
-   * @throws NullPointerException if either the id or the node is {@code null}
-   */
-  public <T extends Serializable> NodeState(@NonNull T id, @NonNull Node node) {
-    this.id = id;
-    this.node = node;
-  }
-
-  /**
-   * Returns a string representation of this state, which corresponds to its identifier.
-   *
-   * @return the string representation of the state identifier
-   */
-  @Override
-  public String toString() {
-    return id.toString();
-  }
+public interface NodeState extends CartesianState {
 
   /**
    * Returns the unique identifier for this {@code NodeState}.
    *
    * @return the {@link Serializable} identifier of this state
    */
-  public Serializable getId() {
-    return this.id;
-  }
+  Serializable getId();
 
   /**
    * Returns the parent {@link Node} associated with this state.
    *
    * @return the {@link Node} instance that exhibits this state
    */
-  public Node getNode() {
-    return this.node;
-  }
+  Node getNode();
 
   /**
    * Returns the index of this {@code NodeState} in its parent {@link Node}'s state list.
    *
    * @return the position of this {@code NodeState}
    */
-  public int getPosition() {
-    return this.position;
+  int getPosition();
+
+  String getName();
+
+  static List<NodeState> createStates(Node node, String... stateNames) {
+    return createStates(node, Arrays.stream(stateNames).toList());
   }
 
-  /**
-   * Package-private setter for the index position of this {@code NodeState} in its parent {@link
-   * Node}'s state list.
-   *
-   * @param position the index of this state.
-   */
-  void setPosition(int position) {
-    this.position = position;
+  static List<NodeState> createStates(Node node, List<String> stateNames) {
+    List<NodeState> states = new ArrayList<>();
+    int position = 0;
+    for (String name : stateNames) {
+      states.add(new DefaultNodeState(node, position++, name, UUID.randomUUID()));
+    }
+    return Collections.unmodifiableList(states);
   }
 }

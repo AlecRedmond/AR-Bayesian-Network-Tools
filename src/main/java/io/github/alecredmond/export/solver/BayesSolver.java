@@ -39,7 +39,7 @@ public interface BayesSolver {
    * @return a new {@code BayesSolver} instance.
    */
   static BayesSolver create(BayesianNetwork network) {
-    return new BayesSolverImpl(network);
+    return new BayesSolverImpl(network.getNetworkData());
   }
 
   /**

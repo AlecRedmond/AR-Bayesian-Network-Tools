@@ -51,7 +51,7 @@ public class NetworkInputBuilder {
   private ConstraintBuilderIterator buildConstraintBuilderIterator(
       BayesianNetworkBuilderNode<?> nodeInput) {
     ProbabilityVector vector = buildCPTInputVector(nodeInput);
-    Node event = bayesianNetwork.getNode(nodeInput.getNodeId());
+    Node event = bayesianNetwork.getNodeById(nodeInput.getNodeId());
     return new ConstraintBuilderIterator(event, vector);
   }
 
@@ -64,7 +64,7 @@ public class NetworkInputBuilder {
   }
 
   private List<Node> convertNodeOrderIdsToNodes(BayesianNetworkBuilderNode<?> nodeInput) {
-    return nodeInput.getCptNodeOrder().stream().map(bayesianNetwork::getNode).toList();
+    return nodeInput.getCptNodeOrder().stream().map(bayesianNetwork::getNodeById).toList();
   }
 
   private static void validateArrayLengths(double[] cptValues, ProbabilityVector vector) {

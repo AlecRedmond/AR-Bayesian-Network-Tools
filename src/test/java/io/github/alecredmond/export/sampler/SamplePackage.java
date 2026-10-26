@@ -33,11 +33,11 @@ public class SamplePackage {
     this.engine = InferenceEngine.create(network).setObservedById(observedStateIds);
     this.numberOfSamples = numberOfSamples;
     this.observedStateIds = observedStateIds;
-    this.observedStates = network.getNodeStates(observedStateIds);
+    this.observedStates = network.getNodeStatesById(observedStateIds);
     this.exportNodeIds = exportNodeIds;
-    this.exportNodes = network.getNodes(exportNodeIds);
+    this.exportNodes = network.getNodesByIds(exportNodeIds);
     this.measuredStateIds = measuredStateIds;
-    this.measuredStates = network.getNodeStates(measuredStateIds);
+    this.measuredStates = network.getNodeStatesById(measuredStateIds);
     this.test =
         MonteCarloSampler.create(network)
             .setObserved(engine.getCurrentObservations())

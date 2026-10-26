@@ -120,7 +120,7 @@ public class InferenceEngineImpl implements InferenceEngine {
 
   @Override
   public <T extends Serializable> ObservedTable getObservedTableById(T nodeId) {
-    Node node = network.getNode(nodeId);
+    Node node = network.getNodeById(nodeId);
     return junctionTree.getData().getObservedTablesMap().get(node);
   }
 
@@ -186,7 +186,7 @@ public class InferenceEngineImpl implements InferenceEngine {
 
   @Override
   public <T extends Serializable> InferenceEngine printObservedById(Collection<T> nodeIds) {
-    return printObserved(network.getNodes(nodeIds));
+    return printObserved(network.getNodesByIds(nodeIds));
   }
 
   @Override

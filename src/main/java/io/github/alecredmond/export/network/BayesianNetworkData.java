@@ -30,9 +30,8 @@ import lombok.ToString;
 @Data
 public class BayesianNetworkData {
   /**
-   * The list of {@link Node}s present within the {@link BayesianNetwork}. When this data is built
-   * using {@link BayesianNetwork#buildNetworkData()}, the nodes will be in topological order, with
-   * root nodes at the start and leaf nodes at the end.
+   * The list of {@link Node}s present within the {@link BayesianNetwork}. When this data is built ,
+   * the nodes will be in topological order, with root nodes at the start and leaf nodes at the end.
    */
   private final List<Node> nodes;
 
@@ -50,8 +49,7 @@ public class BayesianNetworkData {
 
   /**
    * A map from each {@link Node} to its corresponding {@link NetworkTable} (CPT) instance within
-   * the {@link BayesianNetwork}. These are built when calling {@link
-   * BayesianNetwork#buildNetworkData()}.
+   * the {@link BayesianNetwork}.
    */
   private final Map<Node, NetworkTable> networkTablesMap;
 
@@ -104,9 +102,8 @@ public class BayesianNetworkData {
   }
 
   /**
-   * Retrieves the list of nodes present within the network. When this data is built using {@link
-   * BayesianNetwork#buildNetworkData()}, the nodes will be in topological order, with root nodes at
-   * the start and leaf nodes at the end.
+   * Retrieves the list of nodes present within the network. When this data is built , the nodes
+   * will be in topological order, with root nodes at the start and leaf nodes at the end.
    *
    * @return a {@link List} of {@link Node} objects.
    */

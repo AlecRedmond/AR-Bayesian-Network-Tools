@@ -43,7 +43,7 @@ class SolverAlgorithmTest {
     String nodeId = String.valueOf(numNodes);
     network.addNewNode(nodeId, List.of(nodeId + ":TRUE", nodeId + ":FALSE"));
     network.addConstraint(nodeId + ":TRUE", 0.6);
-    nodeQueue.add(network.getNode(nodeId));
+    nodeQueue.add(network.getNodeById(nodeId));
   }
 
   private boolean checkSolve(int numNodes) {
@@ -99,6 +99,6 @@ class SolverAlgorithmTest {
   private Node addParentToNet(int numNodes) {
     String nodeId = String.valueOf(numNodes);
     network.addNewNode(nodeId, List.of(nodeId + ":TRUE", nodeId + ":FALSE"));
-    return network.getNode(nodeId);
+    return network.getNodeById(nodeId);
   }
 }

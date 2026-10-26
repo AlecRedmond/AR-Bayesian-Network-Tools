@@ -1,10 +1,10 @@
 package io.github.alecredmond.export.inference;
 
-import static io.github.alecredmond.scenarios.NetworkScenario.RAIN_NETWORK;
+import static io.github.alecredmond.networkscenario.NetworkScenarioType.RAIN_NETWORK;
 import static org.junit.jupiter.api.Assertions.*;
 
 import io.github.alecredmond.export.network.BayesianNetwork;
-import io.github.alecredmond.scenarios.NetworkScenario;
+import io.github.alecredmond.networkscenario.NetworkScenarioType;
 import io.github.alecredmond.export.solver.BayesSolver;
 import io.github.alecredmond.export.solver.SolverAlgorithm;
 import io.github.alecredmond.export.solver.SolverConstraintResult;
@@ -22,11 +22,11 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 public class NewInferenceEngineTest {
-  static final List<NetworkScenario> scenarios = provideScenarios();
+  static final List<NetworkScenarioType> scenarios = provideScenarios();
   InferenceEngine test;
 
-  private static List<NetworkScenario> provideScenarios() {
-    return Arrays.stream(NetworkScenario.values()).toList();
+  private static List<NetworkScenarioType> provideScenarios() {
+    return Arrays.stream(NetworkScenarioType.values()).toList();
   }
 
   @Nested
@@ -38,7 +38,7 @@ public class NewInferenceEngineTest {
       return scenarios.stream().flatMap(ObservationTests::getDirectCptEntryAndIPFP);
     }
 
-    private static Stream<Arguments> getDirectCptEntryAndIPFP(NetworkScenario scenario) {
+    private static Stream<Arguments> getDirectCptEntryAndIPFP(NetworkScenarioType scenario) {
       BayesianNetwork network = scenario.get();
       BayesSolver solver = BayesSolver.create(network);
       if (!solver.writeCPTsFromConstraints()) {

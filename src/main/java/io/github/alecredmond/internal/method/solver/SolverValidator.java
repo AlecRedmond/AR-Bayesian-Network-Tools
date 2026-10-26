@@ -1,27 +1,28 @@
 package io.github.alecredmond.internal.method.solver;
 
-import io.github.alecredmond.export.network.BayesianNetwork;
 import io.github.alecredmond.export.network.BayesianNetworkData;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
 import io.github.alecredmond.export.probabilitytables.NetworkTable;
 import io.github.alecredmond.export.probabilitytables.ProbabilityVector;
 import io.github.alecredmond.internal.method.constraints.strategy.ValidatedConstraint;
+import io.github.alecredmond.internal.method.network.BaseNetworkFactory;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
 public class SolverValidator {
-  private final BayesianNetwork network;
 
-  public SolverValidator(BayesianNetwork network) {
-    this.network = network;
+  private final BayesianNetworkData networkData;
+
+  public SolverValidator(BayesianNetworkData networkData) {
+    this.networkData = networkData;
   }
 
   public void validateDataBuilt() {
     if (checkNetworkBuilt()) return;
-    network.buildNetworkData();
+    throw new IllegalStateException("Network data not correctly built!");
   }
 
   private boolean checkNetworkBuilt() {
@@ -29,9 +30,8 @@ public class SolverValidator {
   }
 
   private boolean tableDimensionsAreCorrect() {
-    BayesianNetworkData data = network.getNetworkData();
-    Map<Node, NetworkTable> tableMap = data.getNetworkTablesMap();
-    Set<Node> nodes = new HashSet<>(data.getNodeIDsMap().values());
+    Map<Node, NetworkTable> tableMap = networkData.getNetworkTablesMap();
+    Set<Node> nodes = new HashSet<>(networkData.getNodeIDsMap().values());
     for (Node node : nodes) {
       NetworkTable networkTable = tableMap.get(node);
       boolean allCorrect =
@@ -44,8 +44,7 @@ public class SolverValidator {
   }
 
   private boolean constraintsAreValidated() {
-    return network.getNetworkData().getConstraints().stream()
-        .allMatch(ValidatedConstraint.class::isInstance);
+    return networkData.getConstraints().stream().allMatch(ValidatedConstraint.class::isInstance);
   }
 
   private boolean tableContainsAllNodes(NetworkTable table, Set<Node> allNodes, Node node) {
@@ -67,8 +66,8 @@ public class SolverValidator {
   }
 
   public void resetNetworkTables() {
-    network
-        .getNetworkTables()
+    networkData
+        .getNetworkTablesMap()
         .values()
         .forEach(
             table -> {

@@ -3,9 +3,9 @@ package io.github.alecredmond.internal.method.node;
 import io.github.alecredmond.exceptions.NodeStateConflictException;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
-import io.github.alecredmond.internal.application.cartesianvector.CartesianVariable;
 import io.github.alecredmond.export.nodedef.NodeDefinition;
 import io.github.alecredmond.export.nodedef.StateDef;
+import io.github.alecredmond.internal.application.cartesianvector.CartesianVariable;
 import java.io.Serializable;
 import java.util.*;
 import java.util.function.Predicate;
@@ -83,12 +83,19 @@ public class NodeUtils {
         .toList();
   }
 
-  public static List<Serializable> getDefIds(List<NodeDefinition> parentDefs) {
-    return parentDefs.stream().map(NodeDefinition::getId).toList();
-  }
-
-  public static List<Serializable> getDefStateIds(List<StateDef> stateDefs) {
-    return stateDefs.stream().map(StateDef::getId).toList();
+  public static void buildStateNameAndIdMap(
+      List<NodeState> states,
+      Map<String, NodeState> stateNameMap,
+      Map<Serializable, NodeState> stateIdMap) {
+    Set<String> visited = new HashSet<>();
+    for (NodeState state : states) {
+      String name = state.getName();
+      if (!visited.add(name)) {
+        throw new NodeStateConflictException("Duplicated state name %s".formatted(name));
+      }
+      stateNameMap.put(name, state);
+      stateIdMap.put(state.getId(), state);
+    }
   }
 
   public static Set<Node> getNodes(Collection<NodeState> states) {
@@ -103,6 +110,10 @@ public class NodeUtils {
 
   public static List<Serializable> getNodeIds(Collection<Node> nodes) {
     return nodes.stream().map(Node::getId).toList();
+  }
+
+  public static List<NodeState> getAllStates(Collection<Node> nodes){
+      return nodes.stream().map(Node::getStates).flatMap(Collection::stream).toList();
   }
 
   public static List<Serializable> getNodeStateIds(Collection<NodeState> nodeStates) {

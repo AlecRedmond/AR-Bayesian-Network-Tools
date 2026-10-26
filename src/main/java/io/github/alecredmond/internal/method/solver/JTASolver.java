@@ -1,7 +1,7 @@
 package io.github.alecredmond.internal.method.solver;
 
 import io.github.alecredmond.export.constraints.ProbabilityConstraint;
-import io.github.alecredmond.export.network.BayesianNetwork;
+import io.github.alecredmond.export.network.BayesianNetworkData;
 import io.github.alecredmond.export.solver.SolverResults;
 import io.github.alecredmond.internal.application.junctiontree.Clique;
 import io.github.alecredmond.internal.application.solver.SolverConfigs;
@@ -18,13 +18,13 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Getter
 public class JTASolver {
-  protected final BayesianNetwork network;
+  protected final BayesianNetworkData networkData;
   protected final SolverConfigs configs;
   protected JunctionTreeAlgorithm jta;
 
-  protected JTASolver(BayesianNetwork network, SolverConfigs configs) {
+  protected JTASolver(BayesianNetworkData networkData, SolverConfigs configs) {
     this.configs = configs;
-    this.network = network;
+    this.networkData = networkData;
   }
 
   protected SolverResults solveNetwork() {
@@ -35,7 +35,7 @@ public class JTASolver {
       log.info("STARTING SOLVER IN MODE = {}", configs.getSolverAlgorithm());
     }
 
-    jta = JunctionTreeAlgorithm.buildForSolver(network.getNetworkData(), configs);
+    jta = JunctionTreeAlgorithm.buildForSolver(networkData, configs);
     jta.normalizeTables();
 
     double lastError;

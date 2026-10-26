@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import io.github.alecredmond.export.network.BayesianNetwork;
 import io.github.alecredmond.export.node.Node;
-import io.github.alecredmond.scenarios.NetworkScenario;
+import io.github.alecredmond.networkscenario.NetworkScenarioType;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
@@ -16,8 +16,8 @@ import org.junit.jupiter.params.provider.MethodSource;
 class BayesSolverTest {
 
   public static Stream<Arguments> streamScenarios() {
-    return Arrays.stream(NetworkScenario.values())
-        .map(NetworkScenario::get)
+    return Arrays.stream(NetworkScenarioType.values())
+        .map(NetworkScenarioType::get)
         .map(Arguments::of);
   }
 

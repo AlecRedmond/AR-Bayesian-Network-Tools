@@ -4,6 +4,7 @@ import io.github.alecredmond.exceptions.ConstraintValidationException;
 import io.github.alecredmond.export.constraints.ConditionalConstraint;
 import io.github.alecredmond.export.constraints.MarginalConstraint;
 import io.github.alecredmond.export.constraints.ProbabilityConstraint;
+import io.github.alecredmond.export.network.cptdefinition.CptDefinition;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
 import io.github.alecredmond.export.probabilitytables.ProbabilityVector;
@@ -14,6 +15,7 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import lombok.Getter;
 
 @Getter
@@ -22,6 +24,7 @@ public class ConstraintBuilderIterator extends StateUpdateBase<Node, NodeState>
   private final StandardCartesianIterator iterator;
   private final Node event;
   private final double[] probabilities;
+  private final int eventNodeIdx;
   private List<ProbabilityConstraint> built;
 
   public ConstraintBuilderIterator(Node event, ProbabilityVector vector) {
@@ -29,6 +32,23 @@ public class ConstraintBuilderIterator extends StateUpdateBase<Node, NodeState>
     this.event = event;
     this.iterator = StandardCartesianIterator.create(this, vector);
     this.probabilities = vector.getProbabilities();
+    this.eventNodeIdx = calculateEventNodeIndex(event, vector.getOrderedNodes());
+  }
+
+  private int calculateEventNodeIndex(Node event, Node[] orderedNodes) {
+    return IntStream.range(0, orderedNodes.length)
+        .filter(i -> event.equals(orderedNodes[i]))
+        .findFirst()
+        .orElseThrow();
+  }
+
+  public ConstraintBuilderIterator(CptDefinition cptDefinition) {
+    super(cptDefinition.getVector(), NodeState[]::new);
+    ProbabilityVector vector = cptDefinition.getVector();
+    this.event = cptDefinition.measuredNode();
+    this.iterator = StandardCartesianIterator.create(this, vector);
+    this.probabilities = vector.getProbabilities();
+    this.eventNodeIdx = calculateEventNodeIndex(event, vector.getOrderedNodes());
   }
 
   public List<ProbabilityConstraint> buildConstraints() {
@@ -70,10 +90,7 @@ public class ConstraintBuilderIterator extends StateUpdateBase<Node, NodeState>
           iterator.iterateInner(
               i -> {
                 count[0]++;
-                double prob = probabilities[i];
-                if (prob > 1.0 || prob < 0.0) return;
-                NodeState eventState = states[0];
-                constraints.add(new MarginalConstraint(eventState, prob));
+                constraints.add(new MarginalConstraint(states[0], probabilities[i]));
               });
           validateConstraintSums(constraints, count[0]);
           built.addAll(constraints);
@@ -92,8 +109,7 @@ public class ConstraintBuilderIterator extends StateUpdateBase<Node, NodeState>
               i -> {
                 count[0]++;
                 double prob = probabilities[i];
-                if (prob > 1.0 || prob < 0.0) return;
-                NodeState eventState = getEventState(states);
+                NodeState eventState = states[eventNodeIdx];
                 constraints.add(new ConditionalConstraint(eventState, conditionStates, prob));
               });
           validateConstraintSums(constraints, count[0]);
@@ -129,15 +145,9 @@ public class ConstraintBuilderIterator extends StateUpdateBase<Node, NodeState>
   }
 
   private Set<NodeState> getConditionStates(NodeState[] states) {
-    return Arrays.stream(states)
-        .filter(state -> !event.equals(state.getNode()))
+    return IntStream.range(0, states.length)
+        .filter(i -> i != eventNodeIdx)
+        .mapToObj(i -> states[i])
         .collect(Collectors.toSet());
-  }
-
-  private NodeState getEventState(NodeState[] states) {
-    return Arrays.stream(states)
-        .filter(state -> event.equals(state.getNode()))
-        .findFirst()
-        .orElseThrow();
   }
 }

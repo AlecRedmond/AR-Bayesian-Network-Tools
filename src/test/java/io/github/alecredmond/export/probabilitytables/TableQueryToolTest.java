@@ -11,7 +11,7 @@ import io.github.alecredmond.export.probabilitytables.cptentry.CptEntry;
 import io.github.alecredmond.internal.method.node.NodeUtils;
 import io.github.alecredmond.internal.method.probabilitytables.probabilityvector.ProbabilityVectorFactory;
 import io.github.alecredmond.internal.method.vectoriterator.misciterators.StateCombinationGenerator;
-import io.github.alecredmond.scenarios.NetworkScenario;
+import io.github.alecredmond.networkscenario.NetworkScenarioType;
 import java.io.Serializable;
 import java.util.*;
 import java.util.function.BiFunction;
@@ -34,7 +34,7 @@ class TableQueryToolTest {
 
   static Stream<Arguments> provideArgs(
       BiFunction<NetworkTable, BayesianNetwork, Stream<Arguments>> function,
-      Function<NetworkScenario, BayesianNetwork> networkInit,
+      Function<NetworkScenarioType, BayesianNetwork> networkInit,
       Predicate<? super NetworkTable> tableFilter) {
     return getBayesianNetworkStream(networkInit)
         .flatMap(
@@ -47,8 +47,8 @@ class TableQueryToolTest {
   }
 
   private static Stream<BayesianNetwork> getBayesianNetworkStream(
-      Function<NetworkScenario, BayesianNetwork> networkInit) {
-    return Arrays.stream(NetworkScenario.values())
+      Function<NetworkScenarioType, BayesianNetwork> networkInit) {
+    return Arrays.stream(NetworkScenarioType.values())
         .map(networkInit);
   }
 

@@ -20,7 +20,7 @@ public class NetworkDataUtils {
   public static <T extends Observable> List<NodeState> convertToEliminations(
       T observable, BayesianNetwork network, Map<Node, NodeObservation> newObservations) {
     observable.resetObservations();
-    Set<Node> networkNodes = network.getNodes();
+    Set<Node> networkNodes = network.getAllNodes();
     return newObservations.entrySet().stream()
         .filter(e -> networkNodes.contains(e.getKey()))
         .map(Map.Entry::getValue)
@@ -57,14 +57,6 @@ public class NetworkDataUtils {
 
   public static <T extends Serializable> NodeState getStateById(T id, BayesianNetworkData data) {
     return getById(id, data.getNodeStateIDsMap(), NodeState.class, data.getNetworkName());
-  }
-
-  public static void resetAll(BayesianNetworkData networkData) {
-    networkData.getNodes().clear();
-    networkData.getNodeIDsMap().clear();
-    networkData.getNodeStateIDsMap().clear();
-    networkData.getNetworkTablesMap().clear();
-    networkData.getConstraints().clear();
   }
 
   static <E extends Serializable> Set<NodeState> getStatesByIdOrThrow(

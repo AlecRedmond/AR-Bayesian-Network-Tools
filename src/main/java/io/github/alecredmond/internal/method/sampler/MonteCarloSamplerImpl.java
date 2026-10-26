@@ -66,7 +66,7 @@ public abstract class MonteCarloSamplerImpl implements MonteCarloSampler {
   @Override
   public <T extends Serializable> MonteCarloSampler eliminateStatesById(
       Collection<T> toEliminateIDs) {
-    return eliminateStates(network.getNodeStates(toEliminateIDs));
+    return eliminateStates(network.getNodeStatesById(toEliminateIDs));
   }
 
   @Override
@@ -102,6 +102,6 @@ public abstract class MonteCarloSamplerImpl implements MonteCarloSampler {
   @Override
   public <T extends Serializable> MonteCarloSampler setObservedById(
       Collection<T> observedStateIDs) {
-    return this.setObserved(network.getNodeStates(observedStateIDs));
+    return this.setObserved(network.getNodeStatesById(observedStateIDs));
   }
 }

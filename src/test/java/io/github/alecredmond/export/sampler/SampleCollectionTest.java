@@ -1,7 +1,7 @@
 package io.github.alecredmond.export.sampler;
 
 import static io.github.alecredmond.TestConfigs.*;
-import static io.github.alecredmond.scenarios.NetworkScenario.*;
+import static io.github.alecredmond.networkscenario.NetworkScenarioType.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 import io.github.alecredmond.export.inference.InferenceEngine;

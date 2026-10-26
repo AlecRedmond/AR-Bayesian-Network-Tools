@@ -1,8 +1,8 @@
 package io.github.alecredmond.export.inference;
 
 import static io.github.alecredmond.TestConfigs.*;
-import static io.github.alecredmond.scenarios.NetworkScenario.AH_NETWORK;
-import static io.github.alecredmond.scenarios.NetworkScenario.RAIN_NETWORK;
+import static io.github.alecredmond.networkscenario.NetworkScenarioType.AH_NETWORK;
+import static io.github.alecredmond.networkscenario.NetworkScenarioType.RAIN_NETWORK;
 import static org.junit.jupiter.api.Assertions.*;
 
 import io.github.alecredmond.export.network.BayesianNetwork;
