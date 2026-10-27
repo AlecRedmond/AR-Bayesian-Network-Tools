@@ -13,13 +13,17 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
+
+import io.github.alecredmond.networkscenario.NetworkScenario;
+import io.github.alecredmond.networkscenario.NetworkScenarioType;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 class TableNormalizerTest {
   static final List<BayesianNetwork> NETWORKS =
-      List.of(AH_NETWORK.get(), RAIN_NETWORK.get(), SIMPLE_LINEAR.get());
+      //List.of(AH_NETWORK.get(), RAIN_NETWORK.get(), SIMPLE_LINEAR.get());
+          Arrays.stream(values()).map(NetworkScenarioType::get).map(NetworkScenario::buildNetwork).toList();
   TableNormalizer test;
 
   static Stream<Arguments> getNetworkTables() {

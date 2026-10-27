@@ -4,13 +4,12 @@ import io.github.alecredmond.export.network.BayesianNetwork;
 import io.github.alecredmond.export.network.newbuilder.NetworkBuilder;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
-
 import java.util.Set;
 
 public interface NetworkScenario {
-  NetworkBuilder preBuiltScenario();
+  NetworkBuilder getBuilder();
 
-  BayesianNetwork builtScenario();
+  BayesianNetwork buildNetwork();
 
   Node getNodeByName(String name);
 

@@ -47,6 +47,8 @@ public class BayesianNetworkData {
    */
   private final Map<Serializable, NodeState> nodeStateIDsMap;
 
+  private final Map<String, Node> nodeNameMap;
+
   /**
    * A map from each {@link Node} to its corresponding {@link NetworkTable} (CPT) instance within
    * the {@link BayesianNetwork}.
@@ -84,6 +86,7 @@ public class BayesianNetworkData {
     this.networkName = "UNNAMED NETWORK";
     this.solved = false;
     this.bayesianNetwork = null;
+    this.nodeNameMap = new HashMap<>();
   }
 
   /**

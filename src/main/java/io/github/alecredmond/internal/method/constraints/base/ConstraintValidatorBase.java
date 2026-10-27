@@ -9,6 +9,7 @@ import io.github.alecredmond.internal.application.constraint.ConstraintBuilderDa
 import io.github.alecredmond.internal.method.constraints.strategy.ValidatedConstraint;
 import io.github.alecredmond.internal.method.utils.CollectionToString;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
@@ -91,14 +92,20 @@ public abstract class ConstraintValidatorBase<
   private void statesExistInNetwork(ConstraintBuilderData data) {
     ProbabilityConstraint constraint = data.getConstraint();
     BayesianNetworkData networkData = data.getNetworkData();
-    Set<NodeState> states = new HashSet<>(constraint.getAllStates());
-    states.removeAll(networkData.getNodeStateIDsMap().values());
-    if (states.isEmpty()) {
+    Set<Node> constraintNodes = new HashSet<>(constraint.getAllNodes());
+    Set<Node> networkNodes = new HashSet<>(networkData.getNodes());
+    if (!networkNodes.containsAll(constraintNodes)) {
+      throw new ConstraintValidationException(
+          "Not all nodes in constraint %s are declared in the network!".formatted(constraint));
+    }
+    List<NodeState> unregistered =
+        constraint.getAllStates().stream().filter(this::stateNotInCorrectPosition).toList();
+    if (unregistered.isEmpty()) {
       return;
     }
     throw new ConstraintValidationException(
         "NodeStates %s in %s are not defined in the network!"
-            .formatted(CollectionToString.apply(states), constraint));
+            .formatted(CollectionToString.apply(unregistered), constraint));
   }
 
   protected void noIdenticalConstraintsInNetwork(ConstraintBuilderData data) {
@@ -134,6 +141,13 @@ public abstract class ConstraintValidatorBase<
     }
     return "P(%s|%s) == %.3f"
         .formatted(CollectionToString.apply(events), CollectionToString.apply(conditions), prob);
+  }
+
+  private boolean stateNotInCorrectPosition(NodeState state) {
+    int position = state.getPosition();
+    List<NodeState> siblings = state.getNode().getStates();
+    if (position >= siblings.size()) return true;
+    return !siblings.get(position).equals(state);
   }
 
   public boolean checkInputsValid(ConstraintBuilderData data) {

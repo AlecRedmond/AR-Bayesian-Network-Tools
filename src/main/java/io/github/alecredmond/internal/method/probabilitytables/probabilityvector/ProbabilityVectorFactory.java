@@ -29,8 +29,8 @@ public class ProbabilityVectorFactory
       List<Node> orderedNodes, int probabilityLength, int vectorRank) {
     if (vectorRank == probabilityLength) return;
     throw new ProbabilityVectorFactoryException(
-        "Nodes %s : Probability array has length %d, Vector has rank %d"
-            .formatted(CollectionToString.apply(orderedNodes), probabilityLength, vectorRank));
+        "Probability array has length %d, Vector has rank %d, Nodes = %s"
+            .formatted(probabilityLength, vectorRank, CollectionToString.apply(orderedNodes)));
   }
 
   @Override

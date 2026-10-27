@@ -20,7 +20,7 @@ public class RainNetwork extends CptDefinedScenario implements BinaryNodeScenari
     this.wetGrass = binaryNode("WET_GRASS", rain, sprinkler);
     addCpt(rain, 0.2, 0.8);
     addCpt(sprinkler, 0.01, 0.99, 0.4, 0.6);
-    addCpt(sprinkler, 0.99, 0.01, 0.9, 0.1, 0.9, 0.1, 0.0, 1.0);
+    addCpt(wetGrass, 0.99, 0.01, 0.9, 0.1, 0.9, 0.1, 0.0, 1.0);
   }
 
   @Override

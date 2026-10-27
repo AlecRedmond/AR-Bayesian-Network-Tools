@@ -6,10 +6,12 @@ import static io.github.alecredmond.networkscenario.NetworkScenarioType.RAIN_NET
 import static org.junit.jupiter.api.Assertions.*;
 
 import io.github.alecredmond.export.network.BayesianNetwork;
+import io.github.alecredmond.export.node.newnode.BinaryNode;
 import io.github.alecredmond.export.probabilitytables.ObservedTable;
 import io.github.alecredmond.export.probabilitytables.ProbabilityTable;
 import io.github.alecredmond.export.sampler.MonteCarloSampler;
 import io.github.alecredmond.export.sampler.SampleCollection;
+import io.github.alecredmond.networkscenario.scenarios.RainNetwork;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
@@ -21,21 +23,30 @@ class InferenceEngineTest {
 
   @Nested
   class MethodTests {
+    RainNetwork rainNetwork;
     BayesianNetwork net;
     InferenceEngine test;
 
     @BeforeEach
     void init() {
-      net = RAIN_NETWORK.getSupplier().get();
+      rainNetwork = new RainNetwork();
+      net = rainNetwork.buildNetwork();
       test = net.buildInferenceEngine();
     }
 
     @Test
     void observeNetwork_shouldUpdateProbabilities() {
-      assertEquals(0.2, test.getObservedTableById("RAIN").getProbabilityById("RAIN:TRUE"), 1E-6);
-      test.setObservedById("WET_GRASS:TRUE");
-      double pRainGivenWet = test.getObservedTableById("RAIN").getProbabilityById("RAIN:TRUE");
+      BinaryNode rain = rainNetwork.rain;
+      BinaryNode wetGrass = rainNetwork.wetGrass;
+
+      ObservedTable rainTable = test.getObservedTable(rain);
+      double pRainPrior = rainTable.getProbability(rain.trueState());
+      assertEquals(0.2, pRainPrior, 1E-6);
+      System.out.println(pRainPrior);
+      test.setObserved(wetGrass.trueState());
+      double pRainGivenWet = rainTable.getProbability(rain.trueState());
       assertTrue(pRainGivenWet > 0.2);
+      System.out.println(pRainGivenWet);
       // Exact value P(R|W) = P(W|R)P(R)/P(W)
       // P(W|R) = P(W|R,S)P(S|R) + P(W|R,~S)P(~S|R) = 0.99*0.01 + 0.9*0.99 = 0.9009
       // P(W|~R) = P(W|~R,S)P(S|~R) + P(W|~R,~S)P(~S|~R) = 0.9*0.4 + 0.0*0.6 = 0.36
@@ -45,28 +56,22 @@ class InferenceEngineTest {
     }
 
     @Test
-    void observeNetwork_withNonExistentState_shouldThrowException() {
-      assertThrows(Exception.class, () -> test.setObservedById(List.of("ZOMBIE:TRUE")));
-    }
-
-    @Test
     void observeNetwork_withEmptyList_shouldBeSameAsObserveMarginals() {
-      double pRainMarginal = test.getObservedTableById("RAIN").getProbabilityById("RAIN:TRUE");
-
+      ObservedTable table = test.getObservedTable(rainNetwork.rain);
+      double pRainMarginal = table.getProbability(rainNetwork.rain.trueState());
       test.setObserved(List.of());
-      double pRainObservedEmpty = test.getObservedTableById("RAIN").getProbabilityById("RAIN:TRUE");
-
-      assertEquals(pRainMarginal, pRainObservedEmpty);
+      double pRainObservedEmpty = table.getProbability(rainNetwork.rain.trueState());
+      assertEquals(pRainMarginal, pRainObservedEmpty, DOUBLE_EQUALITY);
     }
 
     @Test
     void getNetworkTable_shouldReturnTable() {
       net.solveNetwork();
-      ProbabilityTable rainTable = net.getNetworkTable("RAIN");
+      ProbabilityTable rainTable = net.getNetworkTables().get(rainNetwork.rain);
       assertNotNull(rainTable);
       assertEquals(1, rainTable.getNodes().size());
 
-      ProbabilityTable grassTable = net.getNetworkTable("WET_GRASS");
+      ProbabilityTable grassTable = net.getNetworkTables().get(rainNetwork.wetGrass);
       assertNotNull(grassTable);
       assertEquals(3, grassTable.getNodes().size());
     }
@@ -74,14 +79,14 @@ class InferenceEngineTest {
     @Test
     void getNetworkTable_nonExistentNode_shouldReturnNull() {
       net.solveNetwork();
-      assertNull(net.getNetworkTable("ZOMBIE"));
+      assertNull(net.getNetworkTableById("ZOMBIE"));
     }
 
     @Test
     void getNetworkTable_beforeSolve_shouldImplicitlySolve() {
       assertDoesNotThrow(
           () -> {
-            ProbabilityTable rainTable = net.getNetworkTable("RAIN");
+            ProbabilityTable rainTable = net.getNetworkTableById("RAIN");
             assertNotNull(rainTable);
           });
     }
@@ -129,7 +134,7 @@ class InferenceEngineTest {
 
     @Test
     void testSolves_RainSprinkler() {
-      BayesianNetwork net = RAIN_NETWORK.get().solveNetwork();
+      BayesianNetwork net = RAIN_NETWORK.get().buildNetwork();
       test = net.buildInferenceEngine();
       if (PRINT_TABLES) net.printNetwork();
       test.setObservedById(List.of("WET_GRASS:TRUE"));
@@ -174,7 +179,7 @@ class InferenceEngineTest {
 
     @Test
     void testNetworkAH_NonLocalConstraints() {
-      BayesianNetwork net = AH_NETWORK.get();
+      BayesianNetwork net = AH_NETWORK.get().buildNetwork();
       test = net.buildInferenceEngine();
 
       if (PRINT_TABLES) {

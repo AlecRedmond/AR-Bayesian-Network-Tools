@@ -193,6 +193,10 @@ public interface BayesianNetwork {
    */
   <T extends Serializable> Set<Node> getNodesByIds(Collection<T> nodeIDs);
 
+  Node getNodeByName(String name);
+
+  Set<Node> getNodesByName(Collection<String> nodeNames);
+
   /**
    * Returns a set of all {@link Node}s in this {@code BayesianNetwork}
    *
@@ -264,7 +268,7 @@ public interface BayesianNetwork {
    * @param <T> class of the Node ID
    * @return the probability table for the specified node.
    */
-  <T extends Serializable> NetworkTable getNetworkTable(T nodeID);
+  <T extends Serializable> NetworkTable getNetworkTableById(T nodeID);
 
   /**
    * Returns a new map connecting each {@link Node} in this {@code BayesianNetwork} to its

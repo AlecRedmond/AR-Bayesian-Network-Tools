@@ -11,6 +11,7 @@ import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
 import io.github.alecredmond.export.sampler.MonteCarloSampler;
 import io.github.alecredmond.export.sampler.SampleCollection;
+import io.github.alecredmond.networkscenario.NetworkScenario;
 import io.github.alecredmond.networkscenario.NetworkScenarioType;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -25,7 +26,7 @@ class LikelihoodWeightingSamplerTest {
   public static Stream<Arguments> allNetworkScenarios() {
     return Arrays.stream(NetworkScenarioType.values())
         .map(NetworkScenarioType::get)
-        .map(BayesianNetwork::solveNetwork)
+        .map(NetworkScenario::buildNetwork)
         .map(Arguments::of);
   }
 

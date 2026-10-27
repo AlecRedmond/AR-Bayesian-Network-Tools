@@ -6,13 +6,14 @@ import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.serialized.SerializedNode;
 import io.github.alecredmond.internal.serialization.SerializationData;
 import io.github.alecredmond.internal.serialization.SerializerUtils;
-import java.util.ArrayList;
 import java.util.List;
 
 public class NodeSerializer {
 
+  // TODO - REFACTOR
   public Node createNewBase(SerializedNode sto) {
-    return new Node(sto.id(), sto.stateIds());
+    return null;
+    // return new Node(sto.id(), sto.stateIds());
   }
 
   public List<SerializedNode> serializeAllNodes(BayesianNetworkData networkData) {
@@ -37,9 +38,10 @@ public class NodeSerializer {
   }
 
   public Node deSerialize(SerializedNode sto, SerializationData data) {
-    Node node = data.getNodeIdMap().get(sto.id());
-    node.setParents(SerializerUtils.deSerializeNodes(sto.parentIds(), ArrayList::new, data));
-    node.setChildren(SerializerUtils.deSerializeNodes(sto.childIds(), ArrayList::new, data));
-    return node;
+    return null;
+    //    Node node = data.getNodeIdMap().get(sto.id());
+    //    node.setParents(SerializerUtils.deSerializeNodes(sto.parentIds(), ArrayList::new, data));
+    //    node.setChildren(SerializerUtils.deSerializeNodes(sto.childIds(), ArrayList::new, data));
+    //    return node;
   }
 }

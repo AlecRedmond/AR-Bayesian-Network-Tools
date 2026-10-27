@@ -1,23 +1,34 @@
 package io.github.alecredmond.export.network.newbuilder;
 
 import io.github.alecredmond.export.constraints.ProbabilityConstraint;
+import io.github.alecredmond.export.network.BayesianNetwork;
 import io.github.alecredmond.export.network.BayesianNetworkData;
 import io.github.alecredmond.export.network.cptdefinition.CptDefinition;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
+import io.github.alecredmond.export.probabilitytables.NetworkTable;
+import io.github.alecredmond.export.solver.BayesSolver;
 import io.github.alecredmond.internal.application.constraint.ConstraintFactoryOutput;
 import io.github.alecredmond.internal.method.constraints.ConstraintFactory;
-import io.github.alecredmond.internal.method.network.BaseNetworkFactory;
+import io.github.alecredmond.internal.method.network.BayesianNetworkImpl;
+import io.github.alecredmond.internal.method.network.validator.ValidatorType;
+import io.github.alecredmond.internal.method.node.NodeComparator;
 import io.github.alecredmond.internal.method.probabilitytables.tablefactory.NetworkTableFactory;
+import io.github.alecredmond.internal.method.solver.BayesSolverImpl;
 import io.github.alecredmond.internal.method.vectoriterator.misciterators.ConstraintBuilderIterator;
+import java.io.Serializable;
 import java.util.*;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-public class NetworkBuilderImpl extends BaseNetworkFactory {
+public class NetworkBuilderImpl implements NetworkBuilder {
+  private final BayesianNetworkData networkData;
+  private final NetworkTableFactory tableBuilder;
   private final ConstraintFactory constraintFactory;
 
   public NetworkBuilderImpl() {
-    super(new BayesianNetworkData(), new NetworkTableFactory());
+    this.networkData = new BayesianNetworkData();
+    this.tableBuilder = new NetworkTableFactory();
     this.constraintFactory = new ConstraintFactory(networkData);
   }
 
@@ -28,17 +39,28 @@ public class NetworkBuilderImpl extends BaseNetworkFactory {
   }
 
   @Override
+  public BayesianNetwork build() {
+    if (!networkData.isSolved()) buildSolver().solve();
+    return new BayesianNetworkImpl(networkData);
+  }
+
+  @Override
+  public BayesSolver buildSolver() {
+    clearData();
+    setChildren();
+    validateData();
+    buildNameAndIdMaps();
+    buildNetworkTablesMap(orderNodes());
+    return new BayesSolverImpl(networkData);
+  }
+
+  @Override
   public NetworkBuilder setNodes(Node... nodes) {
     setNodesCommon(Arrays.stream(nodes));
     return this;
   }
 
   private void setNodesCommon(Stream<Node> nodeStream) {
-    networkData.getNodeIDsMap().clear();
-    networkData.getNodeStateIDsMap().clear();
-    networkData.getNetworkTablesMap().clear();
-    networkData.getConstraints().clear();
-    networkData.setSolved(false);
     List<Node> nodes = networkData.getNodes();
     nodes.clear();
     nodeStream.forEach(
@@ -64,9 +86,7 @@ public class NetworkBuilderImpl extends BaseNetworkFactory {
   }
 
   private void addConstraintOrThrow(ConstraintFactoryOutput factoryOutput) {
-    if (factoryOutput.optException() != null) {
-      throw factoryOutput.optException();
-    }
+    if (factoryOutput.optException() != null) throw factoryOutput.optException();
     networkData.getConstraints().add(factoryOutput.validated().getConstraint());
   }
 
@@ -103,6 +123,67 @@ public class NetworkBuilderImpl extends BaseNetworkFactory {
       double probability) {
     addConstraintCommon(new HashSet<>(eventStates), new HashSet<>(conditionStates), probability);
     return this;
+  }
+
+  private void clearData() {
+    networkData.getNodeIDsMap().clear();
+    networkData.getNodeStateIDsMap().clear();
+    networkData.getNetworkTablesMap().clear();
+    networkData.getConstraints().clear();
+    networkData.getNodeNameMap().clear();
+    networkData.setSolved(false);
+  }
+
+  private void setChildren() {
+    for (Node node : networkData.getNodes()) {
+      for (Node parent : node.getParents()) {
+        parent.getChildren().add(node);
+      }
+    }
+  }
+
+  private void validateData() {
+    Arrays.stream(ValidatorType.values())
+        .map(ValidatorType::getValidatorSupplier)
+        .map(Supplier::get)
+        .forEach(networkValidator -> networkValidator.validateData(networkData));
+  }
+
+  private void buildNameAndIdMaps() {
+    Map<Serializable, Node> nodeIdMap = networkData.getNodeIDsMap();
+    Map<Serializable, NodeState> stateIdMap = networkData.getNodeStateIDsMap();
+    Map<String, Node> nodeNameMap = networkData.getNodeNameMap();
+
+    for (Node node : networkData.getNodes()) {
+      nodeIdMap.put(node.getId(), node);
+      nodeNameMap.put(node.getName(), node);
+      for (NodeState state : node.getStates()) {
+        stateIdMap.put(state.getId(), state);
+      }
+    }
+  }
+
+  private void buildNetworkTablesMap(NodeComparator comparator) {
+    networkData.getNetworkTablesMap().clear();
+    networkData
+        .getNodes()
+        .forEach(
+            node -> {
+              List<Node> events = List.of(node);
+              List<Node> conditions = node.getParents().stream().sorted(comparator).toList();
+              NetworkTable table = tableBuilder.buildTable(events, conditions);
+              table.normalizeTable();
+              networkData.getNetworkTablesMap().put(node, table);
+              node.setCpt(table);
+            });
+  }
+
+  private NodeComparator orderNodes() {
+    NodeComparator comparator = new NodeComparator(networkData);
+    List<Node> nodes = networkData.getNodes();
+    nodes.clear();
+    nodes.addAll(comparator.getOrderedNodes());
+    return comparator;
   }
 
   @Override

@@ -92,6 +92,19 @@ public class BayesianNetworkImpl implements BayesianNetwork {
         .collect(Collectors.toCollection(LinkedHashSet::new));
   }
 
+  @Override
+  public Node getNodeByName(String name) {
+    return networkData.getNodeNameMap().get(name);
+  }
+
+  @Override
+  public Set<Node> getNodesByName(Collection<String> nodeNames) {
+    return nodeNames.stream()
+        .map(this::getNodeByName)
+        .collect(Collectors.toCollection(LinkedHashSet::new));
+  }
+
+  @Override
   public Set<Node> getAllNodes() {
     return new LinkedHashSet<>(networkData.getNodes());
   }
@@ -130,7 +143,7 @@ public class BayesianNetworkImpl implements BayesianNetwork {
     return this;
   }
 
-  public <T extends Serializable> NetworkTable getNetworkTable(T nodeID) {
+  public <T extends Serializable> NetworkTable getNetworkTableById(T nodeID) {
     return getNetworkTables().get(getNodeById(nodeID));
   }
 

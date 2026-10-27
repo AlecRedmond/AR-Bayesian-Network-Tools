@@ -2,12 +2,10 @@ package io.github.alecredmond.export.node;
 
 import io.github.alecredmond.export.constraints.ProbabilityConstraint;
 import io.github.alecredmond.export.network.BayesianNetwork;
-import io.github.alecredmond.export.network.BayesianNetworkBuilder;
 import io.github.alecredmond.export.probabilitytables.NetworkTable;
 import io.github.alecredmond.internal.application.cartesianvector.CartesianVariable;
 import java.io.Serializable;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * Represents a variable within a {@link BayesianNetwork}.
@@ -22,7 +20,6 @@ import java.util.Optional;
  *
  * @see NodeState
  * @see BayesianNetwork
- * @see BayesianNetworkBuilder
  * @see ProbabilityConstraint
  * @author Alec Redmond
  */

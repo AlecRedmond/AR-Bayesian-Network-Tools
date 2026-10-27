@@ -13,8 +13,8 @@ public abstract class CptDefinedScenario extends AbstractNetworkScenario {
   protected final Map<Node, CptDefinition> cptDefinitionMap = new HashMap<>();
 
   @Override
-  public NetworkBuilder preBuiltScenario() {
-    NetworkBuilder nb = super.preBuiltScenario();
+  public NetworkBuilder getBuilder() {
+    NetworkBuilder nb = super.getBuilder();
     cptDefinitionMap.values().forEach(nb::defineCPT);
     return nb;
   }
