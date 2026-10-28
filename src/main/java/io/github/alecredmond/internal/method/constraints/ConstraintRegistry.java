@@ -8,15 +8,32 @@ import io.github.alecredmond.internal.method.constraints.strategy.ConstraintVali
 import java.util.*;
 import java.util.stream.Stream;
 import lombok.NonNull;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class ConstraintRegistry {
   private final Map<ConstraintType, ConstraintStrategy<?>> registryMap = buildStrategyMap();
 
-  public <P extends ProbabilityConstraint> ConstraintValidator<?, ?> getValidator(P constraint) {
-    return Optional.ofNullable(getConstraintType(constraint))
-        .map(registryMap::get)
+  public <P extends ProbabilityConstraint> ConstraintValidator<P, ?> getValidator(P constraint) {
+    return Optional.ofNullable(getStrategy(constraint))
         .map(ConstraintStrategy::getConstraintValidator)
         .orElse(null);
+  }
+
+  public <T extends ProbabilityConstraint> ConstraintStrategy<T> getStrategy(
+      @NonNull T constraint) {
+    return getTypedStrategy(getConstraintType(constraint));
+  }
+
+  @SuppressWarnings("unchecked")
+  public <T extends ProbabilityConstraint> ConstraintStrategy<T> getTypedStrategy(
+      ConstraintType type) {
+    try {
+      return (ConstraintStrategy<T>) registryMap.get(type);
+    } catch (ClassCastException e) {
+      log.error("Error casting Constraint Strategy for type '{}'", type);
+      return null;
+    }
   }
 
   private <P extends ProbabilityConstraint> ConstraintType getConstraintType(P constraint) {
@@ -39,21 +56,6 @@ public class ConstraintRegistry {
             .map(registryMap::get)
             .map(ConstraintStrategy::getConstraintSerializer)
             .orElse(null);
-  }
-
-  public <T extends ProbabilityConstraint> ConstraintStrategy<T> getStrategy(
-      @NonNull T constraint) {
-    return getTypedStrategy(getConstraintType(constraint));
-  }
-
-  @SuppressWarnings("unchecked")
-  public <T extends ProbabilityConstraint> ConstraintStrategy<T> getTypedStrategy(
-      ConstraintType type) {
-    try {
-      return (ConstraintStrategy<T>) registryMap.get(type);
-    } catch (ClassCastException e) {
-      return null;
-    }
   }
 
   public <S extends SerializedProbabilityConstraint, T extends ProbabilityConstraint>

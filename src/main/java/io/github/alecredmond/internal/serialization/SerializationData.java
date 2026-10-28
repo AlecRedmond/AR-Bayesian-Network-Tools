@@ -1,8 +1,8 @@
 package io.github.alecredmond.internal.serialization;
 
-import io.github.alecredmond.export.network.BayesianNetworkData;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
+import io.github.alecredmond.internal.application.network.BayesianNetworkData;
 import java.io.Serializable;
 import java.util.Map;
 import lombok.Data;
@@ -14,8 +14,8 @@ public class SerializationData {
   private final Map<Serializable, NodeState> nodeStateIdMap;
 
   public SerializationData() {
-    this.networkData = new BayesianNetworkData();
-    this.nodeIdMap = networkData.getNodeIDsMap();
-    this.nodeStateIdMap = networkData.getNodeStateIDsMap();
+    this.networkData = null;
+    this.nodeIdMap = null; // TODO - FIX THIS
+    this.nodeStateIdMap = null;
   }
 }

@@ -1,9 +1,9 @@
 package io.github.alecredmond.internal.serialization;
 
 import io.github.alecredmond.export.network.BayesianNetwork;
-import io.github.alecredmond.export.network.BayesianNetworkData;
 import io.github.alecredmond.export.network.serialized.SerializedBayesianNetwork;
 import io.github.alecredmond.export.node.Node;
+import io.github.alecredmond.internal.application.network.BayesianNetworkData;
 import io.github.alecredmond.internal.method.network.BayesianNetworkImpl;
 import io.github.alecredmond.internal.serialization.structure.NetworkTableSerializer;
 import io.github.alecredmond.internal.serialization.structure.NodeSerializer;
@@ -14,14 +14,13 @@ import lombok.NoArgsConstructor;
 public class BayesianNetworkSerializer {
 
   public SerializedBayesianNetwork serialize(BayesianNetwork network) {
-    if (!network.isSolved()) network.solveNetwork();
-    BayesianNetworkData networkData = network.getNetworkData();
+    // TODO - REFACTOR
+    BayesianNetworkData networkData = ((BayesianNetworkImpl) network).getNetworkData();
     return new SerializedBayesianNetwork(
         networkData.getNetworkName(),
         new NodeSerializer().serializeAllNodes(networkData),
         new NetworkTableSerializer().serializeAllTables(networkData),
-        new ProbabilityConstraintSerializer().serializeAll(networkData),
-        networkData.isSolved());
+        new ProbabilityConstraintSerializer().serializeAll(networkData));
   }
 
   public BayesianNetwork deSerialize(SerializedBayesianNetwork serializedBayesianNetwork) {
@@ -47,8 +46,8 @@ public class BayesianNetworkSerializer {
   private BayesianNetworkData deSerializeNetworkData(
       SerializedBayesianNetwork sbn, SerializationData serializationData) {
     BayesianNetworkData networkData = serializationData.getNetworkData();
-    networkData.setNetworkName(sbn.networkName());
-    networkData.setSolved(sbn.solved());
+    // networkData.setNetworkName(sbn.networkName());
+    // TODO - REFACTOR
     new NodeSerializer().deSerializeNodes(sbn, serializationData);
     new NetworkTableSerializer().deSerializeNetworkTables(sbn, serializationData);
     new ProbabilityConstraintSerializer().deserialize(sbn, serializationData);

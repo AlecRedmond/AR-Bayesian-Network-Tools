@@ -1,6 +1,6 @@
 package io.github.alecredmond.export.node;
 
-import io.github.alecredmond.export.node.newnode.DefaultNodeState;
+import io.github.alecredmond.export.node.implementation.DefaultNodeState;
 import io.github.alecredmond.internal.application.cartesianvector.CartesianState;
 import java.io.Serializable;
 import java.util.*;

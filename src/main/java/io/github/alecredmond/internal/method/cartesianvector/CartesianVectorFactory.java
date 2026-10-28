@@ -4,7 +4,7 @@ import io.github.alecredmond.exceptions.ProbabilityVectorFactoryException;
 import io.github.alecredmond.internal.application.cartesianvector.CartesianState;
 import io.github.alecredmond.internal.application.cartesianvector.CartesianVariable;
 import io.github.alecredmond.internal.application.cartesianvector.CartesianVector;
-import io.github.alecredmond.internal.method.junctiontree.treebuilding.TreewidthValidator;
+import io.github.alecredmond.internal.method.cliquegraph.factory.factoryutils.TreewidthValidator;
 import io.github.alecredmond.internal.method.utils.CollectionToString;
 import java.util.List;
 import java.util.function.IntFunction;

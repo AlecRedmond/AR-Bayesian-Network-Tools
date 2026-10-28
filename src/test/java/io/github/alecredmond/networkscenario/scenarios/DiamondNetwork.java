@@ -1,6 +1,8 @@
 package io.github.alecredmond.networkscenario.scenarios;
 
 import io.github.alecredmond.export.node.Node;
+import io.github.alecredmond.export.solver.BayesSolver;
+import io.github.alecredmond.export.solver.IPFPJunctionTreeSolver;
 import io.github.alecredmond.networkscenario.templates.AbstractNetworkScenario;
 import java.util.List;
 
@@ -31,6 +33,11 @@ public class DiamondNetwork extends AbstractNetworkScenario {
     addConstraint(state(c, "+"), List.of(state(d, "++")), 1.0);
     addConstraint(List.of(state(d, "++"), state(d, "+-")), 0.325);
   }
+
+    @Override
+    protected BayesSolver defaultSolver() {
+        return new IPFPJunctionTreeSolver();
+    }
 
   protected String getNetworkName() {
     return "DIAMOND NETWORK";

@@ -5,9 +5,7 @@ import io.github.alecredmond.export.constraints.ProbabilityConstraint;
 import io.github.alecredmond.export.constraints.serialized.SerializedProbabilityConstraint;
 import io.github.alecredmond.internal.method.constraints.strategy.ConstraintSerializer;
 import io.github.alecredmond.internal.method.constraints.strategy.ConstraintValidator;
-import io.github.alecredmond.internal.method.constraints.strategy.ValidatedConstraint;
 import io.github.alecredmond.internal.serialization.SerializationData;
-import java.util.Optional;
 
 public abstract class ConstraintSerializerBase<
         P extends ProbabilityConstraint, S extends SerializedProbabilityConstraint>
@@ -18,11 +16,13 @@ public abstract class ConstraintSerializerBase<
       SerializedProbabilityConstraint serialized,
       ConstraintValidator<P, ?> validator,
       SerializationData serializationData) {
-    return Optional.ofNullable(safeCast(serialized))
-        .map(s -> deSerialize(s, serializationData))
-        .map(p -> validator.validateConstraint(p, serializationData.getNetworkData()))
-        .map(ValidatedConstraint::getConstraint)
-        .orElseThrow(() -> supplyWrongTypeException(serialized));
+      //TODO - REFACTOR
+//    return Optional.ofNullable(safeCast(serialized))
+//        .map(s -> deSerialize(s, serializationData))
+//        .map(p -> validator.validateConstraint(p, serializationData.getNetworkData()))
+//        .map(ValidatedConstraint::getConstraint)
+//        .orElseThrow(() -> supplyWrongTypeException(serialized));
+      return null;
   }
 
   protected ConstraintValidationException supplyWrongTypeException(

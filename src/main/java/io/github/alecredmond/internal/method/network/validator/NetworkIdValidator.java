@@ -1,9 +1,9 @@
 package io.github.alecredmond.internal.method.network.validator;
 
 import io.github.alecredmond.exceptions.BayesNetIDException;
-import io.github.alecredmond.export.network.BayesianNetworkData;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
+import io.github.alecredmond.internal.application.network.BayesianNetworkData;
 import io.github.alecredmond.internal.method.node.NodeUtils;
 import java.io.Serializable;
 import java.util.*;
@@ -17,7 +17,7 @@ public class NetworkIdValidator implements NetworkValidator {
 
   @Override
   public void validateData(BayesianNetworkData networkData) {
-    Collection<Node> nodes = networkData.getNodes();
+    List<Node> nodes = Arrays.asList(networkData.getNodes());
     Set<Serializable> checkedIds = new HashSet<>();
     validateNoNullsOrDupes(nodes, Node::getId, checkedIds, ID);
     validateNoNullsOrDupes(NodeUtils.getAllStates(nodes), NodeState::getId, checkedIds, ID);

@@ -1,10 +1,10 @@
 package io.github.alecredmond.internal.serialization.structure;
 
-import io.github.alecredmond.export.network.BayesianNetworkData;
 import io.github.alecredmond.export.network.serialized.SerializedBayesianNetwork;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.probabilitytables.NetworkTable;
 import io.github.alecredmond.export.probabilitytables.serialized.SerializedNetworkTable;
+import io.github.alecredmond.internal.application.network.BayesianNetworkData;
 import io.github.alecredmond.internal.method.probabilitytables.tablefactory.ConditionalTableFactory;
 import io.github.alecredmond.internal.method.probabilitytables.tablefactory.RootNodeTableFactory;
 import io.github.alecredmond.internal.method.probabilitytables.tablefactory.TableFactory;
@@ -16,11 +16,22 @@ import java.util.stream.IntStream;
 
 public class NetworkTableSerializer {
 
+  // TODO - SORT
   public List<SerializedNetworkTable> serializeAllTables(BayesianNetworkData networkData) {
-    return networkData.getNodes().stream()
-        .map(node -> networkData.getNetworkTablesMap().get(node))
-        .map(this::serialize)
-        .toList();
+    return null;
+    //    return networkData.getNodes().stream()
+    //        .map(node -> networkData.getNetworkTablesMap().get(node))
+    //        .map(this::serialize)
+    //        .toList();
+  }
+
+  public void deSerializeNetworkTables(
+      SerializedBayesianNetwork serializedBayesianNetwork, SerializationData serializationData) {
+    //    Map<Node, NetworkTable> tableMap =
+    // serializationData.getNetworkData().getNetworkTablesMap();
+    //    serializedBayesianNetwork.serializedCPTs().stream()
+    //        .map(serializedTable -> deSerialize(serializedTable, serializationData))
+    //        .forEach(networkTable -> tableMap.put(networkTable.getNetworkNode(), networkTable));
   }
 
   private SerializedNetworkTable serialize(NetworkTable table) {
@@ -33,14 +44,6 @@ public class NetworkTableSerializer {
 
   private List<Double> serializeProbabilities(NetworkTable table) {
     return Arrays.stream(table.getProbabilities()).boxed().toList();
-  }
-
-  public void deSerializeNetworkTables(
-      SerializedBayesianNetwork serializedBayesianNetwork, SerializationData serializationData) {
-    Map<Node, NetworkTable> tableMap = serializationData.getNetworkData().getNetworkTablesMap();
-    serializedBayesianNetwork.serializedCPTs().stream()
-        .map(serializedTable -> deSerialize(serializedTable, serializationData))
-        .forEach(networkTable -> tableMap.put(networkTable.getNetworkNode(), networkTable));
   }
 
   private NetworkTable deSerialize(SerializedNetworkTable serialized, SerializationData data) {

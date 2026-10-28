@@ -1,7 +1,7 @@
 package io.github.alecredmond.internal.application.probabilitytables;
 
-import io.github.alecredmond.export.inference.NodeObservation;
 import io.github.alecredmond.export.node.Node;
+import io.github.alecredmond.export.observable.NodeObservation;
 import io.github.alecredmond.internal.application.probabilitytables.base.SingleEventTableData;
 import io.github.alecredmond.internal.method.probabilitytables.tablefactory.TableFactoryData;
 import java.util.LinkedHashMap;

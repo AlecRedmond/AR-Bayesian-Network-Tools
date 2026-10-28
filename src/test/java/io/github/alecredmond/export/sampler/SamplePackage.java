@@ -1,6 +1,7 @@
 package io.github.alecredmond.export.sampler;
 
 import io.github.alecredmond.export.inference.InferenceEngine;
+import io.github.alecredmond.export.inference.JunctionTreeAlgorithm;
 import io.github.alecredmond.export.network.BayesianNetwork;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
@@ -29,8 +30,8 @@ public class SamplePackage {
       Set<String> measuredStateIds,
       boolean printMarginals) {
     this.printMarginals = printMarginals;
-    this.network = network.solveNetwork();
-    this.engine = InferenceEngine.create(network).setObservedById(observedStateIds);
+    this.network = network;
+    this.engine = new JunctionTreeAlgorithm(network).setObservedById(observedStateIds);
     this.numberOfSamples = numberOfSamples;
     this.observedStateIds = observedStateIds;
     this.observedStates = network.getNodeStatesById(observedStateIds);

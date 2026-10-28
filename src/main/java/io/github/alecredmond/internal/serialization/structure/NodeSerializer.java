@@ -1,11 +1,12 @@
 package io.github.alecredmond.internal.serialization.structure;
 
-import io.github.alecredmond.export.network.BayesianNetworkData;
 import io.github.alecredmond.export.network.serialized.SerializedBayesianNetwork;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.serialized.SerializedNode;
+import io.github.alecredmond.internal.application.network.BayesianNetworkData;
 import io.github.alecredmond.internal.serialization.SerializationData;
 import io.github.alecredmond.internal.serialization.SerializerUtils;
+import java.util.Arrays;
 import java.util.List;
 
 public class NodeSerializer {
@@ -17,7 +18,7 @@ public class NodeSerializer {
   }
 
   public List<SerializedNode> serializeAllNodes(BayesianNetworkData networkData) {
-    return networkData.getNodes().stream().map(this::serialize).toList();
+    return Arrays.stream(networkData.getNodes()).map(this::serialize).toList();
   }
 
   public SerializedNode serialize(Node node) {
@@ -30,11 +31,11 @@ public class NodeSerializer {
 
   public void deSerializeNodes(
       SerializedBayesianNetwork serializedBayesianNetwork, SerializationData serializationData) {
-    List<SerializedNode> serializedNodes = serializedBayesianNetwork.serializedNodes();
-    List<Node> nodes = serializationData.getNetworkData().getNodes();
-    serializedNodes.stream()
-        .map(serializedNode -> deSerialize(serializedNode, serializationData))
-        .forEach(nodes::add);
+//    List<SerializedNode> serializedNodes = serializedBayesianNetwork.serializedNodes();
+//    List<Node> nodes = serializationData.getNetworkData().getNodes();
+//    serializedNodes.stream()
+//        .map(serializedNode -> deSerialize(serializedNode, serializationData))
+//        .forEach(nodes::add);
   }
 
   public Node deSerialize(SerializedNode sto, SerializationData data) {

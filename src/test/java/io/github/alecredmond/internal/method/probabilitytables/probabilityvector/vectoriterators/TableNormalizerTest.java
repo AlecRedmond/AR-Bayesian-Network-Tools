@@ -8,30 +8,29 @@ import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.probabilitytables.ProbabilityTable;
 import io.github.alecredmond.internal.method.probabilitytables.tablefactory.NetworkTableFactory;
 import io.github.alecredmond.internal.method.vectoriterator.misciterators.TableNormalizer;
+import io.github.alecredmond.networkscenario.NetworkScenario;
+import io.github.alecredmond.networkscenario.NetworkScenarioType;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
-
-import io.github.alecredmond.networkscenario.NetworkScenario;
-import io.github.alecredmond.networkscenario.NetworkScenarioType;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 class TableNormalizerTest {
   static final List<BayesianNetwork> NETWORKS =
-      //List.of(AH_NETWORK.get(), RAIN_NETWORK.get(), SIMPLE_LINEAR.get());
-          Arrays.stream(values()).map(NetworkScenarioType::get).map(NetworkScenario::buildNetwork).toList();
+      // List.of(AH_NETWORK.get(), RAIN_NETWORK.get(), SIMPLE_LINEAR.get());
+      Arrays.stream(values())
+          .map(NetworkScenarioType::get)
+          .map(NetworkScenario::buildNetwork)
+          .toList();
   TableNormalizer test;
 
   static Stream<Arguments> getNetworkTables() {
     return NETWORKS.stream()
-        .flatMap(
-            net ->
-                net.getNetworkData().getNodeIDsMap().keySet().stream()
-                    .map(s -> Arguments.of(net, s)));
+        .flatMap(net -> net.streamNodes().map(Node::getId).map(s -> Arguments.of(net, s)));
   }
 
   @ParameterizedTest

@@ -1,11 +1,10 @@
 package io.github.alecredmond.internal.method.sampler;
 
-import io.github.alecredmond.export.inference.NodeObservation;
-import io.github.alecredmond.export.inference.ObservationStatus;
 import io.github.alecredmond.export.network.BayesianNetwork;
-import io.github.alecredmond.export.network.BayesianNetworkData;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
+import io.github.alecredmond.export.observable.NodeObservation;
+import io.github.alecredmond.export.observable.ObservationStatus;
 import io.github.alecredmond.export.probabilitytables.NetworkTable;
 import io.github.alecredmond.internal.application.sampler.LikelihoodWeightingSamplerData;
 import io.github.alecredmond.internal.method.sampler.picker.SamplePicker;
@@ -26,10 +25,9 @@ public class LikelihoodWeightingSampler extends MonteCarloSamplerImpl {
   }
 
   private LikelihoodWeightingSamplerData buildSamplerData() {
-    BayesianNetworkData networkData = network.getNetworkData();
-    Node[] nodes = networkData.getNodes().toArray(Node[]::new);
+    Node[] nodes = network.getNodes();
     NetworkTable[] tables = new NetworkTable[nodes.length];
-    Map<Node, NetworkTable> networkTables = networkData.getNetworkTablesMap();
+    Map<Node, NetworkTable> networkTables = network.getNetworkTablesMap();
     IntStream.range(0, nodes.length).forEach(i -> tables[i] = networkTables.get(nodes[i]));
     return new LikelihoodWeightingSamplerData(nodes, tables);
   }
@@ -54,7 +52,7 @@ public class LikelihoodWeightingSampler extends MonteCarloSamplerImpl {
             samplerData.getDistributedSamples(),
             observations,
             samplerData.getNodes(),
-            network.getNetworkData());
+            network);
   }
 
   private boolean anyNegatedObservations(Map<Node, NodeObservation> observations) {

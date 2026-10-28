@@ -2,7 +2,7 @@ package io.github.alecredmond.internal.method.printer;
 
 import io.github.alecredmond.exceptions.NetworkPrinterException;
 import io.github.alecredmond.export.inference.InferenceEngine;
-import io.github.alecredmond.export.network.BayesianNetworkData;
+import io.github.alecredmond.export.network.BayesianNetwork;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.probabilitytables.ProbabilityTable;
 import io.github.alecredmond.internal.application.printer.PrinterPropertyConfigs;
@@ -12,20 +12,20 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class NetworkPrinter {
-  private final BayesianNetworkData networkData;
+  private final BayesianNetwork network;
   private final PrinterPropertyConfigs configs;
   private final TableFormatter tableFormatter;
   private final PrinterFileExporter printerFileExporter;
 
-  public NetworkPrinter(BayesianNetworkData networkData) {
-    this.networkData = networkData;
+  public NetworkPrinter(BayesianNetwork network) {
+    this.network = network;
     this.configs = new PrinterPropertyConfigs();
     this.printerFileExporter = new PrinterFileExporter(configs);
     this.tableFormatter = new TableFormatter(configs);
   }
 
   public NetworkPrinter(InferenceEngine engine) {
-    this.networkData = engine.getNetwork().getNetworkData();
+    this.network = engine.getNetwork();
     this.configs = new PrinterPropertyConfigs();
     this.printerFileExporter = new PrinterFileExporter(configs);
     this.tableFormatter = new TableFormatter(configs);
@@ -42,20 +42,19 @@ public class NetworkPrinter {
       outputLines.forEach(log::info);
     }
     if (configs.isPrintToTextFile()) {
-      printerFileExporter.exportLinesToFile(
-          outputLines, documentTitle, networkData.getNetworkName());
+      printerFileExporter.exportLinesToFile(outputLines, documentTitle, network.getNetworkName());
     }
   }
 
   public void printNetwork() {
-    printTables(networkData.getNetworkTablesMap(), "NETWORK TABLES");
+    printTables(network.getNetworkTablesMap(), "NETWORK TABLES");
   }
 
   public <T extends ProbabilityTable> void printTables(
       Map<Node, T> associatedMap, String tableType) {
     List<String> outputLines = new ArrayList<>(List.of(tableType, ""));
 
-    networkData.getNodes().stream()
+    Arrays.stream(network.getNodes())
         .filter(associatedMap::containsKey)
         .map(associatedMap::get)
         .map(tableFormatter::generateTableLines)

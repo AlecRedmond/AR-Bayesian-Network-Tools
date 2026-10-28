@@ -1,7 +1,6 @@
 package io.github.alecredmond.export.network;
 
 import io.github.alecredmond.export.constraints.ProbabilityConstraint;
-import io.github.alecredmond.export.inference.InferenceAlgorithm;
 import io.github.alecredmond.export.inference.InferenceEngine;
 import io.github.alecredmond.export.network.serialized.SerializedBayesianNetwork;
 import io.github.alecredmond.export.node.Node;
@@ -10,13 +9,15 @@ import io.github.alecredmond.export.probabilitytables.NetworkTable;
 import io.github.alecredmond.export.sampler.MonteCarloSampler;
 import io.github.alecredmond.export.solver.BayesSolver;
 import io.github.alecredmond.internal.fileio.NetworkFileIO;
-import io.github.alecredmond.internal.method.network.BayesianNetworkImpl;
+import io.github.alecredmond.internal.method.network.BayesianNetworkBuilderImpl;
 import io.github.alecredmond.internal.serialization.BayesianNetworkSerializer;
 import java.io.File;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
 import javax.swing.JFileChooser;
 
 /**
@@ -27,29 +28,6 @@ import javax.swing.JFileChooser;
  * Each node is associated with a conditional probability table (CPT) containing the discrete
  * probability distribution {@code P(X|Pa(X))}, where {@code X} is a single node in the graph,
  * {@code Pa(X)} are its parent nodes.
- *
- * <p>In a {@code BayesianNetwork} instance, the CPTs are not directly input; instead an individual
- * CPT entry is entered as a {@link ProbabilityConstraint}. A {@link BayesSolver} uses an Iterative
- * Proportional Fitting Algorithm (IPFP) to provide a CPT mapping that best fits these constraints.
- * This allows finding the best fit CPTs from incomplete domain data, or from known conditional or
- * marginal probabilities which do not follow the graph structure ordering {@code P(X|Pa(X))}.
- * <i>Note: Constraints that span conditionally independent nodes may lose their exact definitions
- * when mapped back to the network's CPTs after solving.</i>
- *
- * <p>If all CPTs are known in advance, the construction of the constraints may be expedited by
- * building a {@code BayesianNetwork} instance using a {@link BayesianNetworkBuilder}.
- *
- * <p>The hard limit on each CPT in the network is 2<sup>31</sup>&minus;1 entries. In practice this
- * limit will be smaller as the solver combines multiple tables during the IPFP process. The solver
- * may be run manually by calling {@link #solveNetwork()}, or will automatically be run when calling
- * a method that requires the network in a solved state, such as {@link #buildInferenceEngine()}.
- *
- * <p>A {@code BayesianNetwork} requires all relevant {@link Node} values to be present within the
- * network before graph structure/parent-child relations, and all relevant {@link NodeState} values
- * to be present before adding {@link ProbabilityConstraint}s. It is advisable to use only the
- * {@code BayesianNetwork} interface to manipulate the graph structure, but if it is necessary to
- * call structuring methods on individual {@link Node} objects, care should be taken to ensure all
- * associated nodes already exist in the {@code BayesianNetwork}.
  *
  * <p>Instances of this interface are not thread-safe. External synchronization is required for
  * concurrent access.
@@ -62,6 +40,7 @@ import javax.swing.JFileChooser;
  * @author Alec Redmond
  * @version 1.0.0 RELEASE
  */
+// TODO - REFORMAT JAVADOC
 @SuppressWarnings({"UnusedReturnValue"})
 public interface BayesianNetwork {
 
@@ -69,23 +48,8 @@ public interface BayesianNetwork {
   // ----------------------------------CONSTRUCTORS------------------------------------------------
   // ----------------------------------------------------------------------------------------------
 
-  /**
-   * Creates a new {@code BayesianNetwork} with the name "UNNAMED NETWORK".
-   *
-   * @return a new {@code BayesianNetwork}.
-   */
-  static BayesianNetwork newNetwork() {
-    return new BayesianNetworkImpl();
-  }
-
-  /**
-   * Creates a new {@code BayesianNetwork} with the specified name.
-   *
-   * @param networkName the name for the new network.
-   * @return a new {@code BayesianNetwork}.
-   */
-  static BayesianNetwork newNetwork(String networkName) {
-    return new BayesianNetworkImpl(networkName);
+  static BayesianNetworkBuilder builder() {
+    return new BayesianNetworkBuilderImpl();
   }
 
   /**
@@ -159,20 +123,17 @@ public interface BayesianNetwork {
    */
   boolean saveNetworkToFile();
 
-  /**
-   * Returns a new {@link Serializable} version of this {@code BayesianNetwork}. A {@link
-   * SerializedBayesianNetwork} is, in essence, a deep copy of the network's {@link
-   * BayesianNetworkData} object, with every {@link Node} and {@link NodeState} replaced with their
-   * identifiers. This saves the current state of the {@code BayesianNetwork}, and is used in file
-   * I/O operations such as {@link #saveNetworkToFile()} and {@link #loadNetworkFromFile()}.
-   *
-   * @return a new {@link SerializedBayesianNetwork} mapping of this {@code BayesianNetwork}.
-   */
   SerializedBayesianNetwork serializeNetwork();
 
   // ----------------------------------------------------------------------------------------------
-  // ----------------------------------NODE/STATE GETTERS------------------------------------------
+  // ----------------------------------DATA GETTERS -----------------------------------------------
   // ----------------------------------------------------------------------------------------------
+
+  <T extends Serializable> int getNodeOrdinalById(T nodeId);
+
+  int getNodeOrdinalByName(String nodeName);
+
+  int getNodeOrdinal(Node node);
 
   /**
    * Returns a {@link Node} from its identifier in this {@code BayesianNetwork}.
@@ -198,11 +159,15 @@ public interface BayesianNetwork {
   Set<Node> getNodesByName(Collection<String> nodeNames);
 
   /**
-   * Returns a set of all {@link Node}s in this {@code BayesianNetwork}
+   * Returns a topographically ordered array of all {@link Node}s in this {@code BayesianNetwork}
    *
-   * @return a new set containing every {@link Node} in this {@code BayesianNetwork}.
+   * @return a new array of every {@link Node} in this {@code BayesianNetwork}.
    */
-  Set<Node> getAllNodes();
+  Node[] getNodes();
+
+  Stream<Node> streamNodes();
+
+  <T extends Collection<Node>, U extends T> U getNodes(Supplier<U> collectionSupplier);
 
   /**
    * Returns a {@link NodeState} from its identifier in this {@code BayesianNetwork}.
@@ -223,26 +188,13 @@ public interface BayesianNetwork {
    */
   <E extends Serializable> Set<NodeState> getNodeStatesById(Collection<E> nodeStateIDs);
 
+  Set<ProbabilityConstraint> getConstraints();
+
+  String getNetworkName();
+
   // ----------------------------------------------------------------------------------------------
   // ----------------------------------NETWORK FUNCTIONS-------------------------------------------
   // ----------------------------------------------------------------------------------------------
-
-  /**
-   * Runs a {@link BayesSolver} instance to find the best fit for the constraints provided. Other
-   * methods that involve sampling, observing, and printing from the network implicitly run this
-   * method. If analysis of the solver convergence is required, consider creating a new {@link
-   * BayesSolver} instance using {@code BayesSolver.create(network)}.
-   *
-   * @return this instance for method chaining.
-   */
-  BayesianNetwork solveNetwork();
-
-  /**
-   * Checks if this {@code BayesianNetwork} is in a solved configuration.
-   *
-   * @return {@code true} if this {@code BayesianNetwork} has been solved.
-   */
-  boolean isSolved();
 
   /**
    * Prints the CPTs of this {@code BayesianNetwork}, either to a {@code .txt} file or to the
@@ -254,14 +206,6 @@ public interface BayesianNetwork {
   BayesianNetwork printNetwork();
 
   /**
-   * Retrieves the data object containing all network information pertinent to this {@code
-   * BayesianNetwork}. It is advisable to not modify this data in any way.
-   *
-   * @return the data object for this {@code BayesianNetwork}.
-   */
-  BayesianNetworkData getNetworkData();
-
-  /**
    * Retrieves the Conditional Probability Table (CPT) for a given node.
    *
    * @param nodeID the identifier of the node.
@@ -270,20 +214,23 @@ public interface BayesianNetwork {
    */
   <T extends Serializable> NetworkTable getNetworkTableById(T nodeID);
 
+  NetworkTable getNetworkTable(Node node);
+
+  NetworkTable[] getAllNetworkTables();
+
   /**
    * Returns a new map connecting each {@link Node} in this {@code BayesianNetwork} to its
    * associated Conditional Probability Table (CPT).
    *
    * @return a new map containing each {@link Node} and its associated {@link NetworkTable} CPT.
    */
-  Map<Node, NetworkTable> getNetworkTables();
+  Map<Node, NetworkTable> getNetworkTablesMap();
 
   /**
    * Builds a new {@link InferenceEngine} from the current {@code BayesianNetwork}. An {@link
    * InferenceEngine} provides utilities for running direct inference on a network, including
    * setting observations, querying prior and posterior probabilities, and printing posterior
-   * probability tables. This method will construct the default variant set in {@code
-   * app.properties}, see the {@link InferenceAlgorithm} documentation for further information.
+   * probability tables.
    *
    * @return a new {@link InferenceEngine} referencing this {@code BayesianNetwork}.
    */

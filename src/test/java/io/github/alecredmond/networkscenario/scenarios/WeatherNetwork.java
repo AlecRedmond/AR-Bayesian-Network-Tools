@@ -1,6 +1,8 @@
 package io.github.alecredmond.networkscenario.scenarios;
 
 import io.github.alecredmond.export.node.Node;
+import io.github.alecredmond.export.solver.BayesSolver;
+import io.github.alecredmond.export.solver.IPFPJunctionTreeSolver;
 import io.github.alecredmond.networkscenario.templates.AbstractNetworkScenario;
 import java.util.List;
 
@@ -23,6 +25,11 @@ public class WeatherNetwork extends AbstractNetworkScenario {
         List.of(state(precipitation, "RAIN"), state(precipitation, "SNOW")),
         List.of(state(cloudCover, "HEAVY")),
         0.90);
+  }
+
+  @Override
+  protected BayesSolver defaultSolver() {
+    return new IPFPJunctionTreeSolver();
   }
 
   @Override

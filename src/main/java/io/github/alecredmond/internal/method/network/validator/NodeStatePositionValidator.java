@@ -1,13 +1,14 @@
 package io.github.alecredmond.internal.method.network.validator;
 
-import io.github.alecredmond.export.network.BayesianNetworkData;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
+import io.github.alecredmond.internal.application.network.BayesianNetworkData;
+import java.util.Arrays;
 
 public class NodeStatePositionValidator implements NetworkValidator {
   @Override
   public void validateData(BayesianNetworkData networkData) {
-    networkData.getNodes().forEach(this::checkPositionsCorrect);
+    Arrays.stream(networkData.getNodes()).forEach(this::checkPositionsCorrect);
   }
 
   private void checkPositionsCorrect(Node node) {

@@ -2,16 +2,12 @@ package io.github.alecredmond.internal.method.constraints.base;
 
 import io.github.alecredmond.exceptions.ConstraintValidationException;
 import io.github.alecredmond.export.constraints.ProbabilityConstraint;
-import io.github.alecredmond.export.network.BayesianNetworkData;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
 import io.github.alecredmond.internal.application.constraint.ConstraintBuilderData;
 import io.github.alecredmond.internal.method.constraints.strategy.ValidatedConstraint;
 import io.github.alecredmond.internal.method.utils.CollectionToString;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -19,11 +15,6 @@ public abstract class ConstraintValidatorBase<
     P extends ProbabilityConstraint, V extends ValidatedConstraint<P>> {
 
   protected ConstraintValidatorBase() {}
-
-  public V validateConstraint(ProbabilityConstraint constraint, BayesianNetworkData data) {
-    ConstraintBuilderData cbd = new ConstraintBuilderData(data, constraint);
-    return validateConstraint(cbd);
-  }
 
   public V validateConstraint(ConstraintBuilderData data) {
     validateInputs(data);
@@ -91,9 +82,8 @@ public abstract class ConstraintValidatorBase<
 
   private void statesExistInNetwork(ConstraintBuilderData data) {
     ProbabilityConstraint constraint = data.getConstraint();
-    BayesianNetworkData networkData = data.getNetworkData();
     Set<Node> constraintNodes = new HashSet<>(constraint.getAllNodes());
-    Set<Node> networkNodes = new HashSet<>(networkData.getNodes());
+    Set<Node> networkNodes = data.getAllDeclaredNodes();
     if (!networkNodes.containsAll(constraintNodes)) {
       throw new ConstraintValidationException(
           "Not all nodes in constraint %s are declared in the network!".formatted(constraint));
@@ -110,11 +100,10 @@ public abstract class ConstraintValidatorBase<
 
   protected void noIdenticalConstraintsInNetwork(ConstraintBuilderData data) {
     ProbabilityConstraint constraint = data.getConstraint();
-    BayesianNetworkData networkData = data.getNetworkData();
     Set<NodeState> eventStates = constraint.getEventStates();
     Set<NodeState> conditionStates = constraint.getConditionStates();
     boolean parametersAreUnique =
-        networkData.getConstraints().parallelStream()
+        data.getAllDeclaredConstraints().parallelStream()
             .filter(c -> eventStates.equals(c.getEventStates()))
             .noneMatch(c -> conditionStates.equals(c.getConditionStates()));
     if (parametersAreUnique) {

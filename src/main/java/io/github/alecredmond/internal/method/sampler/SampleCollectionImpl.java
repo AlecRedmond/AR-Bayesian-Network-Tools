@@ -1,13 +1,12 @@
 package io.github.alecredmond.internal.method.sampler;
 
-import io.github.alecredmond.export.inference.NodeObservation;
-import io.github.alecredmond.export.network.BayesianNetworkData;
+import io.github.alecredmond.export.network.BayesianNetwork;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
+import io.github.alecredmond.export.observable.NodeObservation;
 import io.github.alecredmond.export.sampler.Sample;
 import io.github.alecredmond.export.sampler.SampleCollection;
 import io.github.alecredmond.internal.application.sampler.SampleCollectionData;
-import io.github.alecredmond.internal.method.network.NetworkDataUtils;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
@@ -19,12 +18,11 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class SampleCollectionImpl implements SampleCollection {
   private final SampleCollectionData collectionData;
-  private final BayesianNetworkData networkData;
+  private final BayesianNetwork network;
 
-  public SampleCollectionImpl(
-      SampleCollectionData collectionData, BayesianNetworkData networkData) {
+  public SampleCollectionImpl(SampleCollectionData collectionData, BayesianNetwork network) {
     this.collectionData = collectionData;
-    this.networkData = networkData;
+    this.network = network;
   }
 
   public Map<Node, NodeObservation> getObservations() {
@@ -57,7 +55,7 @@ public class SampleCollectionImpl implements SampleCollection {
   }
 
   public <T extends Serializable> void setDisplayedNodesById(Collection<T> nodeIds) {
-    Set<Node> nodes = NetworkDataUtils.getNodesByID(nodeIds, networkData);
+    Set<Node> nodes = network.getNodesByIds(nodeIds);
     setDisplayedNodes(nodes);
   }
 
@@ -78,7 +76,7 @@ public class SampleCollectionImpl implements SampleCollection {
   }
 
   public <T extends Serializable> int countSamplesIncludingStateIds(Collection<T> stateIds) {
-    return countSamplesIncludingStates(NetworkDataUtils.getStatesByID(stateIds, networkData));
+    return countSamplesIncludingStates(network.getNodeStatesById(stateIds));
   }
 
   public <T extends Serializable> int countSamplesIncludingStateIds(T stateId) {
@@ -99,7 +97,7 @@ public class SampleCollectionImpl implements SampleCollection {
   public <T extends Serializable> List<Sample> getSamplesIncludingStatesById(
       Collection<T> includedStateIds) {
     return SampleUtils.listSamplesIncludingStates(
-        this, NetworkDataUtils.getStatesByID(includedStateIds, networkData));
+        this, network.getNodeStatesById(includedStateIds));
   }
 
   public <T extends Serializable> List<Sample> getSamplesIncludingStatesById(T stateId) {

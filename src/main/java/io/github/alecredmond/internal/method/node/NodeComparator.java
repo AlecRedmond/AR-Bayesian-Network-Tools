@@ -1,29 +1,27 @@
 package io.github.alecredmond.internal.method.node;
 
 import io.github.alecredmond.exceptions.NetworkStructureException;
-import io.github.alecredmond.export.network.BayesianNetworkData;
 import io.github.alecredmond.export.node.Node;
+import io.github.alecredmond.internal.application.network.BayesianNetworkData;
 import java.util.*;
-import lombok.Getter;
 
 public class NodeComparator implements Comparator<Node> {
   private final Comparator<Node> comparator;
-  @Getter private final List<Node> orderedNodes;
+  private final Node[] nodes;
 
   public NodeComparator(BayesianNetworkData networkData) {
+    this.nodes = networkData.getNodes();
     Map<Node, Integer> layerMap = new HashMap<>();
     Map<Node, Integer> orderMap = new HashMap<>();
     fillLayerAndOrderMap(networkData, layerMap, orderMap);
     comparator = Comparator.<Node, Integer>comparing(layerMap::get).thenComparing(orderMap::get);
-    orderedNodes = buildOrderedNodes(networkData.getNodeIDsMap().values());
   }
 
   private void fillLayerAndOrderMap(
       BayesianNetworkData networkData, Map<Node, Integer> layerMap, Map<Node, Integer> orderMap) {
     String networkName = networkData.getNetworkName();
-    Collection<Node> nodes = networkData.getNodeIDsMap().values();
     Map<Node, Integer> degreeMap = new HashMap<>();
-    Queue<Node> nodeQueue = buildQueueAndDegreeMap(nodes, degreeMap, networkName);
+    Queue<Node> nodeQueue = buildQueueAndDegreeMap(degreeMap, networkName);
     int order = 0;
     while (!nodeQueue.isEmpty()) {
       Node node = nodeQueue.poll();
@@ -33,19 +31,13 @@ public class NodeComparator implements Comparator<Node> {
     }
   }
 
-  private List<Node> buildOrderedNodes(Collection<Node> nodes) {
-    return nodes.stream().sorted(comparator).toList();
-  }
-
-  private Queue<Node> buildQueueAndDegreeMap(
-      Collection<Node> nodes, Map<Node, Integer> degreeMap, String networkName) {
+  private Queue<Node> buildQueueAndDegreeMap(Map<Node, Integer> degreeMap, String networkName) {
     Queue<Node> nodeQueue = new ArrayDeque<>();
-    nodes.forEach(
-        node -> {
-          int degree = node.getParents().size();
-          if (degree == 0) nodeQueue.add(node);
-          degreeMap.put(node, degree);
-        });
+    for (Node node : nodes) {
+      int degree = node.getParents().size();
+      if (degree == 0) nodeQueue.add(node);
+      degreeMap.put(node, degree);
+    }
     if (!nodeQueue.isEmpty()) return nodeQueue;
     throw new NetworkStructureException(
         "No nodes without parents exist in network %s".formatted(networkName));

@@ -1,9 +1,9 @@
 package io.github.alecredmond.internal.method.sampler;
 
 import io.github.alecredmond.exceptions.SampleValidationException;
-import io.github.alecredmond.export.inference.NodeObservation;
-import io.github.alecredmond.export.network.BayesianNetworkData;
+import io.github.alecredmond.export.network.BayesianNetwork;
 import io.github.alecredmond.export.node.Node;
+import io.github.alecredmond.export.observable.NodeObservation;
 import io.github.alecredmond.export.sampler.Sample;
 import io.github.alecredmond.internal.application.sampler.SampleCollectionData;
 import io.github.alecredmond.internal.method.node.NodeUtils;
@@ -21,7 +21,7 @@ public class SampleBuilder {
       Map<SampleImpl, Integer> sampleMap,
       Map<Node, NodeObservation> observations,
       Node[] nodeArray,
-      BayesianNetworkData networkData) {
+      BayesianNetwork network) {
 
     if (sampleMap.isEmpty()) numberOfSamples = 0;
     else setCounts(sampleMap);
@@ -35,7 +35,7 @@ public class SampleBuilder {
             .nodeIndexMap(NodeUtils.buildNodeIndexMap(nodeArray))
             .build();
 
-    return new SampleCollectionImpl(collectionData, networkData);
+    return new SampleCollectionImpl(collectionData, network);
   }
 
   private void setCounts(Map<SampleImpl, Integer> sampleMap) {

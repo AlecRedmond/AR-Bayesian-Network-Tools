@@ -27,9 +27,10 @@ public class ConstraintBuilderIterator extends StateUpdateBase<Node, NodeState>
   private final int eventNodeIdx;
   private List<ProbabilityConstraint> built;
 
-  public ConstraintBuilderIterator(Node event, ProbabilityVector vector) {
-    super(vector, NodeState[]::new);
-    this.event = event;
+  public ConstraintBuilderIterator(CptDefinition cptDefinition) {
+    super(cptDefinition.getVector(), NodeState[]::new);
+    ProbabilityVector vector = cptDefinition.getVector();
+    this.event = cptDefinition.measuredNode();
     this.iterator = StandardCartesianIterator.create(this, vector);
     this.probabilities = vector.getProbabilities();
     this.eventNodeIdx = calculateEventNodeIndex(event, vector.getOrderedNodes());
@@ -40,15 +41,6 @@ public class ConstraintBuilderIterator extends StateUpdateBase<Node, NodeState>
         .filter(i -> event.equals(orderedNodes[i]))
         .findFirst()
         .orElseThrow();
-  }
-
-  public ConstraintBuilderIterator(CptDefinition cptDefinition) {
-    super(cptDefinition.getVector(), NodeState[]::new);
-    ProbabilityVector vector = cptDefinition.getVector();
-    this.event = cptDefinition.measuredNode();
-    this.iterator = StandardCartesianIterator.create(this, vector);
-    this.probabilities = vector.getProbabilities();
-    this.eventNodeIdx = calculateEventNodeIndex(event, vector.getOrderedNodes());
   }
 
   public List<ProbabilityConstraint> buildConstraints() {

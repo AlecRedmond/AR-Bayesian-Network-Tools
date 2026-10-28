@@ -3,7 +3,6 @@ package io.github.alecredmond.export.network.serialized;
 import io.github.alecredmond.export.constraints.ProbabilityConstraint;
 import io.github.alecredmond.export.constraints.serialized.SerializedProbabilityConstraint;
 import io.github.alecredmond.export.network.BayesianNetwork;
-import io.github.alecredmond.export.network.BayesianNetworkData;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
 import io.github.alecredmond.export.node.serialized.SerializedNode;
@@ -23,9 +22,6 @@ import java.util.List;
  * @param serializedCPTs a list of all serialized {@link NetworkTable}s from the network.
  * @param serializedConstraints a list of serialized {@link ProbabilityConstraint}s within the
  *     network.
- * @param solved a flag indicating whether all constraints have been fitted within the network's
- *     CPTs.
- * @see BayesianNetworkData
  * @see SerializedNode
  * @see SerializedNetworkTable
  * @see SerializedProbabilityConstraint
@@ -35,6 +31,5 @@ public record SerializedBayesianNetwork(
     String networkName,
     List<SerializedNode> serializedNodes,
     List<SerializedNetworkTable> serializedCPTs,
-    List<SerializedProbabilityConstraint> serializedConstraints,
-    boolean solved)
+    List<SerializedProbabilityConstraint> serializedConstraints)
     implements Serializable {}

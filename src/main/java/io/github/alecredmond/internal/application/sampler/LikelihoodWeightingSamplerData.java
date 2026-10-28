@@ -1,8 +1,8 @@
 package io.github.alecredmond.internal.application.sampler;
 
-import io.github.alecredmond.export.inference.NodeObservation;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
+import io.github.alecredmond.export.observable.NodeObservation;
 import io.github.alecredmond.export.probabilitytables.NetworkTable;
 import io.github.alecredmond.internal.method.sampler.SampleImpl;
 import io.github.alecredmond.internal.method.sampler.picker.SamplePicker;

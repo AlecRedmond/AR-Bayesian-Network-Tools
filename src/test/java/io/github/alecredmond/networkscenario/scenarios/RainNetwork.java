@@ -1,9 +1,9 @@
 package io.github.alecredmond.networkscenario.scenarios;
 
-import static io.github.alecredmond.export.node.newnode.BinaryNode.*;
+import static io.github.alecredmond.export.node.implementation.BinaryNode.*;
 
 import io.github.alecredmond.export.node.Node;
-import io.github.alecredmond.export.node.newnode.BinaryNode;
+import io.github.alecredmond.export.node.implementation.BinaryNode;
 import io.github.alecredmond.networkscenario.templates.BinaryNodeScenario;
 import io.github.alecredmond.networkscenario.templates.CptDefinedScenario;
 

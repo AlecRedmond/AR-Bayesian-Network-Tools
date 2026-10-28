@@ -1,9 +1,11 @@
 package io.github.alecredmond.networkscenario.templates;
 
+import io.github.alecredmond.export.network.BayesianNetworkBuilder;
 import io.github.alecredmond.export.network.cptdefinition.*;
-import io.github.alecredmond.export.network.newbuilder.NetworkBuilder;
 import io.github.alecredmond.export.node.Node;
-import io.github.alecredmond.export.node.newnode.BinaryNode;
+import io.github.alecredmond.export.node.implementation.BinaryNode;
+import io.github.alecredmond.export.solver.BayesSolver;
+import io.github.alecredmond.export.solver.DirectCptSolver;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
@@ -13,12 +15,16 @@ public abstract class CptDefinedScenario extends AbstractNetworkScenario {
   protected final Map<Node, CptDefinition> cptDefinitionMap = new HashMap<>();
 
   @Override
-  public NetworkBuilder getBuilder() {
-    NetworkBuilder nb = super.getBuilder();
+  protected BayesSolver defaultSolver() {
+    return new DirectCptSolver();
+  }
+
+  @Override
+  public BayesianNetworkBuilder getBuilder() {
+    BayesianNetworkBuilder nb = super.getBuilder();
     cptDefinitionMap.values().forEach(nb::defineCPT);
     return nb;
   }
-  
 
   protected void addCpt(Node node, double... probabilities) {
     probabilitiesMap.put(node.getId(), probabilities);

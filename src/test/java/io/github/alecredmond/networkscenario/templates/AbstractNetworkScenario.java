@@ -1,11 +1,11 @@
 package io.github.alecredmond.networkscenario.templates;
 
 import io.github.alecredmond.export.network.BayesianNetwork;
-import io.github.alecredmond.export.network.newbuilder.NetworkBuilder;
-import io.github.alecredmond.export.network.newbuilder.NetworkBuilderImpl;
+import io.github.alecredmond.export.network.BayesianNetworkBuilder;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
-import io.github.alecredmond.export.node.newnode.DefaultNode;
+import io.github.alecredmond.export.node.implementation.DefaultNode;
+import io.github.alecredmond.export.solver.BayesSolver;
 import io.github.alecredmond.networkscenario.ConstraintData;
 import io.github.alecredmond.networkscenario.NetworkScenario;
 import java.util.*;
@@ -49,13 +49,15 @@ public abstract class AbstractNetworkScenario implements NetworkScenario {
   @Override
   public BayesianNetwork buildNetwork() {
     addNodesToNameMap(definedNodes());
-    return getBuilder().build();
+    return getBuilder().build(defaultSolver()).orElseThrow();
   }
 
+  protected abstract BayesSolver defaultSolver();
+
   @Override
-  public NetworkBuilder getBuilder() {
-    NetworkBuilder nb =
-        new NetworkBuilderImpl().setNetworkName(getNetworkName()).setNodes(definedNodes());
+  public BayesianNetworkBuilder getBuilder() {
+    BayesianNetworkBuilder nb =
+        BayesianNetwork.builder().setNetworkName(getNetworkName()).setNodes(definedNodes());
     constraintData.forEach(cd -> nb.addConstraint(cd.events(), cd.conditions(), cd.probability()));
     return nb;
   }

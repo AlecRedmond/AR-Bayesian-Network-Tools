@@ -1,6 +1,6 @@
 package io.github.alecredmond.export.network.cptdefinition;
 
-import io.github.alecredmond.export.node.newnode.BinaryNode;
+import io.github.alecredmond.export.node.implementation.BinaryNode;
 import io.github.alecredmond.internal.method.vectoriterator.misciterators.BinaryCptDefinitionPadder;
 
 public class HalfCptDefinition extends OrderedCptDefinition {

@@ -1,12 +1,12 @@
 package io.github.alecredmond.internal.method.sampler;
 
 import io.github.alecredmond.exceptions.NodeStateConflictException;
-import io.github.alecredmond.export.inference.NodeObservation;
 import io.github.alecredmond.export.network.BayesianNetwork;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
+import io.github.alecredmond.export.observable.NodeObservation;
 import io.github.alecredmond.export.sampler.MonteCarloSampler;
-import io.github.alecredmond.internal.method.network.NetworkDataUtils;
+import io.github.alecredmond.internal.method.observable.ObservableUtils;
 import java.io.Serializable;
 import java.util.*;
 import lombok.Getter;
@@ -31,7 +31,7 @@ public abstract class MonteCarloSamplerImpl implements MonteCarloSampler {
 
   @Override
   public MonteCarloSampler setObserved(Map<Node, NodeObservation> observations) {
-    return eliminateStates(NetworkDataUtils.convertToEliminations(this, network, observations));
+    return eliminateStates(ObservableUtils.convertToEliminations(this, network, observations));
   }
 
   @Override

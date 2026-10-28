@@ -1,10 +1,10 @@
 package io.github.alecredmond.internal.method.probabilitytables;
 
-import static io.github.alecredmond.export.inference.ObservationStatus.*;
+import static io.github.alecredmond.export.observable.ObservationStatus.UNOBSERVED;
 
-import io.github.alecredmond.export.inference.NodeObservation;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
+import io.github.alecredmond.export.observable.NodeObservation;
 import io.github.alecredmond.export.probabilitytables.ProbabilityTable;
 import io.github.alecredmond.internal.application.probabilitytables.base.SingleEventTableData;
 import io.github.alecredmond.internal.method.node.NodeUtils;

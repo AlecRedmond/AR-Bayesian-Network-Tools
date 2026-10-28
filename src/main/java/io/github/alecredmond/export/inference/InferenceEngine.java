@@ -4,10 +4,12 @@ import io.github.alecredmond.exceptions.NetworkPrinterException;
 import io.github.alecredmond.export.network.BayesianNetwork;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
+import io.github.alecredmond.export.observable.NodeObservation;
+import io.github.alecredmond.export.observable.Observable;
+import io.github.alecredmond.export.observable.ObservationStatus;
 import io.github.alecredmond.export.probabilitytables.ObservedTable;
 import io.github.alecredmond.export.sampler.MonteCarloSampler;
 import io.github.alecredmond.export.solver.BayesSolver;
-import io.github.alecredmond.internal.method.inference.InferenceEngineFactory;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Map;
@@ -16,8 +18,7 @@ import java.util.Map;
  * {@code InferenceEngine} provides utilities for running direct inference on a solved {@link
  * BayesianNetwork}. The values stored in the network's Conditional Probability Tables (CPTs) are
  * mapped to a secondary inference network which can be queried for joint, marginal, or conditional
- * probabilities. The documentation for {@link InferenceAlgorithm} provides further information on
- * the available variants.
+ * probabilities.
  *
  * <p>Specific {@link NodeState} values can be set as observed (always true) using {@link
  * #setObserved(Collection)} or {@link #setObservedById(Collection)}. These will be persisted in the
@@ -31,39 +32,10 @@ import java.util.Map;
  * concurrent access.
  *
  * @see BayesSolver
- * @see InferenceAlgorithm
  * @author Alec Redmond
  */
 @SuppressWarnings("UnusedReturnValue")
 public interface InferenceEngine extends Observable {
-  /**
-   * Creates an {@code InferenceEngine} from the given {@link BayesianNetwork}, using the default
-   * inference variant configured in {@code app.properties}. The active variant is controlled by
-   * {@code app.bayes.inference.defaultInferenceAlgorithm} (default: {@code
-   * JUNCTION_TREE_ALGORITHM}). This will automatically solve the network if it is unsolved.
-   *
-   * @param network the network where inference is to be run.
-   * @return a new {@code InferenceEngine} instance, or {@code null} if the given network was
-   *     unsolved and could not be solved.
-   */
-  static InferenceEngine create(BayesianNetwork network) {
-    return new InferenceEngineFactory().create(network);
-  }
-
-  /**
-   * Creates an {@code InferenceEngine} from a {@link BayesianNetwork} and a given {@link
-   * InferenceAlgorithm} variant. This will automatically solve the network if it is unsolved. Under
-   * almost all circumstances the use of {@link InferenceAlgorithm#JUNCTION_TREE_ALGORITHM} is
-   * advised. Refer to the {@link InferenceAlgorithm} documentation for further information.
-   *
-   * @param network the network where inference is to be run.
-   * @param inferenceAlgorithm the {@link InferenceAlgorithm} variant to use for this instance.
-   * @return a new {@code InferenceEngine} instance, or {@code null} if the given network was
-   *     unsolved and could not be solved.
-   */
-  static InferenceEngine create(BayesianNetwork network, InferenceAlgorithm inferenceAlgorithm) {
-    return new InferenceEngineFactory().create(network, inferenceAlgorithm);
-  }
 
   /**
    * Returns an {@link ObservedTable} associated with a {@link Node}. This is a table containing
@@ -78,6 +50,8 @@ public interface InferenceEngine extends Observable {
    * @throws NullPointerException if the identifier was not associated with any {@link Node}.
    */
   <T extends Serializable> ObservedTable getObservedTableById(T nodeId);
+
+  ObservedTable getObservedTableByNodeName(String nodeName);
 
   /**
    * Returns an {@link ObservedTable} associated with a {@link Node}. This is a table containing
@@ -119,16 +93,7 @@ public interface InferenceEngine extends Observable {
    */
   ObservedTable copyObservedTable(Node node);
 
-  /**
-   * Returns a map of all {@link Node} objects present in the network, and their associated observed
-   * {@link ObservedTable}. These tables contain only the node's {@link NodeState} values, which are
-   * mapped to their current posterior probability if this {@code InferenceEngine} has observations
-   * applied, or their prior (marginal) probability otherwise. These tables are not deep-copied and
-   * will update when changes to the current observations are made.
-   *
-   * @return a map associating each {@link Node} with its observed probability table.
-   */
-  Map<Node, ObservedTable> getObservedTables();
+  ObservedTable[] getObservedTables();
 
   /**
    * Returns the posterior probability of the given {@link NodeState} values, or their prior

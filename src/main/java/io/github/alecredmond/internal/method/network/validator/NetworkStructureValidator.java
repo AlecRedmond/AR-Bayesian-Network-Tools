@@ -1,8 +1,8 @@
 package io.github.alecredmond.internal.method.network.validator;
 
 import io.github.alecredmond.exceptions.NetworkStructureException;
-import io.github.alecredmond.export.network.BayesianNetworkData;
 import io.github.alecredmond.export.node.Node;
+import io.github.alecredmond.internal.application.network.BayesianNetworkData;
 import io.github.alecredmond.internal.method.utils.CollectionToString;
 import java.util.*;
 import java.util.stream.Stream;
@@ -13,7 +13,7 @@ public class NetworkStructureValidator implements NetworkValidator {
 
   @Override
   public void validateData(BayesianNetworkData networkData) {
-    Set<Node> remaining = new HashSet<>(networkData.getNodes());
+    Set<Node> remaining = new HashSet<>(Arrays.asList(networkData.getNodes()));
     Set<Node> visited = new HashSet<>();
     Set<Node> candidates = new HashSet<>();
     Queue<Node> queue = new ArrayDeque<>();

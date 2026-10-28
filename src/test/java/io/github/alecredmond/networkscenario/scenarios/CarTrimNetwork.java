@@ -1,6 +1,8 @@
 package io.github.alecredmond.networkscenario.scenarios;
 
 import io.github.alecredmond.export.node.Node;
+import io.github.alecredmond.export.solver.BayesSolver;
+import io.github.alecredmond.export.solver.IPFPJunctionTreeSolver;
 import io.github.alecredmond.networkscenario.templates.AbstractNetworkScenario;
 import java.util.List;
 
@@ -89,6 +91,11 @@ public class CarTrimNetwork extends AbstractNetworkScenario {
     addConstraint(state(colour, "BLACK"), 0.25);
     addConstraint(state(colour, "BLUE"), 0.35);
     addConstraint(state(colour, "WHITE"), 0.1);
+  }
+
+  @Override
+  protected BayesSolver defaultSolver() {
+    return new IPFPJunctionTreeSolver();
   }
 
   @Override

@@ -35,14 +35,14 @@ class LikelihoodWeightingSamplerTest {
   void testSamplerReturnsCorrectCounts(BayesianNetwork network) {
     MonteCarloSampler sampler = network.buildSampler();
     List<ProbabilityConstraint> constraints =
-        network.getNetworkData().getConstraints().stream()
+        network.getConstraints().stream()
             .filter(this::connectedConstraint)
             .toList();
     InferenceEngine engine = network.buildInferenceEngine();
     SampleCollection sampleCollection = sampler.generateSamples(NUMBER_OF_SAMPLES);
     if (PRINT_DEBUG_OUTPUT) {
       System.out.printf(
-          "Measuring for network %s%n".formatted(network.getNetworkData().getNetworkName()));
+          "Measuring for network %s%n".formatted(network.getNetworkName()));
     }
     constraints.forEach(c -> measureCount(sampleCollection, c, engine));
   }

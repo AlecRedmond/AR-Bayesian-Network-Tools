@@ -1,55 +1,38 @@
 package io.github.alecredmond.internal.method.network;
 
+import io.github.alecredmond.export.constraints.ProbabilityConstraint;
 import io.github.alecredmond.export.inference.InferenceEngine;
+import io.github.alecredmond.export.inference.JunctionTreeAlgorithm;
 import io.github.alecredmond.export.network.BayesianNetwork;
-import io.github.alecredmond.export.network.BayesianNetworkData;
 import io.github.alecredmond.export.network.serialized.SerializedBayesianNetwork;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
 import io.github.alecredmond.export.probabilitytables.NetworkTable;
 import io.github.alecredmond.export.sampler.MonteCarloSampler;
-import io.github.alecredmond.internal.application.network.NetworkErrorPolicy;
+import io.github.alecredmond.internal.application.network.BayesianNetworkData;
 import io.github.alecredmond.internal.fileio.NetworkFileIO;
-import io.github.alecredmond.internal.method.constraints.NetworkConstraintHandler;
 import io.github.alecredmond.internal.method.printer.NetworkPrinter;
 import io.github.alecredmond.internal.method.sampler.LikelihoodWeightingSampler;
-import io.github.alecredmond.internal.method.solver.BayesSolverImpl;
 import io.github.alecredmond.internal.serialization.BayesianNetworkSerializer;
 import java.io.File;
 import java.io.Serializable;
 import java.util.*;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
-@Getter
 @Slf4j
 public class BayesianNetworkImpl implements BayesianNetwork {
-  private final BayesianNetworkData networkData;
-  private final NetworkErrorPolicy policy = new NetworkErrorPolicy();
-  private final NetworkConstraintHandler networkConstraintHandler;
+  @Getter private final BayesianNetworkData networkData;
 
   // ----------------------------------------------------------------------------------------------
   // ----------------------------------CONSTRUCTORS------------------------------------------------
   // ----------------------------------------------------------------------------------------------
 
-  public BayesianNetworkImpl(String networkName) {
-    this.networkData = new BayesianNetworkData();
-    this.networkData.setNetworkName(networkName);
-    this.networkData.setBayesianNetwork(this);
-    this.networkConstraintHandler = new NetworkConstraintHandler(networkData);
-  }
-
-  public BayesianNetworkImpl() {
-    this.networkData = new BayesianNetworkData();
-    this.networkData.setBayesianNetwork(this);
-    this.networkConstraintHandler = new NetworkConstraintHandler(networkData);
-  }
-
   public BayesianNetworkImpl(BayesianNetworkData networkData) {
     this.networkData = networkData;
-    this.networkData.setBayesianNetwork(this);
-    this.networkConstraintHandler = new NetworkConstraintHandler(networkData);
   }
 
   // ----------------------------------------------------------------------------------------------
@@ -79,11 +62,28 @@ public class BayesianNetworkImpl implements BayesianNetwork {
   // ----------------------------------------------------------------------------------------------
   // ----------------------------------NODE/STATE GETTERS------------------------------------------
   // ----------------------------------------------------------------------------------------------
+
   @Override
-  public <T extends Serializable> Node getNodeById(T nodeID) {
-    return networkData.getNodeIDsMap().get(nodeID);
+  public <T extends Serializable> int getNodeOrdinalById(T nodeId) {
+    return networkData.getNodeIndexFromId().get(nodeId);
   }
 
+  @Override
+  public int getNodeOrdinalByName(String name) {
+    return networkData.getNodeIndexFromName().get(name);
+  }
+
+  @Override
+  public int getNodeOrdinal(Node node) {
+    return getNodeOrdinalById(node.getId());
+  }
+
+  @Override
+  public <T extends Serializable> Node getNodeById(T nodeID) {
+    return networkData.getNodes()[getNodeOrdinalById(nodeID)];
+  }
+
+  @Override
   public <T extends Serializable> Set<Node> getNodesByIds(Collection<T> nodeIDs) {
     return nodeIDs.stream()
         .distinct()
@@ -94,7 +94,7 @@ public class BayesianNetworkImpl implements BayesianNetwork {
 
   @Override
   public Node getNodeByName(String name) {
-    return networkData.getNodeNameMap().get(name);
+    return networkData.getNodes()[getNodeOrdinalByName(name)];
   }
 
   @Override
@@ -105,8 +105,19 @@ public class BayesianNetworkImpl implements BayesianNetwork {
   }
 
   @Override
-  public Set<Node> getAllNodes() {
-    return new LinkedHashSet<>(networkData.getNodes());
+  public Node[] getNodes() {
+    Node[] nodes = networkData.getNodes();
+    return Arrays.copyOf(nodes, nodes.length);
+  }
+
+  @Override
+  public Stream<Node> streamNodes() {
+    return Arrays.stream(networkData.getNodes());
+  }
+
+  @Override
+  public <T extends Collection<Node>, U extends T> U getNodes(Supplier<U> collectionSupplier) {
+    return streamNodes().collect(Collectors.toCollection(collectionSupplier));
   }
 
   @Override
@@ -123,36 +134,51 @@ public class BayesianNetworkImpl implements BayesianNetwork {
         .collect(Collectors.toCollection(LinkedHashSet::new));
   }
 
+  @Override
+  public Set<ProbabilityConstraint> getConstraints() {
+    return new LinkedHashSet<>(networkData.getConstraints());
+  }
+
+  @Override
+  public String getNetworkName() {
+    return networkData.getNetworkName();
+  }
+
   // ----------------------------------------------------------------------------------------------
   // ----------------------------------NETWORK FUNCTIONS-------------------------------------------
   // ----------------------------------------------------------------------------------------------
 
-  @Override
-  public BayesianNetwork solveNetwork() {
-    new BayesSolverImpl(networkData).solve();
-    return this;
-  }
-
-  public boolean isSolved() {
-    return networkData.isSolved();
-  }
-
   public BayesianNetworkImpl printNetwork() {
-    if (!networkData.isSolved()) solveNetwork();
-    new NetworkPrinter(networkData).printNetwork();
+    new NetworkPrinter(this).printNetwork();
     return this;
   }
 
+  @Override
   public <T extends Serializable> NetworkTable getNetworkTableById(T nodeID) {
-    return getNetworkTables().get(getNodeById(nodeID));
+    return networkData.getNetworkTables()[getNodeOrdinalById(nodeID)];
   }
 
-  public Map<Node, NetworkTable> getNetworkTables() {
-    return Map.copyOf(networkData.getNetworkTablesMap());
+  @Override
+  public NetworkTable getNetworkTable(Node node) {
+    return getNetworkTableById(node.getId());
+  }
+
+  @Override
+  public NetworkTable[] getAllNetworkTables() {
+    NetworkTable[] tables = networkData.getNetworkTables();
+    return Arrays.copyOf(tables, tables.length);
+  }
+
+  public Map<Node, NetworkTable> getNetworkTablesMap() {
+    return Arrays.stream(networkData.getNetworkTables())
+        .map(table -> Map.entry(table.getNetworkNode(), table))
+        .collect(
+            Collectors.toMap(
+                Map.Entry::getKey, Map.Entry::getValue, (x, y) -> y, LinkedHashMap::new));
   }
 
   public InferenceEngine buildInferenceEngine() {
-    return InferenceEngine.create(this);
+    return new JunctionTreeAlgorithm(this);
   }
 
   public MonteCarloSampler buildSampler() {

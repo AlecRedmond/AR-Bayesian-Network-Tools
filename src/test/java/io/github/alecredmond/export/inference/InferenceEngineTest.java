@@ -6,11 +6,12 @@ import static io.github.alecredmond.networkscenario.NetworkScenarioType.RAIN_NET
 import static org.junit.jupiter.api.Assertions.*;
 
 import io.github.alecredmond.export.network.BayesianNetwork;
-import io.github.alecredmond.export.node.newnode.BinaryNode;
+import io.github.alecredmond.export.node.implementation.BinaryNode;
 import io.github.alecredmond.export.probabilitytables.ObservedTable;
 import io.github.alecredmond.export.probabilitytables.ProbabilityTable;
 import io.github.alecredmond.export.sampler.MonteCarloSampler;
 import io.github.alecredmond.export.sampler.SampleCollection;
+import io.github.alecredmond.export.solver.IPFPJunctionTreeSolver;
 import io.github.alecredmond.networkscenario.scenarios.RainNetwork;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
@@ -66,19 +67,17 @@ class InferenceEngineTest {
 
     @Test
     void getNetworkTable_shouldReturnTable() {
-      net.solveNetwork();
-      ProbabilityTable rainTable = net.getNetworkTables().get(rainNetwork.rain);
+      ProbabilityTable rainTable = net.getNetworkTablesMap().get(rainNetwork.rain);
       assertNotNull(rainTable);
       assertEquals(1, rainTable.getNodes().size());
 
-      ProbabilityTable grassTable = net.getNetworkTables().get(rainNetwork.wetGrass);
+      ProbabilityTable grassTable = net.getNetworkTablesMap().get(rainNetwork.wetGrass);
       assertNotNull(grassTable);
       assertEquals(3, grassTable.getNodes().size());
     }
 
     @Test
     void getNetworkTable_nonExistentNode_shouldReturnNull() {
-      net.solveNetwork();
       assertNull(net.getNetworkTableById("ZOMBIE"));
     }
 

@@ -2,9 +2,9 @@ package io.github.alecredmond.internal.method.probabilitytables;
 
 import static io.github.alecredmond.internal.method.probabilitytables.TableUtils.buildObservedTableName;
 
-import io.github.alecredmond.export.inference.NodeObservation;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
+import io.github.alecredmond.export.observable.NodeObservation;
 import io.github.alecredmond.export.probabilitytables.ObservedTable;
 import io.github.alecredmond.internal.application.probabilitytables.ObservedTableData;
 import io.github.alecredmond.internal.method.probabilitytables.printerformat.PrinterMatrixGeneratorBase;

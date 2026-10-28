@@ -1,7 +1,9 @@
 package io.github.alecredmond.networkscenario.scenarios;
 
 import io.github.alecredmond.export.node.Node;
-import io.github.alecredmond.export.node.newnode.BinaryNode;
+import io.github.alecredmond.export.node.implementation.BinaryNode;
+import io.github.alecredmond.export.solver.BayesSolver;
+import io.github.alecredmond.export.solver.IPFPJunctionTreeSolver;
 import io.github.alecredmond.networkscenario.templates.BinaryNodeScenario;
 import io.github.alecredmond.networkscenario.templates.CptDefinedScenario;
 
@@ -38,6 +40,11 @@ public class LopsidedNetwork extends CptDefinedScenario implements BinaryNodeSce
   @Override
   public BinaryNode.StateOrder getBinaryNodeOrder() {
     return BinaryNode.StateOrder.FALSE_FIRST;
+  }
+
+  @Override
+  protected BayesSolver defaultSolver() {
+    return new IPFPJunctionTreeSolver();
   }
 
   @Override

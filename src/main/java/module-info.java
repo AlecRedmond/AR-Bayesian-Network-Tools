@@ -18,12 +18,16 @@ module BayesSolver {
   exports io.github.alecredmond.export.constraints.serialized;
   exports io.github.alecredmond.export.inference;
   exports io.github.alecredmond.export.network;
+  exports io.github.alecredmond.export.network.cptdefinition;
   exports io.github.alecredmond.export.network.serialized;
   exports io.github.alecredmond.export.node;
+  exports io.github.alecredmond.export.node.implementation;
   exports io.github.alecredmond.export.node.serialized;
+  exports io.github.alecredmond.export.observable;
   exports io.github.alecredmond.export.probabilitytables;
   exports io.github.alecredmond.export.probabilitytables.cptentry;
   exports io.github.alecredmond.export.probabilitytables.serialized;
   exports io.github.alecredmond.export.sampler;
   exports io.github.alecredmond.export.solver;
+  exports io.github.alecredmond.export.solver.ipfpresults;
 }
