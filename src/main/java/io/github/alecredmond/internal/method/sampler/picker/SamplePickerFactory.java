@@ -42,8 +42,7 @@ public class SamplePickerFactory {
   private SamplePicker buildUnobservedSamplePicker(SamplePickerFactoryData factoryData) {
     List<NodeState> states = factoryData.getNode().getStates();
 
-    factoryData.setEventCptSteps(IntStream.range(0, states.size()).toArray());
-    factoryData.setEventStates(states.toArray(NodeState[]::new));
+    factoryData.setEventStatePositions(IntStream.range(0, states.size()).toArray());
     factoryData.setSampleWeighting(new double[states.size()]);
 
     return new UnobservedSamplePicker(factoryData);
@@ -59,11 +58,10 @@ public class SamplePickerFactory {
         factoryData.getNodeObservation().observedStates().stream()
             .sorted(Comparator.comparingInt(NodeState::getPosition))
             .toArray(NodeState[]::new);
-    factoryData.setEventStates(partiallyObserved);
 
     int[] eventCptSteps =
         Arrays.stream(partiallyObserved).mapToInt(NodeState::getPosition).toArray();
-    factoryData.setEventCptSteps(eventCptSteps);
+    factoryData.setEventStatePositions(eventCptSteps);
 
     double[] sampleWeighting = new double[partiallyObserved.length];
     factoryData.setSampleWeighting(sampleWeighting);

@@ -48,23 +48,23 @@ public abstract class AbstractNetworkScenario implements NetworkScenario {
 
   @Override
   public BayesianNetwork buildNetwork() {
-    addNodesToNameMap(definedNodes());
-    return getBuilder().build(defaultSolver()).orElseThrow();
+    addNodesToNameMap(getOrderedNodes());
+    return getBuilder().build(getDefaultSolver()).orElseThrow();
   }
 
-  protected abstract BayesSolver defaultSolver();
+  public abstract BayesSolver getDefaultSolver();
 
   @Override
   public BayesianNetworkBuilder getBuilder() {
     BayesianNetworkBuilder nb =
-        BayesianNetwork.builder().setNetworkName(getNetworkName()).setNodes(definedNodes());
+        BayesianNetwork.builder().setNetworkName(getNetworkName()).setNodes(getOrderedNodes());
     constraintData.forEach(cd -> nb.addConstraint(cd.events(), cd.conditions(), cd.probability()));
     return nb;
   }
 
   protected abstract String getNetworkName();
 
-  protected abstract Node[] definedNodes();
+  public abstract Node[] getOrderedNodes();
 
   @Override
   public Node getNodeByName(String name) {

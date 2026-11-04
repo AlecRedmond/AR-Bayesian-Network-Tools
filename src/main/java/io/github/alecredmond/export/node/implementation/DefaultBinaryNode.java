@@ -10,7 +10,10 @@ import lombok.*;
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
+@Setter
 public class DefaultBinaryNode extends AbstractBayesNode implements BinaryNode {
+  public static final String TRUE_STATE_NAME = "TRUE";
+  public static final String FALSE_STATE_NAME = "FALSE";
   private NodeState falseState;
   private NodeState trueState;
 
@@ -25,23 +28,16 @@ public class DefaultBinaryNode extends AbstractBayesNode implements BinaryNode {
   private void setStatesByOrder(StateOrder stateOrder) {
     switch (stateOrder) {
       case FALSE_FIRST -> {
-        setStates(NodeState.createStates(this, "FALSE", "TRUE"));
+        setStates(NodeState.createStates(this, FALSE_STATE_NAME, TRUE_STATE_NAME));
         this.falseState = getStates().getFirst();
         this.trueState = getStates().getLast();
       }
       case TRUE_FIRST -> {
-        setStates(NodeState.createStates(this, "TRUE", "FALSE"));
+        setStates(NodeState.createStates(this, TRUE_STATE_NAME, FALSE_STATE_NAME));
         this.falseState = getStates().getLast();
         this.trueState = getStates().getFirst();
       }
     }
-  }
-
-  public DefaultBinaryNode(Serializable id, String name, List<Node> parents) {
-    setId(id);
-    setName(name);
-    setParents(parents);
-    setStatesByOrder(StateOrder.FALSE_FIRST);
   }
 
   public DefaultBinaryNode(String name, List<Node> parents, StateOrder stateOrder) {
@@ -49,20 +45,6 @@ public class DefaultBinaryNode extends AbstractBayesNode implements BinaryNode {
     setName(name);
     setParents(parents);
     setStatesByOrder(stateOrder);
-  }
-
-  public DefaultBinaryNode(String name, Node parent, StateOrder stateOrder) {
-    setId(UUID.randomUUID());
-    setName(name);
-    setParents(List.of(parent));
-    setStatesByOrder(stateOrder);
-  }
-
-  public DefaultBinaryNode(String name, List<Node> parents) {
-    setId(UUID.randomUUID());
-    setName(name);
-    setParents(parents);
-    setStatesByOrder(StateOrder.FALSE_FIRST);
   }
 
   public DefaultBinaryNode(String name, StateOrder stateOrder) {

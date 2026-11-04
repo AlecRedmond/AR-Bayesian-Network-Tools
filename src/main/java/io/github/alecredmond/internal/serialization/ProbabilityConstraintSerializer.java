@@ -1,28 +1,25 @@
-package io.github.alecredmond.internal.serialization.structure;
+package io.github.alecredmond.internal.serialization;
 
 import io.github.alecredmond.exceptions.ConstraintValidationException;
 import io.github.alecredmond.export.constraints.ProbabilityConstraint;
 import io.github.alecredmond.export.constraints.serialized.SerializedProbabilityConstraint;
 import io.github.alecredmond.export.network.serialized.SerializedBayesianNetwork;
-import io.github.alecredmond.internal.application.network.BayesianNetworkData;
 import io.github.alecredmond.internal.method.constraints.ConstraintRegistry;
 import io.github.alecredmond.internal.method.constraints.strategy.ConstraintSerializer;
 import io.github.alecredmond.internal.method.constraints.strategy.ConstraintStrategy;
-import io.github.alecredmond.internal.method.network.validator.NetworkConstraintValidator;
-import io.github.alecredmond.internal.serialization.SerializationData;
 import java.util.*;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import lombok.NoArgsConstructor;
 
 @NoArgsConstructor
 public class ProbabilityConstraintSerializer {
   private final ConstraintRegistry registry = new ConstraintRegistry();
 
-  public List<SerializedProbabilityConstraint> serializeAll(BayesianNetworkData data) {
-    new NetworkConstraintValidator().validateData(data);
-    List<SerializedProbabilityConstraint> list = new ArrayList<>();
-    data.getConstraints().stream().map(this::serializeConstraint).forEach(list::add);
-    return Collections.unmodifiableList(list);
+  public SerializedProbabilityConstraint[] serialize(Set<ProbabilityConstraint> constraints) {
+    return constraints.stream()
+        .map(this::serializeConstraint)
+        .toArray(SerializedProbabilityConstraint[]::new);
   }
 
   private <T extends ProbabilityConstraint> SerializedProbabilityConstraint serializeConstraint(
@@ -38,13 +35,11 @@ public class ProbabilityConstraintSerializer {
             "Object %s mapped to no valid ConstraintType".formatted(object));
   }
 
-  public void deserialize(SerializedBayesianNetwork sbn, SerializationData data) {
-    List<SerializedProbabilityConstraint> serializedConstraints = sbn.serializedConstraints();
-    Set<ProbabilityConstraint> constraints = data.getNetworkData().getConstraints();
-    serializedConstraints.stream()
+  public Set<ProbabilityConstraint> deserialize(
+      SerializedBayesianNetwork sbn, SerializationData data) {
+    return Arrays.stream(sbn.serializedConstraints())
         .map(serialized -> deSerializeConstraint(serialized, data))
-        .forEach(constraints::add);
-    new NetworkConstraintValidator().validateData(data.getNetworkData());
+        .collect(Collectors.toCollection(LinkedHashSet::new));
   }
 
   private <P extends ProbabilityConstraint> ProbabilityConstraint deSerializeConstraint(

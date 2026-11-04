@@ -17,6 +17,7 @@ public abstract class AbstractExternalTableWriter<T extends GraphData>
     initializeJunctionTreeFromNetwork();
   }
 
+  @Override
   public void initializeJunctionTreeFromNetwork() {
     for (Clique clique : cliqueGraphData.getCliques()) {
       setProbabilitiesToUnity(clique);

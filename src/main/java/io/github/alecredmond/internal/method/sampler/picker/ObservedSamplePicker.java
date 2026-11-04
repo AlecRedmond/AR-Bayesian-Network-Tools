@@ -4,19 +4,17 @@ import io.github.alecredmond.export.node.NodeState;
 import io.github.alecredmond.internal.application.sampler.SamplePickerFactoryData;
 
 public class ObservedSamplePicker extends AbstractSamplePicker {
-  private final NodeState observedState;
-  private final int cptIndexDelta;
+  private final int observedStatePosition;
 
   public ObservedSamplePicker(SamplePickerFactoryData factoryData, NodeState observedState) {
     super(factoryData);
-    this.observedState = observedState;
-    this.cptIndexDelta = observedState.getPosition();
+    this.observedStatePosition = observedState.getPosition();
   }
 
   @Override
-  public double selectStateAndReturnWeight(NodeState[] sampleArray) {
-    sampleArray[eventNodeIndexInSampleArray] = observedState;
-    int cptIndex = super.getInitialCptIndex(sampleArray) + cptIndexDelta;
+  public double selectStateAndReturnWeight(int[] statePositions) {
+    statePositions[eventNodeIndexInSampleArray] = observedStatePosition;
+    int cptIndex = super.getInitialCptIndex(statePositions) + observedStatePosition;
     return cptProbabilities[cptIndex];
   }
 }

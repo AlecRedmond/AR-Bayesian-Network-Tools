@@ -25,7 +25,7 @@ public class SolverValidator {
   }
 
   private void resetNetworkTables() {
-    for (NetworkTable table : network.getAllNetworkTables()) {
+    for (NetworkTable table : network.getNetworkTables()) {
       Arrays.fill(table.getProbabilities(), 1.0);
       table.normalizeTable();
     }
@@ -36,7 +36,7 @@ public class SolverValidator {
   }
 
   private boolean tableDimensionsAreCorrect() {
-    NetworkTable[] tables = network.getAllNetworkTables();
+    NetworkTable[] tables = network.getNetworkTables();
     Node[] nodes = network.getNodes();
     Set<Node> visited = new HashSet<>();
     for (int i = 0; i < nodes.length; i++) {

@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class TreewidthValidator {
   private static final double LOG_INT_MAX = Math.log(Integer.MAX_VALUE);
+  private static final double LOG_LONG_MAX = Math.log(Long.MAX_VALUE);
 
   public void verifyClique(Set<Node> nodes, GraphData jtd) {
     verifyCliques(Set.of(nodes), jtd);
@@ -35,7 +36,11 @@ public class TreewidthValidator {
     return nodes.stream().mapToInt(n -> n.getStates().size()).mapToDouble(Math::log).sum();
   }
 
-  public static <N extends CartesianVariable> boolean validateVectorLength(Collection<N> nodes) {
+  public static <N extends CartesianVariable> boolean validateIndexableByInt(Collection<N> nodes) {
     return getLogCardinality(nodes) <= LOG_INT_MAX;
+  }
+
+  public static <N extends CartesianVariable> boolean validateIndexableByLong(Collection<N> nodes) {
+    return getLogCardinality(nodes) <= LOG_LONG_MAX;
   }
 }

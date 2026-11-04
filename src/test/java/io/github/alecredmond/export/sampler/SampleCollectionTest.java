@@ -1,16 +1,23 @@
 package io.github.alecredmond.export.sampler;
 
 import static io.github.alecredmond.TestConfigs.*;
+import static io.github.alecredmond.export.node.implementation.BinaryNode.StateOrder.TRUE_FIRST;
 import static io.github.alecredmond.networkscenario.NetworkScenarioType.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 import io.github.alecredmond.export.inference.InferenceEngine;
-import io.github.alecredmond.export.inference.NodeObservation;
-import io.github.alecredmond.export.inference.ObservationStatus;
+import io.github.alecredmond.export.inference.JunctionTreeAlgorithm;
 import io.github.alecredmond.export.network.BayesianNetwork;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
+import io.github.alecredmond.export.node.implementation.BinaryNode;
+import io.github.alecredmond.export.node.implementation.DefaultBinaryNode;
+import io.github.alecredmond.export.observable.NodeObservation;
+import io.github.alecredmond.export.observable.ObservationStatus;
+import io.github.alecredmond.export.solver.IPFPJunctionTreeSolver;
 import io.github.alecredmond.internal.method.node.NodeUtils;
+import io.github.alecredmond.networkscenario.NetworkScenario;
+import io.github.alecredmond.networkscenario.NetworkScenarioType;
 import java.io.Serializable;
 import java.util.*;
 import java.util.function.*;
@@ -25,6 +32,8 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 class SampleCollectionTest {
+  static final Function<BayesianNetwork, InferenceEngine> INFERENCE = JunctionTreeAlgorithm::new;
+  static final Predicate<? super NetworkScenarioType> PACKAGE_FILTER = Objects::nonNull;
   static List<SamplePackage> packages;
 
   static Stream<Arguments> provideSamplePackages() {
@@ -33,31 +42,18 @@ class SampleCollectionTest {
 
   @BeforeAll
   static void init() {
-    packages = new ArrayList<>();
-    packages.add(
-        new SamplePackage(
-            AH_NETWORK.get(),
-            NUMBER_OF_SAMPLES,
-            Set.of("H+"),
-            Set.of("C", "E"),
-            Set.of("F+"),
-            true));
-    packages.add(
-        new SamplePackage(
-            SIMPLE_LINEAR.get(),
-            NUMBER_OF_SAMPLES,
-            Set.of(),
-            Set.of("B", "C"),
-            Set.of("D+"),
-            true));
-    packages.add(
-        new SamplePackage(
-            RAIN_NETWORK.get(),
-            NUMBER_OF_SAMPLES,
-            Set.of("WET_GRASS:TRUE"),
-            Set.of("SPRINKLER"),
-            Set.of("RAIN:TRUE"),
-            false));
+    packages =
+        Arrays.stream(values())
+            .filter(PACKAGE_FILTER)
+            .map(NetworkScenarioType::get)
+            .flatMap(SampleCollectionTest::buildPackages)
+            .toList();
+  }
+
+  private static Stream<SamplePackage> buildPackages(NetworkScenario scenario) {
+    BayesianNetwork network = scenario.buildNetwork();
+    return scenario.buildObservationPackages().stream()
+        .map(p -> new SamplePackage(network, NUMBER_OF_SAMPLES, p, PRINT_TABLES, INFERENCE));
   }
 
   @Nested
@@ -93,7 +89,7 @@ class SampleCollectionTest {
     void getNodes(SamplePackage samplePackage) {
       BayesianNetwork network = samplePackage.getNetwork();
       SampleCollection test = samplePackage.getTest();
-      Node[] nodes = network.getNetworkData().getNodes().toArray(new Node[0]);
+      Node[] nodes = network.getNodes();
       Node[] testNodes = test.getNodes();
       IntStream.range(0, nodes.length).forEach(i -> assertEquals(nodes[i], testNodes[i]));
     }
@@ -116,22 +112,38 @@ class SampleCollectionTest {
     @ParameterizedTest
     @MethodSource("provideSamplePackages")
     void countSamplesIncludingStateIds_multipleIDs(SamplePackage samplePackage) {
-      Set<String> measuredStateIds = samplePackage.getMeasuredStateIds();
-      measureCount(
+      Set<Serializable> measuredStateIds =
+          samplePackage.getMeasuredStates().stream()
+              .map(NodeState::getId)
+              .collect(Collectors.toSet());
+      posteriorCount(
           samplePackage,
           sc -> sc.countSamplesIncludingStateIds(measuredStateIds),
           e -> e.getPosteriorProbabilityById(measuredStateIds));
     }
 
-    void measureCount(
+    void posteriorCount(
         SamplePackage samplePackage,
         ToIntFunction<SampleCollection> countFunc,
         ToDoubleFunction<InferenceEngine> probabilityFunc) {
-      int numberOfSamples = samplePackage.getNumberOfSamples();
-      double probOfObserved = probabilityFunc.applyAsDouble(samplePackage.getEngine());
-      double delta = Math.sqrt(numberOfSamples) * ALLOWED_STDEV;
+      measureCount(
+          samplePackage.getNumberOfSamples(),
+          samplePackage.getEngine(),
+          samplePackage.getTest(),
+          countFunc,
+          probabilityFunc);
+    }
+
+    void measureCount(
+        int numberOfSamples,
+        InferenceEngine inferenceEngine,
+        SampleCollection sampleCollection,
+        ToIntFunction<SampleCollection> countFunc,
+        ToDoubleFunction<InferenceEngine> probabilityFunc) {
+      double probOfObserved = probabilityFunc.applyAsDouble(inferenceEngine);
+      double delta = Math.sqrt(numberOfSamples) * STANDARD_DEVIATIONS;
       double expected = probOfObserved * numberOfSamples;
-      int counted = countFunc.applyAsInt(samplePackage.getTest());
+      int counted = countFunc.applyAsInt(sampleCollection);
       assertEquals(expected, counted, delta);
     }
 
@@ -139,7 +151,7 @@ class SampleCollectionTest {
     @MethodSource("provideSamplePackages")
     void countSamplesIncludingStates_multipleStates(SamplePackage samplePackage) {
       Set<NodeState> measuredStates = samplePackage.getMeasuredStates();
-      measureCount(
+      posteriorCount(
           samplePackage,
           sc -> sc.countSamplesIncludingStates(measuredStates),
           e -> e.getPosteriorProbability(measuredStates));
@@ -148,9 +160,13 @@ class SampleCollectionTest {
     @ParameterizedTest
     @MethodSource("provideSamplePackages")
     void countSamplesIncludingStates_singleState(SamplePackage samplePackage) {
+      if (samplePackage.isPrintMarginals()) {
+        samplePackage.getEngine().printObserved();
+        samplePackage.getNetwork().printNetwork();
+      }
       NodeState measuredState =
           samplePackage.getMeasuredStates().stream().findFirst().orElseThrow();
-      measureCount(
+      posteriorCount(
           samplePackage,
           sc -> sc.countSamplesIncludingStates(measuredState),
           e -> e.getPosteriorProbability(measuredState));
@@ -158,9 +174,34 @@ class SampleCollectionTest {
 
     @ParameterizedTest
     @MethodSource("provideSamplePackages")
-    void countSamplesIncludingStateIds_singleID(SamplePackage samplePackage) {
-      String singleId = samplePackage.getMeasuredStateIds().stream().findFirst().orElseThrow();
+    void countSamplesIncludingStates_noStates(SamplePackage samplePackage) {
+      priorCount(
+          samplePackage,
+          sc -> sc.countSamplesIncludingStates(samplePackage.getObservedStates()),
+          e -> e.getPosteriorProbability(samplePackage.getObservedStates()));
+    }
+
+    void priorCount(
+        SamplePackage samplePackage,
+        ToIntFunction<SampleCollection> countFunc,
+        ToDoubleFunction<InferenceEngine> probabilityFunc) {
       measureCount(
+          samplePackage.getNumberOfSamples(),
+          samplePackage.getPriorEngine(),
+          samplePackage.getJointTest(),
+          countFunc,
+          probabilityFunc);
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideSamplePackages")
+    void countSamplesIncludingStateIds_singleID(SamplePackage samplePackage) {
+      Serializable singleId =
+          samplePackage.getMeasuredStates().stream()
+              .findFirst()
+              .map(NodeState::getId)
+              .orElseThrow();
+      posteriorCount(
           samplePackage,
           sc -> sc.countSamplesIncludingStateIds(singleId),
           e -> e.getPosteriorProbabilityById(singleId));
@@ -176,16 +217,19 @@ class SampleCollectionTest {
 
     @Test
     void testZeroSamples() {
+      BinaryNode x = new DefaultBinaryNode("X", TRUE_FIRST);
+      BinaryNode y = new DefaultBinaryNode("Y", List.of(x), TRUE_FIRST);
       BayesianNetwork net =
-          BayesianNetwork.newNetwork()
-              .addNewNode("X", List.of("X+", "X-"))
-              .addNewNode("Y", List.of("Y+", "Y-"))
-              .addParents("Y", "X")
-              .addConstraint("X+", 0.25)
-              .addConstraint("Y+", "X-", 0.0)
-              .solveNetwork();
+          BayesianNetwork.builder()
+              .setNodes(x, y)
+              .addConstraint(x.trueState(), 0.25)
+              .addConstraint(y.trueState(), x.falseState(), 0.0)
+              .build(new IPFPJunctionTreeSolver())
+              .orElseThrow();
       SampleCollection collection =
-          MonteCarloSampler.create(net).setObservedById(List.of("X-", "Y+")).generateSamples(100);
+          MonteCarloSampler.create(net)
+              .setObserved(x.falseState(), y.trueState())
+              .generateSamples(100);
       assertEquals(0, collection.countSamples());
       assertTrue(collection.getSamples().isEmpty());
     }
@@ -228,7 +272,10 @@ class SampleCollectionTest {
     @MethodSource("provideSamplePackages")
     void getSamplesIncludingStateByIds_multipleIds(SamplePackage samplePackage) {
       Set<NodeState> measuredStates = samplePackage.getMeasuredStates();
-      Set<String> measuredStateIds = samplePackage.getMeasuredStateIds();
+      Set<Serializable> measuredStateIds =
+          samplePackage.getMeasuredStates().stream()
+              .map(NodeState::getId)
+              .collect(Collectors.toSet());
       checkSamplesInRange(
           samplePackage,
           sc -> sc.getSamplesIncludingStatesById(measuredStateIds),
@@ -276,7 +323,7 @@ class SampleCollectionTest {
     @ParameterizedTest
     @MethodSource("provideSamplePackages")
     void display_all_nodes(SamplePackage samplePackage) {
-      Set<Node> displayed = new HashSet<>(samplePackage.getNetwork().getNetworkData().getNodes());
+      Set<Node> displayed = samplePackage.getNetwork().getNodes(LinkedHashSet::new);
       assertDisplayedOnly(samplePackage, s -> s.setDisplayedNodes(displayed), displayed);
     }
 

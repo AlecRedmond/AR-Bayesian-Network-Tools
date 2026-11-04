@@ -2,7 +2,6 @@ package io.github.alecredmond.export.node;
 
 import io.github.alecredmond.export.constraints.ProbabilityConstraint;
 import io.github.alecredmond.export.network.BayesianNetwork;
-import io.github.alecredmond.export.probabilitytables.NetworkTable;
 import io.github.alecredmond.internal.application.cartesianvector.CartesianVariable;
 import java.io.Serializable;
 import java.util.List;
@@ -62,10 +61,6 @@ public interface Node extends CartesianVariable {
    * @param children the new list of children connected to this {@code Node}.
    */
   void setChildren(List<Node> children);
-
-  NetworkTable getCpt();
-
-  void setCpt(NetworkTable cpt);
 
   NodeState getStateByName(String stateName);
 

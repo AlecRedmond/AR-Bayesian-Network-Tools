@@ -22,7 +22,7 @@ public abstract class AbstractGraphFactoryBase<T, U extends GraphData> {
   public T build(BayesianNetwork network, U graphData) {
     graphData.setNetwork(network);
     this.cliqueGraphData = graphData;
-    this.networkTables = network.getAllNetworkTables();
+    this.networkTables = network.getNetworkTables();
     commonBuildLogic();
     logBuilt();
     return constructCliqueGraph();

@@ -26,7 +26,6 @@ import lombok.Data;
 public class BayesianNetworkData {
   private final String networkName;
   private final Node[] nodes;
-  private final NodeState[][] states;
   private final NetworkTable[] networkTables;
   // Indexers
   private final Map<Serializable, Integer> nodeIndexFromId;
@@ -40,7 +39,6 @@ public class BayesianNetworkData {
     this.networkName = networkName;
     this.nodes = nodes;
     this.constraints = new LinkedHashSet<>(constraints);
-    this.states = new NodeState[nodes.length][];
     this.networkTables = new NetworkTable[nodes.length];
     this.nodeIndexFromId = new HashMap<>();
     this.nodeStateIDsMap = new HashMap<>();

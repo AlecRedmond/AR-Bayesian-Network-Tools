@@ -2,14 +2,17 @@ package io.github.alecredmond.export.inference;
 
 import static io.github.alecredmond.TestConfigs.DOUBLE_EQUALITY;
 import static io.github.alecredmond.TestConfigs.SOLVE_LONG_TESTS;
-import static io.github.alecredmond.export.inference.ObservationStatus.NEGATED;
-import static io.github.alecredmond.export.inference.ObservationStatus.UNOBSERVED;
+import static io.github.alecredmond.export.observable.ObservationStatus.NEGATED;
+import static io.github.alecredmond.export.observable.ObservationStatus.UNOBSERVED;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import io.github.alecredmond.export.network.BayesianNetwork;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
+import io.github.alecredmond.export.observable.NodeObservation;
+import io.github.alecredmond.export.observable.ObservationStatus;
 import io.github.alecredmond.export.probabilitytables.ObservedTable;
+import io.github.alecredmond.networkscenario.NetworkScenario;
 import io.github.alecredmond.networkscenario.NetworkScenarioType;
 import java.util.*;
 import java.util.function.BiConsumer;
@@ -32,20 +35,31 @@ class ObservableTest {
   static Stream<Arguments> supplyNetworks() {
     return Arrays.stream(NetworkScenarioType.values())
         .map(NetworkScenarioType::get)
+        .map(NetworkScenario::buildNetwork)
         .filter(ObservableTest::suitableTreeWidth)
-        .map(BayesianNetwork::solveNetwork)
         .map(Arguments::of);
   }
 
   private static boolean suitableTreeWidth(BayesianNetwork network) {
     double logWidth =
-        network.getNetworkData().getNodeIDsMap().values().stream()
+        network
+            .streamNodes()
             .map(Node::getStates)
             .mapToInt(Collection::size)
             .mapToDouble(Math::log)
             .sum();
 
     return logWidth <= MAX_LOG_WIDTH;
+  }
+
+  private void negatedObservationsHaveProbabilityZero(InferenceEngine engine) {
+    double totalProb =
+        Arrays.stream(engine.getObservedTables())
+            .map(ObservedTable::getProbabilities)
+            .flatMapToDouble(Arrays::stream)
+            .sum();
+    assertEquals(0.0, totalProb, DOUBLE_EQUALITY);
+    engine.resetObservations();
   }
 
   private boolean observationsNegated(Map<Node, NodeObservation> obsMap) {
@@ -101,7 +115,7 @@ class ObservableTest {
     InferenceEngine observedEngine = network.buildInferenceEngine();
     InferenceEngine unobservedEngine = network.buildInferenceEngine();
     Map<Node, NodeObservation> defaultObsMap = NodeObservation.createUnobservedMap(network);
-    List<Node> nodes = new ArrayList<>(network.getAllNodes());
+    List<Node> nodes = network.getNodes(ArrayList::new);
     Map<Node, List<ObservationRecord>> recordMap = new LinkedHashMap<>();
     nodes.forEach(node -> recordMap.put(node, recursiveObservationFinder(node)));
     recursivelyCheckElimination(
@@ -154,22 +168,16 @@ class ObservableTest {
       BiConsumer<InferenceEngine, Map<Node, NodeObservation>> applyObservations) {
     applyObservations.accept(engine, obsMap);
     if (observationsNegated(obsMap)) {
-      double totalProb =
-          engine.getObservedTables().values().stream()
-              .map(ObservedTable::getProbabilities)
-              .flatMapToDouble(Arrays::stream)
-              .sum();
-      assertEquals(0.0, totalProb, DOUBLE_EQUALITY);
-      engine.resetObservations();
+      negatedObservationsHaveProbabilityZero(engine);
       return;
     }
-    Set<NodeState> allEliminated =
-        getAllFromObservations(obsMap.values(), NodeObservation::eliminatedStates);
-    if (!allEliminated.isEmpty()) {
-      double jointEliminatedSum = engine.getPosteriorProbability(allEliminated);
-      assertEquals(0.0, jointEliminatedSum, DOUBLE_EQUALITY);
-    }
+    eliminatedStatesHaveProbabilityZero(engine, obsMap);
+    remainingStatesHaveJointProbabilityOne(engine, unobservedEngine, obsMap);
+    engine.resetObservations();
+  }
 
+  private void remainingStatesHaveJointProbabilityOne(
+      InferenceEngine engine, InferenceEngine unobservedEngine, Map<Node, NodeObservation> obsMap) {
     Set<NodeState> allRemaining =
         getAllFromObservations(obsMap.values(), NodeObservation::observedStates);
     double jointSumInUnobserved = unobservedEngine.getPosteriorProbability(allRemaining);
@@ -177,7 +185,16 @@ class ObservableTest {
       double probability = engine.getPosteriorProbability(allRemaining);
       assertEquals(1.0, probability, DOUBLE_EQUALITY);
     }
-    engine.resetObservations();
+  }
+
+  private void eliminatedStatesHaveProbabilityZero(
+      InferenceEngine engine, Map<Node, NodeObservation> obsMap) {
+    Set<NodeState> allEliminated =
+        getAllFromObservations(obsMap.values(), NodeObservation::eliminatedStates);
+    if (!allEliminated.isEmpty()) {
+      double jointEliminatedSum = engine.getPosteriorProbability(allEliminated);
+      assertEquals(0.0, jointEliminatedSum, DOUBLE_EQUALITY);
+    }
   }
 
   private Set<NodeState> getAllFromObservations(

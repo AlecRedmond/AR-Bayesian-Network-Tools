@@ -5,7 +5,6 @@ import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
 import io.github.alecredmond.export.observable.NodeObservation;
 import io.github.alecredmond.export.probabilitytables.ObservedTable;
-import java.util.Collection;
 import java.util.Map;
 
 public interface InferenceGraph {
@@ -15,11 +14,11 @@ public interface InferenceGraph {
 
   BayesianNetwork getNetwork();
 
-  void observeNetwork(Collection<NodeState> observedStates);
+  void setObservedStates(NodeState... observedStates);
 
-  double getJointProbOfMeasured(Collection<NodeState> newEvidence);
+  void eliminateStates(NodeState... toEliminate);
 
-  void eliminateStates(Collection<NodeState> toEliminate);
+  void resetObservations();
 
-  double getJointProbability();
+  double getPosteriorProbability(NodeState... measured);
 }

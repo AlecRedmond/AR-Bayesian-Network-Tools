@@ -74,17 +74,18 @@ public interface Observable {
   Observable setObserved(Collection<NodeState> observedStates);
 
   /**
-   * Replaces the current observed states in the inference network with the given {@link NodeState}.
-   * This will lock its associated {@link Node} to that value. This will change all measured
-   * probability values in this instance to posterior probabilities, conditional on this state.
+   * Replaces the current observed states in the inference network with the given states. Each
+   * {@link NodeState} will lock its associated {@link Node} to measure only itself and any other
+   * sibling states declared in the collection. This will change all measured probability values in
+   * this instance to posterior probabilities, conditional on these states.
    *
    * <p><i>NOTE: This method calls {@link #resetObservations()} before applying the new
    * observations.</i>
    *
-   * @param observedState the single state to be observed.
+   * @param observedStates the collection of states to be observed.
    * @return this instance for chaining.
    */
-  Observable setObserved(NodeState observedState);
+  Observable setObserved(NodeState... observedStates);
 
   /**
    * Replaces the current observed states in the inference network with the given states. Each
@@ -103,19 +104,19 @@ public interface Observable {
   <T extends Serializable> Observable setObservedById(Collection<T> observedStateIDs);
 
   /**
-   * Replaces the current observed states in the inference network with the given {@link NodeState},
-   * referenced by its identifier. This will lock its associated {@link Node} to that value. This
-   * will change all measured probability values in this instance to posterior probabilities,
-   * conditional on this state.
+   * Replaces the current observed states in the inference network with the given states. Each
+   * {@link NodeState} will lock its associated {@link Node} to measure only itself and any other
+   * sibling states declared in the collection. This will change all measured probability values in
+   * this instance to posterior probabilities, conditional on these states.
    *
    * <p><i>NOTE: This method calls {@link #resetObservations()} before applying the new
    * observations.</i>
    *
-   * @param observedStateId the identifier of the single state to be observed.
-   * @param <T> the type of the state identifier.
+   * @param observedStateIds the collection of identifiers associated with the states to be
+   *     observed.
    * @return this instance for chaining.
    */
-  <T extends Serializable> Observable setObservedById(T observedStateId);
+  Observable setObservedById(Serializable... observedStateIds);
 
   /**
    * Subtracts the input {@link NodeState} values from the observable pool. This will remove these
@@ -129,15 +130,15 @@ public interface Observable {
   Observable eliminateStates(Collection<NodeState> toEliminate);
 
   /**
-   * Subtracts the input {@link NodeState} value from the observable pool. This will remove this
-   * state from consideration when measuring probability values. The final probability values will
-   * be conditional on this state not being present, as well as the effects of any observations or
+   * Subtracts the input {@link NodeState} values from the observable pool. This will remove these
+   * states from consideration when measuring probability values. The final probability values will
+   * be conditional on these states not being present, as well as the effects of any observations or
    * eliminations declared since the last reset.
    *
-   * @param toEliminate a single {@link NodeState} to eliminate.
+   * @param toEliminate a collection of {@link NodeState}s to eliminate.
    * @return this instance for chaining.
    */
-  Observable eliminateStates(NodeState toEliminate);
+  Observable eliminateStates(NodeState... toEliminate);
 
   /**
    * Subtracts the input {@link NodeState} values from the observable pool. This will remove these
@@ -152,14 +153,13 @@ public interface Observable {
   <T extends Serializable> Observable eliminateStatesById(Collection<T> toEliminateIDs);
 
   /**
-   * Subtracts the input {@link NodeState} value from the observable pool. This will remove this
-   * state from consideration when measuring probability values. The final probability values will
-   * be conditional on this state not being present, as well as the effects of any observations or
+   * Subtracts the input {@link NodeState} values from the observable pool. This will remove these
+   * states from consideration when measuring probability values. The final probability values will
+   * be conditional on these states not being present, as well as the effects of any observations or
    * eliminations declared since the last reset.
    *
-   * @param toEliminateId the identifier of a single {@link NodeState} to eliminate.
-   * @param <T> the type of the state identifier.
+   * @param toEliminateIds a collection of identifiers for {@link NodeState}s to eliminate.
    * @return this instance for chaining.
    */
-  <T extends Serializable> Observable eliminateStatesById(T toEliminateId);
+  Observable eliminateStatesById(Serializable... toEliminateIds);
 }

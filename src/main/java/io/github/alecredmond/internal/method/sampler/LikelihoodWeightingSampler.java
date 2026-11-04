@@ -6,34 +6,35 @@ import io.github.alecredmond.export.node.NodeState;
 import io.github.alecredmond.export.observable.NodeObservation;
 import io.github.alecredmond.export.observable.ObservationStatus;
 import io.github.alecredmond.export.probabilitytables.NetworkTable;
+import io.github.alecredmond.export.sampler.SampleCollection;
 import io.github.alecredmond.internal.application.sampler.LikelihoodWeightingSamplerData;
 import io.github.alecredmond.internal.method.sampler.picker.SamplePicker;
 import io.github.alecredmond.internal.method.sampler.picker.SamplePickerFactory;
+import io.github.alecredmond.internal.method.sampler.samplestore.SampleStore;
 import io.github.alecredmond.internal.method.utils.CollectionToString;
 import io.github.alecredmond.internal.method.utils.WeightedAllocator;
 import java.util.*;
-import java.util.stream.IntStream;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class LikelihoodWeightingSampler extends MonteCarloSamplerImpl {
   private final LikelihoodWeightingSamplerData samplerData;
+  private final SampleStore sampleStore;
 
   public LikelihoodWeightingSampler(BayesianNetwork network) {
     super(network);
     this.samplerData = buildSamplerData();
+    this.sampleStore = SampleStore.create(network);
   }
 
   private LikelihoodWeightingSamplerData buildSamplerData() {
     Node[] nodes = network.getNodes();
-    NetworkTable[] tables = new NetworkTable[nodes.length];
-    Map<Node, NetworkTable> networkTables = network.getNetworkTablesMap();
-    IntStream.range(0, nodes.length).forEach(i -> tables[i] = networkTables.get(nodes[i]));
+    NetworkTable[] tables = network.getNetworkTables();
     return new LikelihoodWeightingSamplerData(nodes, tables);
   }
 
   @Override
-  public SampleCollectionImpl generateSamplesInternal(
+  public SampleCollection generateSamplesInternal(
       Map<Node, NodeObservation> observations, int numberOfSamples) {
     if (numberOfSamples < 0) {
       log.error("Attempted to generate less than zero samples!");
@@ -43,10 +44,10 @@ public class LikelihoodWeightingSampler extends MonteCarloSamplerImpl {
       return null;
     }
     initSamplerData(observations, numberOfSamples);
-    generateWeightedStateSets();
-    convertSetsToSamples();
+    generateWeightedStateArrays();
+    convertArraysToSamples();
     distributeSamples();
-    return new SampleBuilder()
+    return new SampleCollectionBuilder()
         .build(
             numberOfSamples,
             samplerData.getDistributedSamples(),
@@ -75,19 +76,18 @@ public class LikelihoodWeightingSampler extends MonteCarloSamplerImpl {
     samplerData.setDistributedSamples(new HashMap<>());
   }
 
-  private void generateWeightedStateSets() {
-    NodeState[] selectedStateArray = new NodeState[samplerData.getNodes().length];
+  private void generateWeightedStateArrays() {
+    int[] selectedStatePositions = new int[samplerData.getNodes().length];
     SamplePicker[] samplePickers = samplerData.getSamplePickers();
-    Map<Set<NodeState>, Double> weightedStateSets = samplerData.getWeightedStateSets();
     int numberOfSamples = samplerData.getNumberOfSamples();
     for (int s = 0; s < numberOfSamples; s++) {
-      performWeightedRandomWalk(samplePickers, selectedStateArray, weightedStateSets);
+      performWeightedRandomWalk(samplePickers, selectedStatePositions);
     }
   }
 
-  private void convertSetsToSamples() {
+  private void convertArraysToSamples() {
     Map<SampleImpl, Double> weightedSamples = samplerData.getWeightedSamples();
-    Map<Set<NodeState>, Double> weightedStateSets = samplerData.getWeightedStateSets();
+    Map<NodeState[], Double> weightedStateSets = sampleStore.getWeightedSamples();
     weightedStateSets.forEach((set, weight) -> weightedSamples.put(new SampleImpl(set), weight));
   }
 
@@ -98,15 +98,12 @@ public class LikelihoodWeightingSampler extends MonteCarloSamplerImpl {
   }
 
   private void performWeightedRandomWalk(
-      SamplePicker[] samplePickers,
-      NodeState[] selectedStateArray,
-      Map<Set<NodeState>, Double> weightedStateSets) {
+      SamplePicker[] samplePickers, int[] selectedStatePositions) {
     double weight = 1.0;
     for (SamplePicker samplePicker : samplePickers) {
-      weight *= samplePicker.selectStateAndReturnWeight(selectedStateArray);
+      weight *= samplePicker.selectStateAndReturnWeight(selectedStatePositions);
       if (weight <= 0) return;
     }
-    Set<NodeState> selectedStates = new LinkedHashSet<>(Arrays.asList(selectedStateArray));
-    weightedStateSets.merge(selectedStates, weight, Double::sum);
+    sampleStore.storeSample(selectedStatePositions, weight);
   }
 }

@@ -38,7 +38,7 @@ public abstract class CartesianVectorFactory<
           "Attempted to create a vector using nodes [%s], which have no NodeStates!"
               .formatted(CollectionToString.apply(emptyStates)));
     }
-    if (!TreewidthValidator.validateVectorLength(nodes)) {
+    if (!TreewidthValidator.validateIndexableByInt(nodes)) {
       throw new ProbabilityVectorFactoryException(
           "Attempted to create a Probability Vector that would exceed 2^31 - 1 entries with nodes: [%s]"
               .formatted(CollectionToString.apply(nodes)));

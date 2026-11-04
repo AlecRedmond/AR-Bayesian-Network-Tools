@@ -1,10 +1,7 @@
 package io.github.alecredmond.export.network.cptdefinition;
 
 import io.github.alecredmond.export.node.Node;
-import io.github.alecredmond.export.node.NodeState;
 import io.github.alecredmond.export.probabilitytables.ProbabilityVector;
-import io.github.alecredmond.internal.method.cartesianvector.indexfinder.FastIndexFinder;
-import io.github.alecredmond.internal.method.cartesianvector.indexfinder.VectorIndexFinder;
 import io.github.alecredmond.internal.method.probabilitytables.probabilityvector.ProbabilityVectorFactory;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,14 +10,12 @@ import lombok.NonNull;
 public class OrderedCptDefinition implements CptDefinition {
   protected final Node measuredNode;
   protected final ProbabilityVector vector;
-  protected final VectorIndexFinder<NodeState> indexFinder;
 
   @NonNull
   public OrderedCptDefinition(
       Node node, double[] probabilities, CptNodeOrder cptNodeOrder, CptStrideOrder cptStrideOrder) {
     List<Node> combinationOrder = buildCombinationOder(node, cptNodeOrder);
     this.vector = buildVector(combinationOrder, cptStrideOrder, probabilities);
-    this.indexFinder = FastIndexFinder.create(vector);
     this.measuredNode = node;
   }
 

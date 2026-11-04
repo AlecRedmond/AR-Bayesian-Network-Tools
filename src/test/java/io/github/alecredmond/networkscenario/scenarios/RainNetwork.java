@@ -4,8 +4,11 @@ import static io.github.alecredmond.export.node.implementation.BinaryNode.*;
 
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.implementation.BinaryNode;
+import io.github.alecredmond.networkscenario.ObservationPackage;
 import io.github.alecredmond.networkscenario.templates.BinaryNodeScenario;
 import io.github.alecredmond.networkscenario.templates.CptDefinedScenario;
+import java.util.List;
+import java.util.Set;
 
 public class RainNetwork extends CptDefinedScenario implements BinaryNodeScenario {
   public static final String NETWORK_NAME = "RAIN NETWORK";
@@ -29,12 +32,19 @@ public class RainNetwork extends CptDefinedScenario implements BinaryNodeScenari
   }
 
   @Override
+  public List<ObservationPackage> buildObservationPackages() {
+    return List.of(
+        new ObservationPackage(
+            Set.of(sprinkler), Set.of(wetGrass.trueState()), Set.of(rain.trueState())));
+  }
+
+  @Override
   protected String getNetworkName() {
     return NETWORK_NAME;
   }
 
   @Override
-  protected Node[] definedNodes() {
+  public Node[] getOrderedNodes() {
     return new Node[] {rain, sprinkler, wetGrass};
   }
 }

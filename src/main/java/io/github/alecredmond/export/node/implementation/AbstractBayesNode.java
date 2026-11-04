@@ -2,7 +2,6 @@ package io.github.alecredmond.export.node.implementation;
 
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
-import io.github.alecredmond.export.probabilitytables.NetworkTable;
 import io.github.alecredmond.internal.method.node.NodeUtils;
 import java.io.Serializable;
 import java.util.*;
@@ -23,7 +22,6 @@ public abstract class AbstractBayesNode implements Node {
   protected Map<Serializable, NodeState> stateIdMap;
   protected List<Node> parents;
   protected List<Node> children;
-  protected NetworkTable cpt;
 
   protected AbstractBayesNode(
       Serializable id, String name, List<NodeState> states, List<Node> parents) {
@@ -32,7 +30,6 @@ public abstract class AbstractBayesNode implements Node {
     this.parents = Collections.unmodifiableList(parents);
     this.children = List.of();
     this.states = Collections.unmodifiableList(states);
-    this.cpt = null;
   }
 
   public Serializable getId() {
@@ -66,15 +63,7 @@ public abstract class AbstractBayesNode implements Node {
 
   @Override
   public void setChildren(List<Node> children) {
-    this.children = children;
-  }
-
-  public NetworkTable getCpt() {
-    return this.cpt;
-  }
-
-  public void setCpt(NetworkTable cpt) {
-    this.cpt = cpt;
+    this.children = Collections.unmodifiableList(children);
   }
 
   @Override

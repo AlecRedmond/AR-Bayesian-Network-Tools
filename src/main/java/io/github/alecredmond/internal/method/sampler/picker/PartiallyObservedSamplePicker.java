@@ -1,6 +1,5 @@
 package io.github.alecredmond.internal.method.sampler.picker;
 
-import io.github.alecredmond.export.node.NodeState;
 import io.github.alecredmond.internal.application.sampler.SamplePickerFactoryData;
 
 public class PartiallyObservedSamplePicker extends AbstractSamplePicker {
@@ -10,17 +9,17 @@ public class PartiallyObservedSamplePicker extends AbstractSamplePicker {
   }
 
   @Override
-  public double selectStateAndReturnWeight(NodeState[] sampleArray) {
-    int cptIndex = super.getInitialCptIndex(sampleArray);
+  public double selectStateAndReturnWeight(int[] sampleStatePositions) {
+    int cptIndex = super.getInitialCptIndex(sampleStatePositions);
     int statePosition = 0;
     double totalWeight = 0.0;
-    for (int delta : eventCptSteps) {
+    for (int delta : eventStatePositions) {
       double weight = cptProbabilities[cptIndex + delta];
       totalWeight += weight;
       sampleWeighting[statePosition++] = weight;
     }
     int pickedStatePosition = randomIndex(sampleWeighting, totalWeight);
-    sampleArray[eventNodeIndexInSampleArray] = eventStates[pickedStatePosition];
+    sampleStatePositions[eventNodeIndexInSampleArray] = pickedStatePosition;
     return sampleWeighting[pickedStatePosition] == 0.0 ? 0.0 : totalWeight;
   }
 }

@@ -61,6 +61,10 @@ public class NodeUtils {
         .toList();
   }
 
+  public static List<String> getNodeNames(Collection<Node> nodes) {
+    return nodes.stream().map(Node::getName).toList();
+  }
+
   public static void buildStateNameAndIdMap(
       List<NodeState> states,
       Map<String, NodeState> stateNameMap,

@@ -1,7 +1,7 @@
 package io.github.alecredmond.internal.application.cliquegraph;
 
 import io.github.alecredmond.export.node.Node;
-import io.github.alecredmond.export.node.NodeState;
+import io.github.alecredmond.export.observable.NodeObservation;
 import io.github.alecredmond.internal.method.probabilitytables.JunctionTreeTable;
 import io.github.alecredmond.internal.method.probabilitytables.tabletransfer.TableTransfer;
 import java.util.*;
@@ -34,12 +34,15 @@ public class Clique {
     table.resetObservations();
   }
 
-  public void setObserved(Set<NodeState> observedStates) {
-    table.setObserved(observedStates);
+  public void applyState(Map<Node, NodeObservation> finalInferenceState) {
+    table.setObserved(filterContains(finalInferenceState));
   }
 
-  public void eliminateStates(Set<NodeState> toEliminate) {
-    table.eliminateStates(toEliminate);
+  private NodeObservation[] filterContains(Map<Node, NodeObservation> observationMap) {
+    return observationMap.entrySet().stream()
+        .filter(e -> nodes.contains(e.getKey()))
+        .map(Map.Entry::getValue)
+        .toArray(NodeObservation[]::new);
   }
 
   @Override

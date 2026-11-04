@@ -21,7 +21,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 class TableNormalizerTest {
   static final List<BayesianNetwork> NETWORKS =
-      // List.of(AH_NETWORK.get(), RAIN_NETWORK.get(), SIMPLE_LINEAR.get());
       Arrays.stream(values())
           .map(NetworkScenarioType::get)
           .map(NetworkScenario::buildNetwork)

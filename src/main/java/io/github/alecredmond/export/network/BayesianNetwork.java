@@ -7,6 +7,7 @@ import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
 import io.github.alecredmond.export.probabilitytables.NetworkTable;
 import io.github.alecredmond.export.sampler.MonteCarloSampler;
+import io.github.alecredmond.export.serializer.NodeSerializer;
 import io.github.alecredmond.export.solver.BayesSolver;
 import io.github.alecredmond.internal.fileio.NetworkFileIO;
 import io.github.alecredmond.internal.method.network.BayesianNetworkBuilderImpl;
@@ -18,7 +19,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
-import javax.swing.JFileChooser;
 
 /**
  * Provides a toolset to structure and query a Bayesian Network.
@@ -40,7 +40,6 @@ import javax.swing.JFileChooser;
  * @author Alec Redmond
  * @version 1.0.0 RELEASE
  */
-// TODO - REFORMAT JAVADOC
 @SuppressWarnings({"UnusedReturnValue"})
 public interface BayesianNetwork {
 
@@ -53,23 +52,27 @@ public interface BayesianNetwork {
   }
 
   /**
-   * Loads a saved {@code BayesianNetwork} from a {@code .bayes} file on the disk. This will open a
-   * {@link JFileChooser} window.
-   *
-   * @return a new {@code BayesianNetwork}, loaded from the file.
-   */
-  static BayesianNetwork loadNetworkFromFile() {
-    return new NetworkFileIO(new BayesianNetworkSerializer()).loadNetwork();
-  }
-
-  /**
    * Loads a saved {@code BayesianNetwork} from a {@code .bayes} file on the disk.
    *
    * @param file a {@code .bayes} file.
    * @return a new {@code BayesianNetwork}, loaded from the file.
    */
-  static BayesianNetwork loadNetworkFromFile(File file) {
-    return new NetworkFileIO(new BayesianNetworkSerializer()).loadNetwork(file);
+  static BayesianNetwork loadNetworkFromFile(File file, NodeSerializer<?>... serializers) {
+    return loadNetwork(new NetworkFileIO().loadNetwork(file), serializers);
+  }
+
+  /**
+   * De-serializes and loads a new {@code BayesianNetwork} from a {@link SerializedBayesianNetwork}.
+   * {@link SerializedBayesianNetwork}s are constructed by calling {@link
+   * #serializeNetwork(NodeSerializer[])} on an active {@link BayesianNetwork}, which provides a
+   * deep-copy of the network in a format suitable for file I/O operations.
+   *
+   * @param serializedNetwork a {@link SerializedBayesianNetwork} instance.
+   * @return a new copy of the serialized {@code BayesianNetwork}.
+   */
+  static BayesianNetwork loadNetwork(
+      SerializedBayesianNetwork serializedNetwork, NodeSerializer<?>... serializers) {
+    return new BayesianNetworkSerializer(serializers).deSerializeNetwork(serializedNetwork);
   }
 
   /**
@@ -78,21 +81,8 @@ public interface BayesianNetwork {
    * @param filePath the absolute path to a {@code .bayes} file.
    * @return a new {@code BayesianNetwork}, loaded from the file.
    */
-  static BayesianNetwork loadNetworkFromFile(String filePath) {
-    return new NetworkFileIO(new BayesianNetworkSerializer()).loadNetwork(filePath);
-  }
-
-  /**
-   * De-serializes and loads a new {@code BayesianNetwork} from a {@link SerializedBayesianNetwork}.
-   * {@link SerializedBayesianNetwork}s are constructed by calling {@link #serializeNetwork()} on an
-   * active {@link BayesianNetwork}, which provides a deep-copy of the network in a format suitable
-   * for file I/O operations.
-   *
-   * @param serializedNetwork a {@link SerializedBayesianNetwork} instance.
-   * @return a new copy of the serialized {@code BayesianNetwork}.
-   */
-  static BayesianNetwork loadNetwork(SerializedBayesianNetwork serializedNetwork) {
-    return new BayesianNetworkSerializer().deSerialize(serializedNetwork);
+  static BayesianNetwork loadNetworkFromFile(String filePath, NodeSerializer<?>... serializers) {
+    return loadNetwork(new NetworkFileIO().loadNetwork(filePath), serializers);
   }
 
   // ----------------------------------------------------------------------------------------------
@@ -105,7 +95,7 @@ public interface BayesianNetwork {
    * @param file the file to write.
    * @return {@code true} if the save operation was successful.
    */
-  boolean saveNetworkToFile(File file);
+  boolean saveNetworkToFile(File file, NodeSerializer<?>... additionalSerializers);
 
   /**
    * Serializes and saves this {@code BayesianNetwork} to the disk.
@@ -113,27 +103,19 @@ public interface BayesianNetwork {
    * @param filePath path to the new file.
    * @return {@code true} if the save operation was successful.
    */
-  boolean saveNetworkToFile(String filePath);
+  boolean saveNetworkToFile(String filePath, NodeSerializer<?>... additionalSerializers);
 
-  /**
-   * Serializes and saves this {@code BayesianNetwork} to the disk. This will open a {@link
-   * JFileChooser} window.
-   *
-   * @return {@code true} if the save operation was successful.
-   */
-  boolean saveNetworkToFile();
-
-  SerializedBayesianNetwork serializeNetwork();
+  SerializedBayesianNetwork serializeNetwork(NodeSerializer<?>... additionalSerializers);
 
   // ----------------------------------------------------------------------------------------------
   // ----------------------------------DATA GETTERS -----------------------------------------------
   // ----------------------------------------------------------------------------------------------
 
-  <T extends Serializable> int getNodeOrdinalById(T nodeId);
+  <T extends Serializable> Integer getNodeOrdinalById(T nodeId);
 
-  int getNodeOrdinalByName(String nodeName);
+  Integer getNodeOrdinalByName(String nodeName);
 
-  int getNodeOrdinal(Node node);
+  Integer getNodeOrdinal(Node node);
 
   /**
    * Returns a {@link Node} from its identifier in this {@code BayesianNetwork}.
@@ -212,11 +194,16 @@ public interface BayesianNetwork {
    * @param <T> class of the Node ID
    * @return the probability table for the specified node.
    */
-  <T extends Serializable> NetworkTable getNetworkTableById(T nodeID);
+  <T extends Serializable> NetworkTable getNetworkTableByNodeId(T nodeID);
+
+  NetworkTable getNetworkTableByNodeName(String nodeName);
 
   NetworkTable getNetworkTable(Node node);
 
-  NetworkTable[] getAllNetworkTables();
+  NetworkTable[] getNetworkTables();
+
+  <T extends Collection<NetworkTable>, U extends T> T getNetworkTables(
+      Supplier<U> collectionSupplier);
 
   /**
    * Returns a new map connecting each {@link Node} in this {@code BayesianNetwork} to its

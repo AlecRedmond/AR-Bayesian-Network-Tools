@@ -9,6 +9,7 @@ import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
 import io.github.alecredmond.export.probabilitytables.NetworkTable;
 import io.github.alecredmond.export.sampler.MonteCarloSampler;
+import io.github.alecredmond.export.serializer.NodeSerializer;
 import io.github.alecredmond.internal.application.network.BayesianNetworkData;
 import io.github.alecredmond.internal.fileio.NetworkFileIO;
 import io.github.alecredmond.internal.method.printer.NetworkPrinter;
@@ -20,12 +21,16 @@ import java.util.*;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import lombok.Getter;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
+@EqualsAndHashCode
+@ToString
 public class BayesianNetworkImpl implements BayesianNetwork {
-  @Getter private final BayesianNetworkData networkData;
+  private final BayesianNetworkData networkData;
+  @EqualsAndHashCode.Exclude @ToString.Exclude private final BayesNetIdConverter converter;
 
   // ----------------------------------------------------------------------------------------------
   // ----------------------------------CONSTRUCTORS------------------------------------------------
@@ -33,6 +38,7 @@ public class BayesianNetworkImpl implements BayesianNetwork {
 
   public BayesianNetworkImpl(BayesianNetworkData networkData) {
     this.networkData = networkData;
+    this.converter = new BayesNetIdConverter(this);
   }
 
   // ----------------------------------------------------------------------------------------------
@@ -40,23 +46,18 @@ public class BayesianNetworkImpl implements BayesianNetwork {
   // ----------------------------------------------------------------------------------------------
 
   @Override
-  public boolean saveNetworkToFile(File file) {
-    return new NetworkFileIO(new BayesianNetworkSerializer()).saveNetwork(this, file);
+  public boolean saveNetworkToFile(File file, NodeSerializer<?>... additionalSerializers) {
+    return new NetworkFileIO().saveNetwork(serializeNetwork(additionalSerializers), file);
   }
 
   @Override
-  public boolean saveNetworkToFile(String filePath) {
-    return new NetworkFileIO(new BayesianNetworkSerializer()).saveNetwork(this, filePath);
+  public boolean saveNetworkToFile(String filePath, NodeSerializer<?>... additionalSerializers) {
+    return new NetworkFileIO().saveNetwork(serializeNetwork(additionalSerializers), filePath);
   }
 
   @Override
-  public boolean saveNetworkToFile() {
-    return new NetworkFileIO(new BayesianNetworkSerializer()).saveNetwork(this);
-  }
-
-  @Override
-  public SerializedBayesianNetwork serializeNetwork() {
-    return new BayesianNetworkSerializer().serialize(this);
+  public SerializedBayesianNetwork serializeNetwork(NodeSerializer<?>... additionalSerializers) {
+    return new BayesianNetworkSerializer(additionalSerializers).serializeNetwork(this);
   }
 
   // ----------------------------------------------------------------------------------------------
@@ -64,44 +65,38 @@ public class BayesianNetworkImpl implements BayesianNetwork {
   // ----------------------------------------------------------------------------------------------
 
   @Override
-  public <T extends Serializable> int getNodeOrdinalById(T nodeId) {
+  public <T extends Serializable> Integer getNodeOrdinalById(T nodeId) {
     return networkData.getNodeIndexFromId().get(nodeId);
   }
 
   @Override
-  public int getNodeOrdinalByName(String name) {
+  public Integer getNodeOrdinalByName(String name) {
     return networkData.getNodeIndexFromName().get(name);
   }
 
   @Override
-  public int getNodeOrdinal(Node node) {
+  public Integer getNodeOrdinal(Node node) {
     return getNodeOrdinalById(node.getId());
   }
 
   @Override
   public <T extends Serializable> Node getNodeById(T nodeID) {
-    return networkData.getNodes()[getNodeOrdinalById(nodeID)];
+    return converter.accessByNodeId(nodeID, networkData.getNodes());
   }
 
   @Override
   public <T extends Serializable> Set<Node> getNodesByIds(Collection<T> nodeIDs) {
-    return nodeIDs.stream()
-        .distinct()
-        .map(this::getNodeById)
-        .filter(Objects::nonNull)
-        .collect(Collectors.toCollection(LinkedHashSet::new));
+    return converter.collectByNodeIds(nodeIDs, networkData.getNodes(), LinkedHashSet::new);
   }
 
   @Override
   public Node getNodeByName(String name) {
-    return networkData.getNodes()[getNodeOrdinalByName(name)];
+    return converter.accessByNodeName(name, networkData.getNodes());
   }
 
   @Override
   public Set<Node> getNodesByName(Collection<String> nodeNames) {
-    return nodeNames.stream()
-        .map(this::getNodeByName)
-        .collect(Collectors.toCollection(LinkedHashSet::new));
+    return converter.collectByNodeName(nodeNames, networkData.getNodes(), LinkedHashSet::new);
   }
 
   @Override
@@ -154,19 +149,31 @@ public class BayesianNetworkImpl implements BayesianNetwork {
   }
 
   @Override
-  public <T extends Serializable> NetworkTable getNetworkTableById(T nodeID) {
-    return networkData.getNetworkTables()[getNodeOrdinalById(nodeID)];
+  public <T extends Serializable> NetworkTable getNetworkTableByNodeId(T nodeID) {
+    return converter.accessByNodeId(nodeID, networkData.getNetworkTables());
+  }
+
+  @Override
+  public NetworkTable getNetworkTableByNodeName(String nodeName) {
+    return converter.accessByNodeName(nodeName, networkData.getNetworkTables());
   }
 
   @Override
   public NetworkTable getNetworkTable(Node node) {
-    return getNetworkTableById(node.getId());
+    return converter.accessByNode(node, networkData.getNetworkTables());
   }
 
   @Override
-  public NetworkTable[] getAllNetworkTables() {
+  public NetworkTable[] getNetworkTables() {
     NetworkTable[] tables = networkData.getNetworkTables();
     return Arrays.copyOf(tables, tables.length);
+  }
+
+  @Override
+  public <T extends Collection<NetworkTable>, U extends T> T getNetworkTables(
+      Supplier<U> collectionSupplier) {
+    return Arrays.stream(networkData.getNetworkTables())
+        .collect(Collectors.toCollection(collectionSupplier));
   }
 
   public Map<Node, NetworkTable> getNetworkTablesMap() {

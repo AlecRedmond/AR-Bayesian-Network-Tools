@@ -9,6 +9,7 @@ import io.github.alecredmond.export.observable.Observable;
 import io.github.alecredmond.export.observable.ObservationStatus;
 import io.github.alecredmond.internal.method.sampler.LikelihoodWeightingSampler;
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Random;
@@ -102,20 +103,6 @@ public interface MonteCarloSampler extends Observable {
   MonteCarloSampler setObserved(Collection<NodeState> observedStates);
 
   /**
-   * Replaces the current observed states in the inference network with the given {@link NodeState}.
-   * This will lock its associated {@link Node} to that value. This will change all measured
-   * probability values in this instance to posterior probabilities, conditional on this state.
-   *
-   * <p><i>NOTE: This method calls {@link #resetObservations()} before applying the new
-   * observations.</i>
-   *
-   * @param observedState the single state to be observed.
-   * @return this instance for chaining.
-   */
-  @Override
-  MonteCarloSampler setObserved(NodeState observedState);
-
-  /**
    * Replaces the current observed states in the inference network with the given states. Each
    * {@link NodeState} will lock its associated {@link Node} to measure only itself and any other
    * sibling states declared in the collection. This will change all measured probability values in
@@ -132,21 +119,15 @@ public interface MonteCarloSampler extends Observable {
   @Override
   <T extends Serializable> MonteCarloSampler setObservedById(Collection<T> observedStateIDs);
 
-  /**
-   * Replaces the current observed states in the inference network with the given {@link NodeState},
-   * referenced by its identifier. This will lock its associated {@link Node} to that value. This
-   * will change all measured probability values in this instance to posterior probabilities,
-   * conditional on this state.
-   *
-   * <p><i>NOTE: This method calls {@link #resetObservations()} before applying the new
-   * observations.</i>
-   *
-   * @param observedStateId the identifier of the single state to be observed.
-   * @param <T> the type of the state identifier.
-   * @return this instance for chaining.
-   */
   @Override
-  <T extends Serializable> MonteCarloSampler setObservedById(T observedStateId);
+  default MonteCarloSampler setObserved(NodeState... observedStates) {
+    return setObserved(Arrays.asList(observedStates));
+  }
+
+  @Override
+  default MonteCarloSampler setObservedById(Serializable... observedStateIds) {
+    return setObservedById(Arrays.asList(observedStateIds));
+  }
 
   /**
    * Subtracts the input {@link NodeState} values from the observable pool. This will remove these
@@ -160,17 +141,10 @@ public interface MonteCarloSampler extends Observable {
   @Override
   MonteCarloSampler eliminateStates(Collection<NodeState> toEliminate);
 
-  /**
-   * Subtracts the input {@link NodeState} value from the observable pool. This will remove this
-   * state from consideration when measuring probability values. The final probability values will
-   * be conditional on this state not being present, as well as the effects of any observations or
-   * eliminations declared since the last reset.
-   *
-   * @param toEliminate a single {@link NodeState} to eliminate.
-   * @return this instance for chaining.
-   */
   @Override
-  MonteCarloSampler eliminateStates(NodeState toEliminate);
+  default MonteCarloSampler eliminateStates(NodeState... toEliminate) {
+    return eliminateStates(Arrays.asList(toEliminate));
+  }
 
   /**
    * Subtracts the input {@link NodeState} values from the observable pool. This will remove these
@@ -185,16 +159,8 @@ public interface MonteCarloSampler extends Observable {
   @Override
   <T extends Serializable> MonteCarloSampler eliminateStatesById(Collection<T> toEliminateIDs);
 
-  /**
-   * Subtracts the input {@link NodeState} value from the observable pool. This will remove this
-   * state from consideration when measuring probability values. The final probability values will
-   * be conditional on this state not being present, as well as the effects of any observations or
-   * eliminations declared since the last reset.
-   *
-   * @param toEliminateId the identifier of a single {@link NodeState} to eliminate.
-   * @param <T> the type of the state identifier.
-   * @return this instance for chaining.
-   */
   @Override
-  <T extends Serializable> MonteCarloSampler eliminateStatesById(T toEliminateId);
+  default MonteCarloSampler eliminateStatesById(Serializable... toEliminateIDs) {
+    return eliminateStatesById(Arrays.asList(toEliminateIDs));
+  }
 }

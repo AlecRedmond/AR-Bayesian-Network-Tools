@@ -15,7 +15,7 @@ public abstract class CptDefinedScenario extends AbstractNetworkScenario {
   protected final Map<Node, CptDefinition> cptDefinitionMap = new HashMap<>();
 
   @Override
-  protected BayesSolver defaultSolver() {
+  public BayesSolver getDefaultSolver() {
     return new DirectCptSolver();
   }
 

@@ -4,9 +4,8 @@ import io.github.alecredmond.export.node.NodeState;
 import io.github.alecredmond.internal.application.printer.PrinterPropertyConfigs;
 import io.github.alecredmond.internal.application.printer.PrinterStringMatrix;
 import java.util.Arrays;
-import java.util.Objects;
 
-public abstract class PrinterMatrixGeneratorBase {
+public abstract class PrinterMatrixGeneratorBase implements PrinterMatrixGenerator {
 
   public PrinterStringMatrix generate(PrinterPropertyConfigs configs) {
     PrinterStateMatrix matrix = buildPrinterStateMatrix();
@@ -33,8 +32,7 @@ public abstract class PrinterMatrixGeneratorBase {
 
   private static String[] statesToString(NodeState[] states) {
     return Arrays.stream(states)
-        .map(NodeState::getId)
-        .map(Objects::toString)
+        .map(state -> state.getNode().getName() + ":" + state.getName())
         .toArray(String[]::new);
   }
 
@@ -59,9 +57,13 @@ public abstract class PrinterMatrixGeneratorBase {
 
   private AxisLabels buildColumnLabels(PrinterStateMatrix matrix, PrinterPropertyConfigs configs) {
     NodeState[][] columnStates = matrix.columnStates();
+    int probabilityCharLength = configs.getProbabilityCharLength();
+    if (columnStates.length == 0) {
+      return new AxisLabels(new String[][] {{""}}, new int[] {probabilityCharLength});
+    }
     String[][] labels = new String[columnStates.length][];
     int[] labelWidths = new int[columnStates[0].length];
-    Arrays.fill(labelWidths, configs.getProbabilityCharLength());
+    Arrays.fill(labelWidths, probabilityCharLength);
     fillLabelArray(columnStates, labelWidths, labels);
     return new AxisLabels(labels, labelWidths);
   }

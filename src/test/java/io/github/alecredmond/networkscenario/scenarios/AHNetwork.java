@@ -2,8 +2,11 @@ package io.github.alecredmond.networkscenario.scenarios;
 
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.implementation.BinaryNode;
+import io.github.alecredmond.networkscenario.ObservationPackage;
 import io.github.alecredmond.networkscenario.templates.BinaryNodeScenario;
 import io.github.alecredmond.networkscenario.templates.CptDefinedScenario;
+import java.util.List;
+import java.util.Set;
 
 public class AHNetwork extends CptDefinedScenario implements BinaryNodeScenario {
   // A   B   C
@@ -28,7 +31,7 @@ public class AHNetwork extends CptDefinedScenario implements BinaryNodeScenario 
     e = binaryNode("E", b, c);
     f = binaryNode("F", d);
     g = binaryNode("G", d, e);
-    h = binaryNode("H", g);
+    h = binaryNode("H", e);
 
     addHalfCpt(a, 0.80);
     addHalfCpt(b, 0.40);
@@ -46,12 +49,18 @@ public class AHNetwork extends CptDefinedScenario implements BinaryNodeScenario 
   }
 
   @Override
+  public List<ObservationPackage> buildObservationPackages() {
+    return List.of(
+        new ObservationPackage(Set.of(c, e), Set.of(h.trueState()), Set.of(f.trueState())));
+  }
+
+  @Override
   protected String getNetworkName() {
     return "A-H Network";
   }
 
   @Override
-  protected Node[] definedNodes() {
-    return new Node[0];
+  public Node[] getOrderedNodes() {
+    return new Node[] {a, b, c, d, e, f, g, h};
   }
 }

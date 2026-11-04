@@ -1,10 +1,13 @@
 package io.github.alecredmond.internal.method.vectoriterator.misciterators;
 
+import static io.github.alecredmond.export.observable.ObservationStatus.*;
+
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
+import io.github.alecredmond.export.observable.NodeObservation;
+import io.github.alecredmond.export.observable.ObservationStatus;
 import io.github.alecredmond.export.probabilitytables.ProbabilityVector;
 import io.github.alecredmond.internal.application.vectoriterator.CartesianOdometer;
-import io.github.alecredmond.internal.method.node.NodeUtils;
 import io.github.alecredmond.internal.method.probabilitytables.JunctionTreeTable;
 import io.github.alecredmond.internal.method.vectoriterator.standardtemplate.*;
 import java.util.*;
@@ -30,19 +33,32 @@ public class ObservationCopier implements ProbabilityIteratorTemplate {
     this.odometer = iterator.getOdometer();
   }
 
-  public void observeStates(Collection<NodeState> observedStates) {
+  public void observeStates(NodeObservation[] observations) {
     this.requestStates.clear();
     this.requestNodes.clear();
-    this.requestStates.addAll(observedStates);
-    this.requestNodes.addAll(NodeUtils.getNodes(requestStates));
-    if (observedStates.isEmpty()) writeFromBackupVector();
-    else resetAndRunIterator();
+    switch (addObservationsAndCheckStatus(observations)) {
+      case UNOBSERVED -> resetObservations();
+      case OBSERVED, PARTIALLY_OBSERVED -> resetAndRunIterator();
+      case NEGATED -> negateTable();
+    }
   }
 
-  private void writeFromBackupVector() {
-    double[] backup = backupVector.getProbabilities();
-    double[] observed = mainVector.getProbabilities();
-    System.arraycopy(backup, 0, observed, 0, backup.length);
+  private ObservationStatus addObservationsAndCheckStatus(NodeObservation[] observations) {
+    for (NodeObservation observation : observations) {
+      ObservationStatus current = observation.status();
+      if (current.equals(NEGATED)) return NEGATED;
+      if (current.equals(UNOBSERVED)) continue;
+      requestNodes.add(observation.node());
+      requestStates.addAll(observation.observedStates());
+    }
+    if (requestNodes.isEmpty()) return UNOBSERVED;
+    return requestNodes.size() == requestStates.size() ? OBSERVED : PARTIALLY_OBSERVED;
+  }
+
+  public void resetObservations() {
+    this.requestStates.clear();
+    this.requestNodes.clear();
+    writeFromBackupVector();
   }
 
   private void resetAndRunIterator() {
@@ -58,6 +74,16 @@ public class ObservationCopier implements ProbabilityIteratorTemplate {
             iterator.iterateInner(i -> observed[i] = backup[i]);
           }
         });
+  }
+
+  private void negateTable() {
+    Arrays.fill(mainVector.getProbabilities(), 0);
+  }
+
+  private void writeFromBackupVector() {
+    double[] backup = backupVector.getProbabilities();
+    double[] observed = mainVector.getProbabilities();
+    System.arraycopy(backup, 0, observed, 0, backup.length);
   }
 
   public void eliminateStates(Collection<NodeState> toEliminate) {

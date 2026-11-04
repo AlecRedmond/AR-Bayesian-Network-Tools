@@ -3,19 +3,34 @@ package io.github.alecredmond.networkscenario.scenarios;
 import static io.github.alecredmond.export.node.implementation.BinaryNode.StateOrder.*;
 
 import io.github.alecredmond.export.node.Node;
+import io.github.alecredmond.export.node.NodeState;
 import io.github.alecredmond.export.node.implementation.BinaryNode;
+import io.github.alecredmond.networkscenario.ObservationPackage;
 import io.github.alecredmond.networkscenario.templates.BinaryNodeScenario;
 import io.github.alecredmond.networkscenario.templates.CptDefinedScenario;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class AsiaNetwork extends CptDefinedScenario implements BinaryNodeScenario {
+  /*
+  a     s
+  |    / \
+  t   l   b
+   \ /    |
+    e    /
+   /  \ /
+  x    d
+   */
+
   public final BinaryNode asiaVisit; // a
   public final BinaryNode smoking; // s
   public final BinaryNode tuberculosis; // t
   public final BinaryNode lungCancer; // l
   public final BinaryNode bronchitis; // b
   public final BinaryNode eitherTbOrCancer; // e
-  public final BinaryNode positiveXRay;
-  public final BinaryNode dyspnoea;
+  public final BinaryNode positiveXRay; // x
+  public final BinaryNode dyspnoea; // d
 
   public AsiaNetwork() {
     this.asiaVisit = binaryNode("ASIA_VISIT");
@@ -34,6 +49,7 @@ public class AsiaNetwork extends CptDefinedScenario implements BinaryNodeScenari
     addHalfCpt(bronchitis, 0.3, 0.6);
     addHalfCpt(eitherTbOrCancer, 0, 1, 1, 1);
     addHalfCpt(positiveXRay, 0.05, 0.98);
+    addHalfCpt(dyspnoea, 0.10, 0.80, 0.70, 0.90);
   }
 
   @Override
@@ -42,12 +58,37 @@ public class AsiaNetwork extends CptDefinedScenario implements BinaryNodeScenari
   }
 
   @Override
+  public List<ObservationPackage> buildObservationPackages() {
+    Set<Node> diseases = Set.of(tuberculosis, lungCancer, bronchitis);
+    Set<NodeState> diseasesTrue =
+        diseases.stream()
+            .filter(BinaryNode.class::isInstance)
+            .map(BinaryNode.class::cast)
+            .map(BinaryNode::trueState)
+            .collect(Collectors.toSet());
+
+    List<Set<NodeState>> evidence =
+        List.of(
+            Set.of(
+                asiaVisit.trueState(),
+                smoking.trueState(),
+                positiveXRay.trueState(),
+                dyspnoea.trueState()),
+            Set.of(
+                asiaVisit.trueState(),
+                smoking.trueState(),
+                positiveXRay.trueState(),
+                dyspnoea.falseState()));
+    return evidence.stream().map(e -> new ObservationPackage(diseases, e, diseasesTrue)).toList();
+  }
+
+  @Override
   protected String getNetworkName() {
     return "VISIT_TO_ASIA";
   }
 
   @Override
-  protected Node[] definedNodes() {
+  public Node[] getOrderedNodes() {
     return new Node[] {
       asiaVisit,
       smoking,

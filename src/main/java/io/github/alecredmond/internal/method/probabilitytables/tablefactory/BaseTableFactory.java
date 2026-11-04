@@ -7,7 +7,6 @@ import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
 import io.github.alecredmond.export.probabilitytables.ProbabilityTable;
 import io.github.alecredmond.export.probabilitytables.ProbabilityVector;
-import io.github.alecredmond.internal.method.node.NodeUtils;
 import io.github.alecredmond.internal.method.probabilitytables.TableUtils;
 import io.github.alecredmond.internal.method.probabilitytables.probabilityvector.ProbabilityVectorFactory;
 import java.io.Serializable;
@@ -90,8 +89,7 @@ public abstract class BaseTableFactory<T extends ProbabilityTable> implements Ta
   protected static String buildTableName(TableFactoryData tableFactoryData) {
     Set<Node> events = tableFactoryData.getEvents();
     Set<Node> conditions = tableFactoryData.getConditions();
-    return TableUtils.buildTableName(
-        NodeUtils.getNodeIds(events), NodeUtils.getNodeIds(conditions));
+    return TableUtils.buildTableName(events, conditions);
   }
 
   protected static Node buildEventNode(TableFactoryData data) {

@@ -21,7 +21,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 class LikelihoodWeightingSamplerTest {
-  static final boolean PRINT_DEBUG_OUTPUT = false;
+  static final boolean PRINT_DEBUG_OUTPUT = true;
 
   public static Stream<Arguments> allNetworkScenarios() {
     return Arrays.stream(NetworkScenarioType.values())
@@ -35,14 +35,11 @@ class LikelihoodWeightingSamplerTest {
   void testSamplerReturnsCorrectCounts(BayesianNetwork network) {
     MonteCarloSampler sampler = network.buildSampler();
     List<ProbabilityConstraint> constraints =
-        network.getConstraints().stream()
-            .filter(this::connectedConstraint)
-            .toList();
+        network.getConstraints().stream().filter(this::connectedConstraint).toList();
     InferenceEngine engine = network.buildInferenceEngine();
     SampleCollection sampleCollection = sampler.generateSamples(NUMBER_OF_SAMPLES);
     if (PRINT_DEBUG_OUTPUT) {
-      System.out.printf(
-          "Measuring for network %s%n".formatted(network.getNetworkName()));
+      System.out.printf("Measuring for network %s%n".formatted(network.getNetworkName()));
     }
     constraints.forEach(c -> measureCount(sampleCollection, c, engine));
   }
@@ -61,7 +58,7 @@ class LikelihoodWeightingSamplerTest {
     double probOfObserved = constraint.getProbability();
     Set<NodeState> conditions = constraint.getConditionStates();
     Set<NodeState> allStates = constraint.getAllStates();
-    double error = Math.sqrt(NUMBER_OF_SAMPLES) * ALLOWED_STDEV;
+    double error = Math.sqrt(NUMBER_OF_SAMPLES) * STANDARD_DEVIATIONS;
 
     int conditionSamples = sampleCollection.countSamplesIncludingStates(conditions);
     double expectedConditionProb = engine.getPosteriorProbability(conditions);

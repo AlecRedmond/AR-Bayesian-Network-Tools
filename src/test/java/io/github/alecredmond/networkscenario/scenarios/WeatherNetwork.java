@@ -3,6 +3,7 @@ package io.github.alecredmond.networkscenario.scenarios;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.solver.BayesSolver;
 import io.github.alecredmond.export.solver.IPFPJunctionTreeSolver;
+import io.github.alecredmond.networkscenario.ObservationPackage;
 import io.github.alecredmond.networkscenario.templates.AbstractNetworkScenario;
 import java.util.List;
 
@@ -28,7 +29,7 @@ public class WeatherNetwork extends AbstractNetworkScenario {
   }
 
   @Override
-  protected BayesSolver defaultSolver() {
+  public BayesSolver getDefaultSolver() {
     return new IPFPJunctionTreeSolver();
   }
 
@@ -38,7 +39,12 @@ public class WeatherNetwork extends AbstractNetworkScenario {
   }
 
   @Override
-  protected Node[] definedNodes() {
+  public Node[] getOrderedNodes() {
     return new Node[] {cloudCover, precipitation};
+  }
+
+  @Override
+  public List<ObservationPackage> buildObservationPackages() {
+    return List.of();
   }
 }

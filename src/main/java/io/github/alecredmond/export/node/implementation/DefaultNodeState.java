@@ -5,8 +5,26 @@ import io.github.alecredmond.export.node.NodeState;
 import java.io.Serializable;
 import java.util.Objects;
 
-public record DefaultNodeState(Node node, int position, String name, Serializable id)
-    implements NodeState {
+public final class DefaultNodeState implements NodeState {
+  private final Node node;
+  private final int position;
+  private final String name;
+  private final Serializable id;
+  private final int hashCode;
+
+  public DefaultNodeState(Node node, int position, String name, Serializable id) {
+    this.node = node;
+    this.position = position;
+    this.name = name;
+    this.id = id;
+    this.hashCode = Objects.hash(node.getId(), node.getName(), id, name, position);
+  }
+
+  @Override
+  public int hashCode() {
+    return hashCode;
+  }
+
   @Override
   public boolean equals(Object object) {
     if (!(object instanceof DefaultNodeState that)) return false;
@@ -16,16 +34,13 @@ public record DefaultNodeState(Node node, int position, String name, Serializabl
   }
 
   @Override
-  public int hashCode() {
-    return Objects.hash(position, name, id);
-  }
-
-  @Override
   public String toString() {
     return "DefaultNodeState{"
         + "position="
         + position
-        + ", name='"
+        + ", node = '"
+        + node.getName()
+        + "', name='"
         + name
         + '\''
         + ", id="
@@ -51,5 +66,21 @@ public record DefaultNodeState(Node node, int position, String name, Serializabl
   @Override
   public String getName() {
     return name;
+  }
+
+  public Node node() {
+    return node;
+  }
+
+  public int position() {
+    return position;
+  }
+
+  public String name() {
+    return name;
+  }
+
+  public Serializable id() {
+    return id;
   }
 }

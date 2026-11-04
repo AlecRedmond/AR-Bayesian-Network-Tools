@@ -24,6 +24,10 @@ public class SampleImpl implements Sample {
     }
   }
 
+  public SampleImpl(NodeState[] states) {
+    this.sampleData = new SampleData(states);
+  }
+
   public int count() {
     return sampleData.getCount();
   }

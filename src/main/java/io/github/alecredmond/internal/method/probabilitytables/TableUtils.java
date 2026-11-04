@@ -9,7 +9,6 @@ import io.github.alecredmond.export.probabilitytables.ProbabilityTable;
 import io.github.alecredmond.internal.application.probabilitytables.base.SingleEventTableData;
 import io.github.alecredmond.internal.method.node.NodeUtils;
 import io.github.alecredmond.internal.method.utils.CollectionToString;
-import java.io.Serializable;
 import java.util.*;
 import lombok.extern.slf4j.Slf4j;
 
@@ -41,20 +40,21 @@ public class TableUtils {
     return map;
   }
 
-  public static String buildTableName(
-      List<Serializable> eventIds, List<Serializable> conditionIds) {
+  public static String buildTableName(Collection<Node> events, Collection<Node> conditions) {
+    List<String> eventNames = NodeUtils.getNodeNames(events);
+    List<String> conditionNames = NodeUtils.getNodeNames(conditions);
     StringBuilder sb = new StringBuilder("P(");
-    sb.append(CollectionToString.apply(eventIds));
-    if (!conditionIds.isEmpty()) {
+    sb.append(CollectionToString.apply(eventNames));
+    if (!conditionNames.isEmpty()) {
       sb.append("|");
-      sb.append(CollectionToString.apply(conditionIds));
+      sb.append(CollectionToString.apply(conditionNames));
     }
     return sb.append(")").toString();
   }
 
   public static String buildObservedTableName(
       Node measured, Map<Node, NodeObservation> nodeObservationMap) {
-    return "P(" + measured.getId() + observationStrings(nodeObservationMap) + ")";
+    return "P(" + measured.getName() + observationStrings(nodeObservationMap) + ")";
   }
 
   private static String observationStrings(Map<Node, NodeObservation> nodeObservationMap) {

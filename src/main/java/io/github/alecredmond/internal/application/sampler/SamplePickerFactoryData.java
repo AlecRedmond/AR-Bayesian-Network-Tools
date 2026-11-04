@@ -1,7 +1,6 @@
 package io.github.alecredmond.internal.application.sampler;
 
 import io.github.alecredmond.export.node.Node;
-import io.github.alecredmond.export.node.NodeState;
 import io.github.alecredmond.export.observable.NodeObservation;
 import io.github.alecredmond.export.probabilitytables.NetworkTable;
 import io.github.alecredmond.export.probabilitytables.ProbabilityVector;
@@ -20,8 +19,7 @@ public class SamplePickerFactoryData {
   private final int[] conditionIndexesInSampleArray;
   private final int eventNodeIndexInSampleArray;
 
-  private int[] eventCptSteps = null;
-  private NodeState[] eventStates = null;
+  private int[] eventStatePositions = null;
   private double[] sampleWeighting = null;
 
   public SamplePickerFactoryData(

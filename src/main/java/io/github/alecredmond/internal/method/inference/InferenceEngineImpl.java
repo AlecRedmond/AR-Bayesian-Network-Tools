@@ -9,6 +9,7 @@ import io.github.alecredmond.export.observable.ObservationStatus;
 import io.github.alecredmond.export.probabilitytables.ObservedTable;
 import io.github.alecredmond.internal.method.cliquegraph.InferenceGraph;
 import io.github.alecredmond.internal.method.cliquegraph.factory.InferenceGraphFactory;
+import io.github.alecredmond.internal.method.network.BayesNetIdConverter;
 import io.github.alecredmond.internal.method.observable.ObservableUtils;
 import io.github.alecredmond.internal.method.printer.NetworkPrinter;
 import java.io.Serializable;
@@ -20,18 +21,21 @@ import lombok.extern.slf4j.Slf4j;
 @Getter
 public abstract class InferenceEngineImpl implements InferenceEngine {
   private final BayesianNetwork network;
+  private final BayesNetIdConverter converter;
   private final InferenceGraph inferenceGraph;
 
   protected InferenceEngineImpl(
       BayesianNetwork network, InferenceGraphFactory inferenceGraphFactory) {
     this.network = network;
+    this.converter = new BayesNetIdConverter(network);
     this.inferenceGraph = inferenceGraphFactory.build(network);
     resetObservations();
   }
 
   @Override
   public InferenceEngineImpl resetObservations() {
-    return this.setObserved(List.of());
+    inferenceGraph.resetObservations();
+    return this;
   }
 
   @Override
@@ -41,29 +45,20 @@ public abstract class InferenceEngineImpl implements InferenceEngine {
 
   @Override
   public InferenceEngine eliminateStates(Collection<NodeState> toEliminate) {
-    inferenceGraph.eliminateStates(toEliminate);
+    inferenceGraph.eliminateStates(toEliminate.toArray(NodeState[]::new));
     return this;
   }
 
   @Override
-  public InferenceEngine eliminateStates(NodeState toEliminate) {
-    return eliminateStates(List.of(toEliminate));
+  public <T extends Serializable> InferenceEngine eliminateStatesById(
+      Collection<T> toEliminateIDs) {
+    return eliminateStates(network.getNodeStatesById(toEliminateIDs));
   }
 
   @Override
   public InferenceEngineImpl setObserved(Collection<NodeState> observed) {
-    inferenceGraph.observeNetwork(observed);
+    inferenceGraph.setObservedStates(observed.toArray(NodeState[]::new));
     return this;
-  }
-
-  @Override
-  public InferenceEngine setObserved(NodeState observedState) {
-    return this.setObserved(List.of(observedState));
-  }
-
-  @Override
-  public <T extends Serializable> InferenceEngine setObservedById(T observedStateId) {
-    return setObservedById(List.of(observedStateId));
   }
 
   @Override
@@ -77,29 +72,18 @@ public abstract class InferenceEngineImpl implements InferenceEngine {
   }
 
   @Override
-  public <T extends Serializable> InferenceEngine eliminateStatesById(
-      Collection<T> toEliminateIDs) {
-    return eliminateStates(network.getNodeStatesById(toEliminateIDs));
-  }
-
-  @Override
-  public <T extends Serializable> InferenceEngine eliminateStatesById(T toEliminateIDs) {
-    return eliminateStatesById(List.of(toEliminateIDs));
-  }
-
-  @Override
   public <T extends Serializable> ObservedTable getObservedTableById(T nodeId) {
-    return inferenceGraph.getObservedTables()[network.getNodeOrdinalById(nodeId)];
+    return converter.accessByNodeId(nodeId, inferenceGraph.getObservedTables());
   }
 
   @Override
   public ObservedTable getObservedTableByNodeName(String nodeName) {
-    return inferenceGraph.getObservedTables()[network.getNodeOrdinalByName(nodeName)];
+    return converter.accessByNodeName(nodeName, inferenceGraph.getObservedTables());
   }
 
   @Override
   public ObservedTable getObservedTable(Node node) {
-    return getObservedTableById(node.getId());
+    return converter.accessByNode(node, inferenceGraph.getObservedTables());
   }
 
   @Override
@@ -120,26 +104,13 @@ public abstract class InferenceEngineImpl implements InferenceEngine {
 
   @Override
   public double getPosteriorProbability(Collection<NodeState> measuredStates) {
-    double currentJointProb = inferenceGraph.getJointProbability();
-    if (currentJointProb == 0.0) return 0.0;
-    double newJointProb = inferenceGraph.getJointProbOfMeasured(measuredStates);
-    return newJointProb / currentJointProb;
-  }
-
-  @Override
-  public double getPosteriorProbability(NodeState measuredState) {
-    return getPosteriorProbability(List.of(measuredState));
+    return inferenceGraph.getPosteriorProbability(measuredStates.toArray(NodeState[]::new));
   }
 
   @Override
   public <T extends Serializable> double getPosteriorProbabilityById(
       Collection<T> measuredStateIds) {
     return getPosteriorProbability(network.getNodeStatesById(measuredStateIds));
-  }
-
-  @Override
-  public <T extends Serializable> double getPosteriorProbabilityById(T measuredStateId) {
-    return getPosteriorProbabilityById(List.of(measuredStateId));
   }
 
   @Override
@@ -160,17 +131,11 @@ public abstract class InferenceEngineImpl implements InferenceEngine {
   }
 
   @Override
-  public <T extends Serializable> InferenceEngine printObservedById(T nodeId) {
-    return printObservedById(List.of(nodeId));
-  }
-
-  @Override
   public InferenceEngine printObserved(Collection<Node> nodes) {
     ObservedTable[] observedTables = inferenceGraph.getObservedTables();
     Map<Node, ObservedTable> toPrint = new LinkedHashMap<>();
     nodes.stream()
-        .mapToInt(network::getNodeOrdinal)
-        .mapToObj(i -> observedTables[i])
+        .map(n -> converter.accessByNode(n, observedTables))
         .forEach(table -> toPrint.put(table.getMeasuredNode(), table));
     new NetworkPrinter(this).printTables(toPrint, "OBSERVED");
     return this;

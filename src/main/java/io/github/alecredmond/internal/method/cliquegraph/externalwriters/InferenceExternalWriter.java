@@ -3,14 +3,11 @@ package io.github.alecredmond.internal.method.cliquegraph.externalwriters;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.observable.NodeObservation;
 import io.github.alecredmond.export.probabilitytables.ObservedTable;
-import io.github.alecredmond.export.probabilitytables.ProbabilityTable;
+import io.github.alecredmond.internal.application.cliquegraph.Clique;
 import io.github.alecredmond.internal.application.cliquegraph.GraphDataInference;
 import io.github.alecredmond.internal.method.probabilitytables.ObservedTableImpl;
 import io.github.alecredmond.internal.method.probabilitytables.tabletransfer.TableTransfer;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
+import java.util.*;
 
 public class InferenceExternalWriter extends AbstractExternalTableWriter<GraphDataInference> {
   public InferenceExternalWriter(GraphDataInference cliqueGraphData) {
@@ -19,22 +16,26 @@ public class InferenceExternalWriter extends AbstractExternalTableWriter<GraphDa
 
   @Override
   public void writeToExternal() {
-    Arrays.stream(cliqueGraphData.getCliques())
-        .map(clique -> clique.getWriteToExternal())
-        .flatMap(Collection::stream)
-        .parallel()
-        .forEach(TableTransfer::transfer);
-
     ObservedTable[] observedTables = cliqueGraphData.getObservedTables();
 
-    Arrays.stream(observedTables).parallel().forEach(ProbabilityTable::normalizeTable);
+    for (ObservedTable observedTable : observedTables) {
+      Arrays.fill(observedTable.getProbabilities(), 1.0);
+    }
 
-    Map<Node, NodeObservation> observationMap =
-        Collections.unmodifiableMap(cliqueGraphData.getObservedEvidence());
+    for (Clique clique : cliqueGraphData.getCliques()) {
+      for (TableTransfer externalWriter : clique.getWriteToExternal()) {
+        externalWriter.transfer();
+      }
+    }
 
-    Arrays.stream(observedTables)
-        .filter(ObservedTableImpl.class::isInstance)
-        .map(ObservedTableImpl.class::cast)
-        .forEach(oti -> oti.setObservations(observationMap));
+    Map<Node, NodeObservation> observationMap = cliqueGraphData.getObservedEvidence();
+
+    for (ObservedTable observedTable : observedTables) {
+      observedTable.normalizeTable();
+      if (!(observedTable instanceof ObservedTableImpl impl)) {
+        throw new IllegalStateException("Unexpected instance :" + observedTable.getClass());
+      }
+      impl.setObservations(observationMap);
+    }
   }
 }

@@ -17,12 +17,21 @@ public class NetworkStructureValidator implements NetworkValidator {
     Set<Node> visited = new HashSet<>();
     Set<Node> candidates = new HashSet<>();
     Queue<Node> queue = new ArrayDeque<>();
+
+    assertRootNodesExist(remaining, queue);
+    assertGraphIsConnected(queue, candidates, remaining, visited);
+  }
+
+  private void assertRootNodesExist(Set<Node> remaining, Queue<Node> queue) {
     remaining.stream()
         .filter(n -> n.getParents().isEmpty())
         .findAny()
         .map(queue::add)
         .orElseThrow(() -> new NetworkStructureException("NO NODES WITHOUT PARENTS!"));
+  }
 
+  private void assertGraphIsConnected(
+      Queue<Node> queue, Set<Node> candidates, Set<Node> remaining, Set<Node> visited) {
     while (!queue.isEmpty()) {
       Node current = queue.poll();
       candidates.remove(current);

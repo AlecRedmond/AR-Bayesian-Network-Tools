@@ -20,17 +20,17 @@ public class UnconditionalMatrixGenerator extends PrinterMatrixGeneratorBase
     List<NodeState> eventStates = eventNode.getStates();
     double[] probabilities = tableData.getProbabilities();
 
-    int cols = eventStates.size();
-    int rows = 1;
+    int rows = eventStates.size();
+    int cols = 1;
 
     String tableName = tableData.getTableName().toString();
-    NodeState[][] rowStates = new NodeState[0][0];
-    NodeState[][] colStates = new NodeState[rows][cols];
+    NodeState[][] colStates = new NodeState[0][0];
+    NodeState[][] rowStates = new NodeState[rows][cols];
     double[][] probabilities2D = new double[rows][cols];
 
     for (int i = 0; i < eventStates.size(); i++) {
-      colStates[0][i] = eventStates.get(i);
-      probabilities2D[0][i] = probabilities[i];
+      rowStates[i][0] = eventStates.get(i);
+      probabilities2D[i][0] = probabilities[i];
     }
 
     return new PrinterStateMatrix(tableName, colStates, rowStates, probabilities2D);

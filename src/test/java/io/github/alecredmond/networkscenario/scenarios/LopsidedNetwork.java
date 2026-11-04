@@ -4,8 +4,10 @@ import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.implementation.BinaryNode;
 import io.github.alecredmond.export.solver.BayesSolver;
 import io.github.alecredmond.export.solver.IPFPJunctionTreeSolver;
+import io.github.alecredmond.networkscenario.ObservationPackage;
 import io.github.alecredmond.networkscenario.templates.BinaryNodeScenario;
 import io.github.alecredmond.networkscenario.templates.CptDefinedScenario;
+import java.util.List;
 
 public class LopsidedNetwork extends CptDefinedScenario implements BinaryNodeScenario {
   /*
@@ -43,9 +45,14 @@ public class LopsidedNetwork extends CptDefinedScenario implements BinaryNodeSce
   }
 
   @Override
-  protected BayesSolver defaultSolver() {
+  public BayesSolver getDefaultSolver() {
     return new IPFPJunctionTreeSolver();
   }
+
+    @Override
+    public List<ObservationPackage> buildObservationPackages() {
+        return List.of();
+    }
 
   @Override
   protected String getNetworkName() {
@@ -53,7 +60,7 @@ public class LopsidedNetwork extends CptDefinedScenario implements BinaryNodeSce
   }
 
   @Override
-  protected Node[] definedNodes() {
+  public Node[] getOrderedNodes() {
     return new Node[] {v, w, x, y, z};
   }
 }

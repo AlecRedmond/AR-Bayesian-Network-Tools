@@ -5,6 +5,7 @@ import io.github.alecredmond.export.network.BayesianNetwork;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.observable.NodeObservation;
 import io.github.alecredmond.export.sampler.Sample;
+import io.github.alecredmond.export.sampler.SampleCollection;
 import io.github.alecredmond.internal.application.sampler.SampleCollectionData;
 import io.github.alecredmond.internal.method.node.NodeUtils;
 import java.util.*;
@@ -14,9 +15,9 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @NoArgsConstructor
-public class SampleBuilder {
+public class SampleCollectionBuilder {
 
-  public SampleCollectionImpl build(
+  public SampleCollection build(
       int numberOfSamples,
       Map<SampleImpl, Integer> sampleMap,
       Map<Node, NodeObservation> observations,
@@ -59,7 +60,7 @@ public class SampleBuilder {
       Node[] nodeArray, Map<Node, NodeObservation> observations) {
     return IntStream.range(0, nodeArray.length)
         .filter(i -> validObservationForSorting(nodeArray[i], observations))
-        .mapToObj(SampleBuilder::compareStatesByPosition)
+        .mapToObj(SampleCollectionBuilder::compareStatesByPosition)
         .reduce(Comparator::thenComparing)
         .orElseThrow(() -> new SampleValidationException("SAMPLES COULD NOT BE ORDERED"));
   }
@@ -68,8 +69,7 @@ public class SampleBuilder {
     return switch (observations.get(node).status()) {
       case UNOBSERVED, PARTIALLY_OBSERVED -> true;
       case OBSERVED -> false;
-      case NEGATED ->
-          throw new IllegalStateException("Negated Observation found for node %s".formatted(node));
+      case NEGATED -> throw new IllegalStateException("Negated Observation found for node " + node);
     };
   }
 

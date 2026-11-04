@@ -52,7 +52,6 @@ public class CliqueJoiner {
       if (rootOfB.equals(rootOfA)) continue;
 
       mergeAndRemoveShorterBranch(branches, branchRoots, rootOfA, rootOfB);
-
       finalSeparators.add(separatorFactory.buildSeparator(cliqueA, cliqueB));
     }
     jtd.setSeparators(finalSeparators.toArray(Separator[]::new));

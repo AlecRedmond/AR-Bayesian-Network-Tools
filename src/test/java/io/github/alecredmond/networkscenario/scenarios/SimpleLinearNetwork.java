@@ -2,8 +2,11 @@ package io.github.alecredmond.networkscenario.scenarios;
 
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.implementation.BinaryNode;
+import io.github.alecredmond.networkscenario.ObservationPackage;
 import io.github.alecredmond.networkscenario.templates.BinaryNodeScenario;
 import io.github.alecredmond.networkscenario.templates.CptDefinedScenario;
+import java.util.List;
+import java.util.Set;
 
 public class SimpleLinearNetwork extends CptDefinedScenario implements BinaryNodeScenario {
   public final BinaryNode a;
@@ -29,12 +32,17 @@ public class SimpleLinearNetwork extends CptDefinedScenario implements BinaryNod
   }
 
   @Override
+  public List<ObservationPackage> buildObservationPackages() {
+    return List.of(new ObservationPackage(Set.of(b, c), Set.of(), Set.of(d.trueState())));
+  }
+
+  @Override
   protected String getNetworkName() {
     return "SIMPLE LINEAR NETWORK";
   }
 
   @Override
-  protected Node[] definedNodes() {
+  public Node[] getOrderedNodes() {
     return new Node[] {a, b, c, d};
   }
 }

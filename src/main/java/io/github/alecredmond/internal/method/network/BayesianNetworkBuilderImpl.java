@@ -1,6 +1,7 @@
 package io.github.alecredmond.internal.method.network;
 
-import io.github.alecredmond.exceptions.ConstraintValidationException;
+import static org.apache.commons.lang3.ArrayUtils.isSorted;
+
 import io.github.alecredmond.export.constraints.ProbabilityConstraint;
 import io.github.alecredmond.export.network.BayesianNetwork;
 import io.github.alecredmond.export.network.BayesianNetworkBuilder;
@@ -13,6 +14,7 @@ import io.github.alecredmond.internal.application.network.BayesianNetworkData;
 import io.github.alecredmond.internal.method.constraints.ConstraintFactory;
 import io.github.alecredmond.internal.method.network.validator.ValidatorType;
 import io.github.alecredmond.internal.method.node.NodeComparator;
+import io.github.alecredmond.internal.method.node.NodeUtils;
 import io.github.alecredmond.internal.method.probabilitytables.tablefactory.NetworkTableFactory;
 import io.github.alecredmond.internal.method.vectoriterator.misciterators.ConstraintBuilderIterator;
 import java.io.Serializable;
@@ -35,7 +37,7 @@ public class BayesianNetworkBuilderImpl implements BayesianNetworkBuilder {
 
   @Override
   public Optional<BayesianNetwork> build(BayesSolver solver) {
-    setNodeChildren();
+    resetNodeChildren();
     BayesianNetworkData networkData = new BayesianNetworkData(networkName, nodes, constraints);
     validateData(networkData);
     NodeComparator comparator = orderNodes(networkData);
@@ -43,18 +45,16 @@ public class BayesianNetworkBuilderImpl implements BayesianNetworkBuilder {
     return solver.solveNetwork(new BayesianNetworkImpl(networkData));
   }
 
-  private void setNodeChildren() {
+  private void resetNodeChildren() {
+    Map<Node, List<Node>> childMap = new LinkedHashMap<>();
     for (Node node : nodes) {
-      if (node.getChildren() == null) {
-        node.setChildren(new ArrayList<>());
-      }
+      childMap.putIfAbsent(node, new ArrayList<>());
       for (Node parent : node.getParents()) {
-        if (parent.getChildren() == null) {
-          parent.setChildren(new ArrayList<>());
-        }
-        parent.getChildren().add(node);
+        childMap.putIfAbsent(parent, new ArrayList<>());
+        childMap.get(parent).add(node);
       }
     }
+    childMap.forEach(Node::setChildren);
   }
 
   private void validateData(BayesianNetworkData networkData) {
@@ -66,13 +66,14 @@ public class BayesianNetworkBuilderImpl implements BayesianNetworkBuilder {
 
   private NodeComparator orderNodes(BayesianNetworkData networkData) {
     NodeComparator comparator = new NodeComparator(networkData);
-    Arrays.sort(networkData.getNodes(), comparator);
+    if (!isSorted(networkData.getNodes(), comparator)) {
+      Arrays.sort(networkData.getNodes(), comparator);
+    }
     return comparator;
   }
 
   private void buildArraysAndMaps(BayesianNetworkData networkData, NodeComparator comparator) {
     Node[] nodeArray = networkData.getNodes();
-    NodeState[][] states = networkData.getStates();
     NetworkTable[] networkTables = networkData.getNetworkTables();
     Map<Serializable, Integer> nodeIndexFromId = networkData.getNodeIndexFromId();
     Map<String, Integer> nodeIndexFromName = networkData.getNodeIndexFromName();
@@ -84,16 +85,13 @@ public class BayesianNetworkBuilderImpl implements BayesianNetworkBuilder {
       Node node = nodeArray[i];
       nodeIndexFromId.put(node.getId(), i);
       nodeIndexFromName.put(node.getName(), i);
-      states[i] = buildStateArrayAndAddToIdMap(node, nodeStateIDsMap);
+      addStatesToMap(node, nodeStateIDsMap);
       networkTables[i] = buildNetworkTable(node, tableFactory, comparator);
     }
   }
 
-  private NodeState[] buildStateArrayAndAddToIdMap(
-      Node node, Map<Serializable, NodeState> nodeStateIDsMap) {
-    return node.getStates().stream()
-        .map(state -> nodeStateIDsMap.put(state.getId(), state))
-        .toArray(NodeState[]::new);
+  private void addStatesToMap(Node node, Map<Serializable, NodeState> nodeStateIDsMap) {
+    node.getStates().forEach(state -> nodeStateIDsMap.put(state.getId(), state));
   }
 
   private NetworkTable buildNetworkTable(
@@ -102,16 +100,7 @@ public class BayesianNetworkBuilderImpl implements BayesianNetworkBuilder {
     List<Node> conditions = node.getParents().stream().sorted(comparator).toList();
     NetworkTable table = tableFactory.buildTable(events, conditions);
     table.normalizeTable();
-    node.setCpt(table);
     return table;
-  }
-
-  private void addConstraintCommon(Supplier<ProbabilityConstraint> supplier) {
-    try {
-      getConstraints().add(supplier.get());
-    } catch (ConstraintValidationException e) {
-      log.error(e.getMessage(), e);
-    }
   }
 
   @Override
@@ -153,7 +142,7 @@ public class BayesianNetworkBuilderImpl implements BayesianNetworkBuilder {
   public BayesianNetworkBuilder addConstraint(NodeState eventState, double probability) {
     Set<NodeState> eSet = Set.of(eventState);
     Set<NodeState> cSet = Set.of();
-    addConstraintCommon(() -> constraintFactory.buildConstraint(eSet, cSet, probability));
+    constraints.add(constraintFactory.buildConstraint(eSet, cSet, probability));
     return this;
   }
 
@@ -162,17 +151,14 @@ public class BayesianNetworkBuilderImpl implements BayesianNetworkBuilder {
       NodeState eventState, NodeState conditionState, double probability) {
     Set<NodeState> eSet = Set.of(eventState);
     Set<NodeState> cSet = Set.of(conditionState);
-    addConstraintCommon(() -> constraintFactory.buildConstraint(eSet, cSet, probability));
+    constraints.add(constraintFactory.buildConstraint(eSet, cSet, probability));
     return this;
   }
 
   @Override
   public BayesianNetworkBuilder addConstraint(
       NodeState eventState, Collection<NodeState> conditionStates, double probability) {
-    Set<NodeState> eSet = Set.of(eventState);
-    Set<NodeState> cSet = new HashSet<>(conditionStates);
-    addConstraintCommon(() -> constraintFactory.buildConstraint(eSet, cSet, probability));
-    return this;
+    return addConstraint(Set.of(eventState), conditionStates, probability);
   }
 
   @Override
@@ -181,14 +167,15 @@ public class BayesianNetworkBuilderImpl implements BayesianNetworkBuilder {
       Collection<NodeState> conditionStates,
       double probability) {
     Set<NodeState> eSet = new HashSet<>(eventStates);
-    Set<NodeState> cSet = new HashSet<>(conditionStates);
-    addConstraintCommon(() -> constraintFactory.buildConstraint(eSet, cSet, probability));
+    for (Set<NodeState> cSet : NodeUtils.splitStatesSharingNodes(conditionStates)) {
+      constraints.add(constraintFactory.buildConstraint(eSet, cSet, probability));
+    }
     return this;
   }
 
   @Override
   public BayesianNetworkBuilder addConstraint(ProbabilityConstraint probabilityConstraint) {
-    addConstraintCommon(() -> constraintFactory.validateConstraint(probabilityConstraint));
+    constraints.add(constraintFactory.validateConstraint(probabilityConstraint));
     return this;
   }
 

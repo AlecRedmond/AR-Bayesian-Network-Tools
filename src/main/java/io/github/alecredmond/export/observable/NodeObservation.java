@@ -60,6 +60,11 @@ public class NodeObservation {
     return new NodeObservationFactory().buildUnobservedNetwork(network.getNodes(ArrayList::new));
   }
 
+  public static Map<Node, NodeObservation> observe(
+      Map<Node, NodeObservation> currentObservations, NodeState... toObserve) {
+    return observe(currentObservations, Arrays.asList(toObserve));
+  }
+
   /**
    * Adds the declared observations to the existing map. Each {@link Node} represented by one or
    * more {@link NodeState}s in the collection will be remapped to a new {@link NodeObservation},
@@ -74,6 +79,11 @@ public class NodeObservation {
       Map<Node, NodeObservation> currentObservations, Collection<NodeState> toObserve) {
     return new NodeObservationFactory()
         .buildFromObservedStates(currentObservations, NodeUtils.generateMultiRequest(toObserve));
+  }
+
+  public static Map<Node, NodeObservation> eliminate(
+      Map<Node, NodeObservation> currentObservations, NodeState... toEliminate) {
+    return eliminate(currentObservations, Arrays.asList(toEliminate));
   }
 
   /**
@@ -162,9 +172,10 @@ public class NodeObservation {
   @Override
   public String toString() {
     return switch (status) {
-      case UNOBSERVED -> "%s:%s".formatted(node, UNOBSERVED);
-      case NEGATED -> "%s:%s".formatted(node, NEGATED);
-      case OBSERVED -> "%s=%s".formatted(node, observedStates.iterator().next());
+      case UNOBSERVED -> "%s:%s".formatted(node.getName(), UNOBSERVED);
+      case NEGATED -> "%s:%s".formatted(node.getName(), NEGATED);
+      case OBSERVED ->
+          "%s=%s".formatted(node.getName(), observedStates.iterator().next().getName());
       case PARTIALLY_OBSERVED -> formatPartiallyObservedString();
     };
   }
@@ -181,10 +192,10 @@ public class NodeObservation {
     String stringStates;
     if (observedStates.size() >= eliminatedStates.size()) {
       format = "%s!={%s}";
-      stringStates = CollectionToString.apply(eliminatedStates);
+      stringStates = CollectionToString.apply(eliminatedStates, NodeState::getName);
     } else {
       format = "%s=={%s}";
-      stringStates = CollectionToString.apply(observedStates);
+      stringStates = CollectionToString.apply(observedStates, NodeState::getName);
     }
     return format.formatted(node, stringStates);
   }
