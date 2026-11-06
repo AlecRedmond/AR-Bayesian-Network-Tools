@@ -144,6 +144,13 @@ class BayesianNetworkBuilderTest {
       builder.setNodes(a, b, d);
       assertThrows(NetworkStructureException.class, () -> builder.build(solver));
     }
+
+    @Test
+    void addCircularReference_shouldThrowStructureException() {
+      b.setParents(List.of(a, d));
+      builder.setNodes(a, b, c, d);
+      assertThrows(NetworkStructureException.class, () -> builder.build(solver));
+    }
   }
 
   @Nested
@@ -267,6 +274,13 @@ class BayesianNetworkBuilderTest {
     void addConstraints_manuallyBuilt_shouldSucceed() {
       assertDoesNotThrow(() -> builder.addConstraints(buildTestConstraints()));
       assertDoesNotThrow(() -> builder.build(solver));
+    }
+
+    @Test
+    void addconstraint_sneakyUsingGetter_shouldThrowException() {
+      List<ProbabilityConstraint> constraints = buildTestConstraints();
+      builder.getConstraints().addAll(constraints);
+      assertThrows(ConstraintValidationException.class, () -> builder.build(solver));
     }
 
     @Test

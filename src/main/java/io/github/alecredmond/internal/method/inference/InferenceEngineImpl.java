@@ -10,6 +10,7 @@ import io.github.alecredmond.export.probabilitytables.ObservedTable;
 import io.github.alecredmond.internal.method.cliquegraph.InferenceGraph;
 import io.github.alecredmond.internal.method.cliquegraph.factory.InferenceGraphFactory;
 import io.github.alecredmond.internal.method.network.BayesNetIdConverter;
+import io.github.alecredmond.internal.method.node.NodeUtils;
 import io.github.alecredmond.internal.method.observable.ObservableUtils;
 import io.github.alecredmond.internal.method.printer.NetworkPrinter;
 import java.io.Serializable;
@@ -45,7 +46,7 @@ public abstract class InferenceEngineImpl implements InferenceEngine {
 
   @Override
   public InferenceEngine eliminateStates(Collection<NodeState> toEliminate) {
-    inferenceGraph.eliminateStates(toEliminate.toArray(NodeState[]::new));
+    inferenceGraph.eliminateStates(NodeUtils.generateMultiRequest(toEliminate));
     return this;
   }
 
@@ -57,7 +58,7 @@ public abstract class InferenceEngineImpl implements InferenceEngine {
 
   @Override
   public InferenceEngineImpl setObserved(Collection<NodeState> observed) {
-    inferenceGraph.setObservedStates(observed.toArray(NodeState[]::new));
+    inferenceGraph.setObservedStates(NodeUtils.generateMultiRequest(observed));
     return this;
   }
 
@@ -104,7 +105,7 @@ public abstract class InferenceEngineImpl implements InferenceEngine {
 
   @Override
   public double getPosteriorProbability(Collection<NodeState> measuredStates) {
-    return inferenceGraph.getPosteriorProbability(measuredStates.toArray(NodeState[]::new));
+    return inferenceGraph.getPosteriorProbability(NodeUtils.generateMultiRequest(measuredStates));
   }
 
   @Override

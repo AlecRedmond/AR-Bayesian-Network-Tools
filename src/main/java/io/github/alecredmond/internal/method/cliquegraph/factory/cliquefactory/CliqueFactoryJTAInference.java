@@ -2,13 +2,15 @@ package io.github.alecredmond.internal.method.cliquegraph.factory.cliquefactory;
 
 import io.github.alecredmond.export.network.BayesianNetwork;
 import io.github.alecredmond.export.node.Node;
-import io.github.alecredmond.internal.application.cliquegraph.Clique;
+import io.github.alecredmond.internal.application.cliquegraph.CliqueData;
 import io.github.alecredmond.internal.application.cliquegraph.GraphData;
+import io.github.alecredmond.internal.method.cliquegraph.Clique;
 import io.github.alecredmond.internal.method.cliquegraph.factory.factoryutils.CliqueJoiner;
 import io.github.alecredmond.internal.method.cliquegraph.factory.factoryutils.GraphTriangulator;
 import io.github.alecredmond.internal.method.cliquegraph.factory.factoryutils.TreewidthValidator;
 import io.github.alecredmond.internal.method.cliquegraph.factory.separatorfactory.SeparatorFactory;
 import io.github.alecredmond.internal.method.cliquegraph.factory.separatorfactory.SeparatorFactoryInference;
+import io.github.alecredmond.internal.method.cliquegraph.implementation.CliqueImpl;
 import io.github.alecredmond.internal.method.node.NodeUtils;
 import io.github.alecredmond.internal.method.probabilitytables.tablefactory.JunctionTreeTableFactory;
 import java.util.*;
@@ -20,10 +22,10 @@ import lombok.NoArgsConstructor;
 public class CliqueFactoryJTAInference implements CliqueFactory {
 
   @Override
-  public void buildCliques(GraphData graphData) {
-    buildJtaCliques(graphData);
-    indexCliques(graphData);
-    new CliqueJoiner().joinCliques(graphData, getSeparatorFactory(graphData));
+  public Map<Clique, CliqueData> buildCliques(GraphData graphData) {
+    Map<Clique, CliqueData> cliqueDataMap = buildJtaCliques(graphData);
+    buildSeparators(graphData, cliqueDataMap);
+    return cliqueDataMap;
   }
 
   protected SeparatorFactory getSeparatorFactory(GraphData graphData) {
@@ -37,11 +39,9 @@ public class CliqueFactoryJTAInference implements CliqueFactory {
     return edgeGraph;
   }
 
-  private void indexCliques(GraphData graphData) {
-    Clique[] cliques = graphData.getCliques();
-    for (int i = 0; i < cliques.length; i++) {
-      cliques[i].setCliqueIndex(i);
-    }
+  private void buildSeparators(GraphData graphData, Map<Clique, CliqueData> cliqueDataMap) {
+    SeparatorFactory separatorFactory = getSeparatorFactory(graphData);
+    new CliqueJoiner().joinCliques(cliqueDataMap, separatorFactory, graphData);
   }
 
   private void triangulate(Map<Node, Set<Node>> edgeGraph) {
@@ -50,19 +50,21 @@ public class CliqueFactoryJTAInference implements CliqueFactory {
         .forEach((node, fillIns) -> edgeGraph.get(node).addAll(fillIns));
   }
 
-  private void buildJtaCliques(GraphData graphData) {
+  private Map<Clique, CliqueData> buildJtaCliques(GraphData graphData) {
     Map<Node, Set<Node>> edgeGraph = buildEdgeGraph(graphData);
     triangulate(edgeGraph);
     Set<Set<Node>> maximalSets = findMaximalCliques(edgeGraph);
     new TreewidthValidator().verifyCliques(maximalSets, graphData);
-    graphData.setCliques(buildCliqueArray(maximalSets, graphData.getNetwork()));
+    return buildCliqueArray(maximalSets, graphData.getNetwork());
   }
 
-  private Clique[] buildCliqueArray(Set<Set<Node>> maximalCliques, BayesianNetwork network) {
+  private Map<Clique, CliqueData> buildCliqueArray(
+      Set<Set<Node>> maximalCliques, BayesianNetwork network) {
     JunctionTreeTableFactory tableBuilder = new JunctionTreeTableFactory();
     return maximalCliques.stream()
-        .map(nodes -> new Clique(nodes, tableBuilder.buildTable(nodes, network)))
-        .toArray(Clique[]::new);
+        .map(nodes -> new CliqueData(tableBuilder.buildTable(nodes, network)))
+        .map(cd -> Map.entry(new CliqueImpl(cd), cd))
+        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
   }
 
   private Set<Node> intersectionOf(Set<Node> setA, Set<Node> setB) {
@@ -94,7 +96,7 @@ public class CliqueFactoryJTAInference implements CliqueFactory {
   }
 
   private Set<Set<Node>> findMaximalCliques(Map<Node, Set<Node>> edges) {
-    Set<Set<Node>> maximalCliques = new HashSet<>();
+    Set<Set<Node>> maximalCliques = new LinkedHashSet<>();
 
     List<Node> degeneracyOrdering =
         edges.entrySet().stream()

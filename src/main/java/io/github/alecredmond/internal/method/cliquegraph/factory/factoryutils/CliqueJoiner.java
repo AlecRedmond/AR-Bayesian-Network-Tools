@@ -1,11 +1,13 @@
 package io.github.alecredmond.internal.method.cliquegraph.factory.factoryutils;
 
 import io.github.alecredmond.export.node.Node;
-import io.github.alecredmond.internal.application.cliquegraph.Clique;
+import io.github.alecredmond.internal.application.cliquegraph.CliqueData;
 import io.github.alecredmond.internal.application.cliquegraph.GraphData;
-import io.github.alecredmond.internal.application.cliquegraph.Separator;
+import io.github.alecredmond.internal.method.cliquegraph.Clique;
+import io.github.alecredmond.internal.method.cliquegraph.Separator;
 import io.github.alecredmond.internal.method.cliquegraph.factory.separatorfactory.SeparatorFactory;
-import io.github.alecredmond.internal.method.probabilitytables.TableUtils;
+import io.github.alecredmond.internal.method.cliquegraph.implementation.SeparatorImpl;
+import io.github.alecredmond.internal.method.node.NodeUtils;
 import java.util.*;
 import java.util.stream.Stream;
 import lombok.NoArgsConstructor;
@@ -28,17 +30,26 @@ public class CliqueJoiner {
    * Assuming a group of properly triangulated cliques is input, the joined tree will not contain
    * loops and should form the optimal structure.
    */
-  public void joinCliques(GraphData jtd, SeparatorFactory separatorFactory) {
-    Clique[] cliques = jtd.getCliques();
-
-    if (cliques.length <= 1) {
-      jtd.setSeparators(new Separator[0]);
+  public void joinCliques(
+      Map<Clique, CliqueData> cliqueDataMap,
+      SeparatorFactory separatorFactory,
+      GraphData graphData) {
+    if (cliqueDataMap.size() <= 1) {
+      Clique[] cliques = cliqueDataMap.keySet().toArray(Clique[]::new);
+      SeparatorImpl[] separators = new SeparatorImpl[0];
+      graphData.setCliques(cliques);
+      graphData.setSeparators(separators);
       return;
     }
+    joinCliquesWithSeparators(cliqueDataMap, separatorFactory);
+    orderAndSetCliquesAndSeparators(graphData, cliqueDataMap);
+  }
 
+  private void joinCliquesWithSeparators(
+      Map<Clique, CliqueData> cliqueDataMap, SeparatorFactory separatorFactory) {
+    List<Clique> cliques = new ArrayList<>(cliqueDataMap.keySet());
     Map<Clique, Clique> branchRoots = new HashMap<>();
     Map<Clique, List<Clique>> branches = new HashMap<>();
-    List<Separator> finalSeparators = new ArrayList<>();
     initBranches(cliques, branches, branchRoots);
 
     for (CliqueEdge edge : orderCandidateEdges(cliques)) {
@@ -52,20 +63,52 @@ public class CliqueJoiner {
       if (rootOfB.equals(rootOfA)) continue;
 
       mergeAndRemoveShorterBranch(branches, branchRoots, rootOfA, rootOfB);
-      finalSeparators.add(separatorFactory.buildSeparator(cliqueA, cliqueB));
+      Separator separator = separatorFactory.buildSeparator(cliqueA, cliqueB,cliqueDataMap);
+      cliqueDataMap.get(cliqueA).getSeparatorMap().put(cliqueB, separator);
+      cliqueDataMap.get(cliqueB).getSeparatorMap().put(cliqueA, separator);
     }
-    jtd.setSeparators(finalSeparators.toArray(Separator[]::new));
+  }
+
+  private void orderAndSetCliquesAndSeparators(
+      GraphData cliqueData, Map<Clique, CliqueData> cliqueDataMap) {
+    Clique smallestLeaf =
+        cliqueDataMap.entrySet().stream()
+            .filter(e -> e.getValue().getSeparatorMap().size() == 1)
+            .min(Comparator.comparingInt(e -> e.getValue().getTable().getProbabilities().length))
+            .map(Map.Entry::getKey)
+            .orElseThrow();
+
+    Queue<Clique> queue = new LinkedList<>(List.of(smallestLeaf));
+    Set<Clique> finalCliques = new LinkedHashSet<>();
+    Set<Separator> finalSeparators = new LinkedHashSet<>();
+    int i = 0;
+    while (!queue.isEmpty()) {
+      Clique current = queue.poll();
+      if (finalCliques.contains(current)) continue;
+      cliqueDataMap.get(current).setCliqueIndex(i++);
+      finalCliques.add(current);
+      current
+          .getSeparatorMap()
+          .forEach(
+              (clique, separator) -> {
+                if (finalCliques.contains(clique)) return;
+                finalSeparators.add(separator);
+                queue.add(clique);
+              });
+    }
+    cliqueData.setCliques(finalCliques.toArray(Clique[]::new));
+    cliqueData.setSeparators(finalSeparators.toArray(Separator[]::new));
   }
 
   private void initBranches(
-      Clique[] cliques, Map<Clique, List<Clique>> branches, Map<Clique, Clique> branchRoots) {
+      List<Clique> cliques, Map<Clique, List<Clique>> branches, Map<Clique, Clique> branchRoots) {
     for (Clique clique : cliques) {
       branches.put(clique, new ArrayList<>(List.of(clique)));
       branchRoots.put(clique, clique);
     }
   }
 
-  private List<CliqueEdge> orderCandidateEdges(Clique[] cliques) {
+  private List<CliqueEdge> orderCandidateEdges(List<Clique> cliques) {
     Set<Set<Clique>> visitedPairs = new HashSet<>();
     return findCliquesBySharedNodes(cliques).stream()
         .map(commonCliques -> buildEdgeCandidates(commonCliques, visitedPairs))
@@ -92,7 +135,7 @@ public class CliqueJoiner {
     branches.remove(rootOfSmaller);
   }
 
-  private List<List<Clique>> findCliquesBySharedNodes(Clique[] cliqueArray) {
+  private List<List<Clique>> findCliquesBySharedNodes(List<Clique> cliqueArray) {
     Map<Node, List<Clique>> sharedNodes = new HashMap<>();
     for (Clique clique : cliqueArray) {
       for (Node node : clique.getNodes()) {
@@ -124,7 +167,7 @@ public class CliqueJoiner {
   }
 
   private int getCommonNodeCount(Clique cliqueA, Clique cliqueB) {
-    return TableUtils.getCommonNodes(cliqueA.getTable(), cliqueB.getTable()).size();
+    return NodeUtils.getOverlap(cliqueA.getNodes(), cliqueB.getNodes()).size();
   }
 
   private record CliqueEdge(Clique cliqueA, Clique cliqueB, int weight) {}

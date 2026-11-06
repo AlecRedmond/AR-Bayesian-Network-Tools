@@ -16,6 +16,7 @@ public class DefaultBinaryNode extends AbstractBayesNode implements BinaryNode {
   public static final String FALSE_STATE_NAME = "FALSE";
   private NodeState falseState;
   private NodeState trueState;
+  private StateOrder stateOrder;
 
   public DefaultBinaryNode(
       Serializable id, String name, List<Node> parents, StateOrder stateOrder) {
@@ -23,6 +24,7 @@ public class DefaultBinaryNode extends AbstractBayesNode implements BinaryNode {
     setName(name);
     setParents(parents);
     setStatesByOrder(stateOrder);
+    this.stateOrder = stateOrder;
   }
 
   private void setStatesByOrder(StateOrder stateOrder) {
@@ -62,5 +64,10 @@ public class DefaultBinaryNode extends AbstractBayesNode implements BinaryNode {
   @Override
   public NodeState falseState() {
     return falseState;
+  }
+
+  @Override
+  public StateOrder getStateOrder() {
+    return stateOrder;
   }
 }

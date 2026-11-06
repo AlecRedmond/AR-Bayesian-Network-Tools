@@ -10,6 +10,7 @@ import io.github.alecredmond.internal.method.probabilitytables.tablefactory.Junc
 import io.github.alecredmond.internal.method.vectoriterator.misciterators.JunctionTableSummer;
 import io.github.alecredmond.internal.method.vectoriterator.misciterators.ObservationCopier;
 import java.util.Collection;
+import java.util.List;
 import lombok.EqualsAndHashCode;
 
 @EqualsAndHashCode(callSuper = true, onlyExplicitlyIncluded = true)
@@ -35,7 +36,7 @@ public class JunctionTreeTableImpl extends ProbabilityTableBase<JunctionTreeTabl
   }
 
   @Override
-  public void setObserved(NodeObservation[] nodeObservations) {
+  public void setObserved(List<NodeObservation> nodeObservations) {
     copier.observeStates(nodeObservations);
   }
 

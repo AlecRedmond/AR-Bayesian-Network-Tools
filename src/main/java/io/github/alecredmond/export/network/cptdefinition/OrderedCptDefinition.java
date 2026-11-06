@@ -45,11 +45,6 @@ public class OrderedCptDefinition implements CptDefinition {
   }
 
   @Override
-  public double[] probabilities() {
-    return vector.getProbabilities();
-  }
-
-  @Override
   public ProbabilityVector getVector() {
     return vector;
   }
@@ -57,10 +52,5 @@ public class OrderedCptDefinition implements CptDefinition {
   @Override
   public Node measuredNode() {
     return measuredNode;
-  }
-
-  @Override
-  public Node[] orderedNodes() {
-    return vector.getOrderedNodes();
   }
 }

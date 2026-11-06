@@ -49,10 +49,10 @@ public class LopsidedNetwork extends CptDefinedScenario implements BinaryNodeSce
     return new IPFPJunctionTreeSolver();
   }
 
-    @Override
-    public List<ObservationPackage> buildObservationPackages() {
-        return List.of();
-    }
+  @Override
+  public List<ObservationPackage> buildObservationPackages() {
+    return List.of();
+  }
 
   @Override
   protected String getNetworkName() {

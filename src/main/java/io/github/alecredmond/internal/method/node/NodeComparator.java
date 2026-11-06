@@ -3,6 +3,7 @@ package io.github.alecredmond.internal.method.node;
 import io.github.alecredmond.exceptions.NetworkStructureException;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.internal.application.network.BayesianNetworkData;
+import io.github.alecredmond.internal.method.utils.CollectionToString;
 import java.util.*;
 
 public class NodeComparator implements Comparator<Node> {
@@ -23,11 +24,17 @@ public class NodeComparator implements Comparator<Node> {
     Map<Node, Integer> degreeMap = new HashMap<>();
     Queue<Node> nodeQueue = buildQueueAndDegreeMap(degreeMap, networkName);
     int order = 0;
+    Node node = null;
     while (!nodeQueue.isEmpty()) {
-      Node node = nodeQueue.poll();
+      node = nodeQueue.poll();
       addToLayerMap(node, layerMap, networkName);
       decrementConnectedAndAppend(node.getChildren(), degreeMap, nodeQueue, networkName);
       orderMap.put(node, order++);
+    }
+    int expectedLen = networkData.getNodes().length;
+    if (order != expectedLen) {
+      if (order < expectedLen) throwCycleInRemaining(node, networkName);
+      else throwUnexpectedCycleException(networkName);
     }
   }
 
@@ -69,6 +76,34 @@ public class NodeComparator implements Comparator<Node> {
           if (newDegree == 0) nodeQueue.add(node);
           if (newDegree < 0) throwCycleError(node, networkName);
         });
+  }
+
+  private void throwCycleInRemaining(Node node, String networkName) {
+    String nodeName;
+    String children;
+    if (node == null) {
+      nodeName = "NULL";
+      children = "NULL";
+    } else {
+      nodeName = node.getName();
+      children = CollectionToString.apply(node.getChildren());
+    }
+    throw new NetworkStructureException(
+        "The children of node "
+            + nodeName
+            + "(Network : "
+            + networkName
+            + ")"
+            + "could not be processed. This implies one or more children create a cycle"
+            + "\n Affected Nodes = "
+            + children);
+  }
+
+  private void throwUnexpectedCycleException(String networkName) {
+    throw new NetworkStructureException(
+        "Found a loopy network graph: "
+            + networkName
+            + "\nThis error implies an fault with the Network Builder, which should have caught it upstream.");
   }
 
   private void throwCycleError(Node node, String networkName) {

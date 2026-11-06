@@ -1,9 +1,8 @@
 package io.github.alecredmond.internal.method.cliquegraph.externalwriters;
 
 import io.github.alecredmond.export.probabilitytables.NetworkTable;
-import io.github.alecredmond.internal.application.cliquegraph.Clique;
 import io.github.alecredmond.internal.application.cliquegraph.GraphDataSolver;
-import io.github.alecredmond.internal.method.probabilitytables.tabletransfer.TableTransfer;
+import io.github.alecredmond.internal.method.cliquegraph.Clique;
 import java.util.Arrays;
 
 public class SolverExternalWriter extends AbstractExternalTableWriter<GraphDataSolver> {
@@ -20,9 +19,7 @@ public class SolverExternalWriter extends AbstractExternalTableWriter<GraphDataS
     }
 
     for (Clique clique : cliqueGraphData.getCliques()) {
-      for (TableTransfer networkTableWriter : clique.getWriteToExternal()) {
-        networkTableWriter.transfer();
-      }
+      clique.exportPotentialsToTables();
     }
 
     for (NetworkTable table : tables) {

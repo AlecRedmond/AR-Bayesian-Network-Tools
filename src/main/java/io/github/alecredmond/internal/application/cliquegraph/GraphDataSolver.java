@@ -1,5 +1,6 @@
 package io.github.alecredmond.internal.application.cliquegraph;
 
+import io.github.alecredmond.internal.method.cliquegraph.Clique;
 import io.github.alecredmond.internal.method.constraints.strategy.ConstraintSolver;
 import java.util.List;
 import java.util.Map;

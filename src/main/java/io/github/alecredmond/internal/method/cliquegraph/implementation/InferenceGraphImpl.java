@@ -2,20 +2,21 @@ package io.github.alecredmond.internal.method.cliquegraph.implementation;
 
 import static io.github.alecredmond.export.observable.NodeObservation.eliminate;
 import static io.github.alecredmond.export.observable.NodeObservation.observe;
+import static io.github.alecredmond.export.observable.ObservationStatus.*;
 
 import io.github.alecredmond.export.network.BayesianNetwork;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
 import io.github.alecredmond.export.observable.NodeObservation;
+import io.github.alecredmond.export.observable.ObservationStatus;
 import io.github.alecredmond.export.probabilitytables.ObservedTable;
-import io.github.alecredmond.internal.application.cliquegraph.Clique;
 import io.github.alecredmond.internal.application.cliquegraph.GraphDataInference;
-import io.github.alecredmond.internal.application.cliquegraph.Separator;
+import io.github.alecredmond.internal.method.cliquegraph.Clique;
+import io.github.alecredmond.internal.method.cliquegraph.CliqueGraphTable;
 import io.github.alecredmond.internal.method.cliquegraph.InferenceGraph;
+import io.github.alecredmond.internal.method.cliquegraph.Separator;
 import io.github.alecredmond.internal.method.cliquegraph.externalwriters.InferenceExternalWriter;
-import io.github.alecredmond.internal.method.probabilitytables.JunctionTreeTable;
 import java.util.*;
-import java.util.function.Function;
 
 public class InferenceGraphImpl extends CliqueGraph<GraphDataInference> implements InferenceGraph {
 
@@ -25,8 +26,8 @@ public class InferenceGraphImpl extends CliqueGraph<GraphDataInference> implemen
 
   @Override
   public void resetObservations() {
-    Arrays.stream(data.getCliques()).forEach(Clique::resetObservations);
-    Arrays.stream(data.getSeparators()).forEach(Separator::resetSeparator);
+    Arrays.stream(data.getCliques()).forEach(Clique::resetPotentials);
+    Arrays.stream(data.getSeparators()).forEach(Separator::resetPotentials);
     passMessages();
     data.setObservedEvidence(data.getUnobservedBackup());
     data.setJointProbability(calculateJointProbability());
@@ -34,27 +35,34 @@ public class InferenceGraphImpl extends CliqueGraph<GraphDataInference> implemen
   }
 
   @Override
-  public double getPosteriorProbability(NodeState[] measured) {
+  public double getPosteriorProbability(Map<Node, Set<NodeState>> measureRequest) {
     double prior = data.getJointProbability();
     if (prior == 0.0) return prior;
     Map<Node, NodeObservation> priorEvidence = data.getObservedEvidence();
-    if (negatesPriorEvidence(priorEvidence, measured)) return 0.0;
-    double joint = modifyGraphState(observe(priorEvidence, measured));
+    if (negatesPriorEvidence(priorEvidence, measureRequest)) return 0.0;
+    double joint = modifyGraphState(observe(priorEvidence, measureRequest));
     modifyGraphState(priorEvidence);
     return joint / prior;
   }
 
   private boolean negatesPriorEvidence(
-      Map<Node, NodeObservation> priorEvidence, NodeState[] measured) {
-    for (NodeState state : measured) {
-      if (priorEvidence.get(state.getNode()).eliminatedStates().contains(state)) return true;
+      Map<Node, NodeObservation> priorEvidence, Map<Node, Set<NodeState>> measureRequest) {
+    for (Map.Entry<Node, Set<NodeState>> entry : measureRequest.entrySet()) {
+      NodeObservation observation = priorEvidence.get(entry.getKey());
+      ObservationStatus status = observation.status();
+      if (status.equals(UNOBSERVED)) continue;
+      if (status.equals(NEGATED)) return true;
+      Set<NodeState> eliminated = observation.eliminatedStates();
+      for (NodeState measured : entry.getValue()) {
+        if (eliminated.contains(measured)) return true;
+      }
     }
     return false;
   }
 
   private double modifyGraphState(Map<Node, NodeObservation> finalInferenceState) {
-    Arrays.stream(data.getSeparators()).forEach(Separator::resetSeparator);
-    Arrays.stream(data.getCliques()).forEach(c -> c.applyState(finalInferenceState));
+    Arrays.stream(data.getSeparators()).forEach(Separator::resetPotentials);
+    Arrays.stream(data.getCliques()).forEach(c -> c.applyPotentials(finalInferenceState));
     passMessages();
     return calculateJointProbability();
   }
@@ -66,22 +74,21 @@ public class InferenceGraphImpl extends CliqueGraph<GraphDataInference> implemen
   }
 
   private double calculateJointProbability() {
-    double separatorSums = productOfSums(data.getSeparators(), Separator::getTable);
+    double separatorSums = productOfSums(data.getSeparators());
     if (separatorSums == 0.0) return 0.0;
-    double cliqueSums = productOfSums(data.getCliques(), Clique::getTable);
+    double cliqueSums = productOfSums(data.getCliques());
     return cliqueSums / separatorSums;
   }
 
-  private <T> double productOfSums(T[] array, Function<T, JunctionTreeTable> tableFunction) {
+  private <T extends CliqueGraphTable> double productOfSums(T[] array) {
     return Arrays.stream(array)
-        .map(tableFunction)
-        .mapToDouble(table -> table.sumProbabilities(List.of()))
+        .mapToDouble(CliqueGraphTable::sumPotentials)
         .reduce(1.0, (x, y) -> x * y);
   }
 
   @Override
-  public void setObservedStates(NodeState... observedStates) {
-    Map<Node, NodeObservation> newState = observe(data.getUnobservedBackup(), observedStates);
+  public void setObservedStates(Map<Node, Set<NodeState>> observedStateRequest) {
+    Map<Node, NodeObservation> newState = observe(data.getUnobservedBackup(), observedStateRequest);
     double jointProb = modifyGraphState(newState);
     data.setJointProbability(jointProb);
     data.setObservedEvidence(newState);
@@ -89,9 +96,9 @@ public class InferenceGraphImpl extends CliqueGraph<GraphDataInference> implemen
   }
 
   @Override
-  public void eliminateStates(NodeState... toEliminate) {
-    if (toEliminate.length == 0) return;
-    Map<Node, NodeObservation> newState = eliminate(getObservedEvidence(), toEliminate);
+  public void eliminateStates(Map<Node, Set<NodeState>> toEliminateRequest) {
+    if (toEliminateRequest.isEmpty()) return;
+    Map<Node, NodeObservation> newState = eliminate(getObservedEvidence(), toEliminateRequest);
     double jointProb = modifyGraphState(newState);
     data.setObservedEvidence(newState);
     data.setJointProbability(jointProb);

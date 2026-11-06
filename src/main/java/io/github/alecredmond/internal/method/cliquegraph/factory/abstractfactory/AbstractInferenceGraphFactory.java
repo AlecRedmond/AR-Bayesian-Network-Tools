@@ -5,7 +5,9 @@ import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.observable.NodeObservation;
 import io.github.alecredmond.export.probabilitytables.ObservedTable;
 import io.github.alecredmond.export.probabilitytables.ProbabilityTable;
+import io.github.alecredmond.internal.application.cliquegraph.CliqueData;
 import io.github.alecredmond.internal.application.cliquegraph.GraphDataInference;
+import io.github.alecredmond.internal.method.cliquegraph.Clique;
 import io.github.alecredmond.internal.method.cliquegraph.InferenceGraph;
 import io.github.alecredmond.internal.method.cliquegraph.externalwriters.InferenceExternalWriter;
 import io.github.alecredmond.internal.method.cliquegraph.factory.InferenceGraphFactory;
@@ -22,9 +24,9 @@ public abstract class AbstractInferenceGraphFactory
   }
 
   @Override
-  protected void commonBuildLogic() {
+  protected Map<Clique, CliqueData> commonBuildLogic() {
     buildObservedTables();
-    super.commonBuildLogic();
+    return super.commonBuildLogic();
   }
 
   @Override

@@ -77,8 +77,12 @@ public class NodeObservation {
    */
   public static Map<Node, NodeObservation> observe(
       Map<Node, NodeObservation> currentObservations, Collection<NodeState> toObserve) {
-    return new NodeObservationFactory()
-        .buildFromObservedStates(currentObservations, NodeUtils.generateMultiRequest(toObserve));
+    return observe(currentObservations, NodeUtils.generateMultiRequest(toObserve));
+  }
+
+  public static Map<Node, NodeObservation> observe(
+      Map<Node, NodeObservation> currentRequest, Map<Node, Set<NodeState>> toObserveRequest) {
+    return new NodeObservationFactory().buildFromObservedStates(currentRequest, toObserveRequest);
   }
 
   public static Map<Node, NodeObservation> eliminate(
@@ -98,9 +102,14 @@ public class NodeObservation {
    */
   public static Map<Node, NodeObservation> eliminate(
       Map<Node, NodeObservation> currentObservations, Collection<NodeState> toEliminate) {
+    return eliminate(currentObservations, NodeUtils.generateMultiRequest(toEliminate));
+  }
+
+  public static Map<Node, NodeObservation> eliminate(
+      Map<Node, NodeObservation> currentObservations,
+      Map<Node, Set<NodeState>> toEliminateRequest) {
     return new NodeObservationFactory()
-        .buildFromEliminatedStates(
-            currentObservations, NodeUtils.generateMultiRequest(toEliminate));
+        .buildFromEliminatedStates(currentObservations, toEliminateRequest);
   }
 
   /**

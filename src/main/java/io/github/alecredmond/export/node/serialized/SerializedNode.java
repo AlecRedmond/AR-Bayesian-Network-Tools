@@ -4,6 +4,7 @@ import io.github.alecredmond.export.network.serialized.SerializedBayesianNetwork
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
 import io.github.alecredmond.export.probabilitytables.NetworkTable;
+import io.github.alecredmond.export.serializer.NodeSerializer;
 import java.io.Serializable;
 
 /**
@@ -16,6 +17,8 @@ import java.io.Serializable;
  * @param stateNames the names of the {@link Node}'s {@link NodeState}s.
  * @param parentIds the identifiers of the {@link Node}'s parents.
  * @param cptProbabilities the probability values from the {@link Node}'s {@link NetworkTable}
+ * @param serializerId the unique identifier for the {@link NodeSerializer} which can deserialize
+ *     this instance.
  * @see Node
  * @see SerializedBayesianNetwork
  * @author Alec Redmond

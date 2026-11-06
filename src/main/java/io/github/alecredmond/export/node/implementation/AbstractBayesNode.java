@@ -9,6 +9,17 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
+/**
+ * Abstract common base for a {@link Node} interface. Contains the basic fields required during for
+ * {@link Node} processing, as well as {@link HashMap}s to access each {@link NodeState} from its
+ * name or identifier. The setters automatically convert any {@link List} values to be unmodifiable
+ * views, and the Equals/Hashcode includes only the node's identifier, name, and its states.
+ *
+ * @see Node
+ * @see DefaultNode
+ * @see DefaultBinaryNode
+ * @author Alec Redmond
+ */
 @SuppressWarnings({"LombokGetterMayBeUsed", "LombokSetterMayBeUsed"})
 @NoArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)

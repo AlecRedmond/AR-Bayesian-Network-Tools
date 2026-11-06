@@ -1,6 +1,8 @@
 package io.github.alecredmond.internal.application.cliquegraph;
 
 import io.github.alecredmond.export.network.BayesianNetwork;
+import io.github.alecredmond.internal.method.cliquegraph.Clique;
+import io.github.alecredmond.internal.method.cliquegraph.Separator;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

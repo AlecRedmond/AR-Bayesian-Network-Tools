@@ -4,8 +4,8 @@ import io.github.alecredmond.export.constraints.ProbabilityConstraint;
 import io.github.alecredmond.export.network.BayesianNetwork;
 import io.github.alecredmond.export.solver.IPFPSolver;
 import io.github.alecredmond.export.solver.ipfpresults.IPFPResults;
-import io.github.alecredmond.internal.application.cliquegraph.Clique;
 import io.github.alecredmond.internal.application.solver.SolverConfigs;
+import io.github.alecredmond.internal.method.cliquegraph.Clique;
 import io.github.alecredmond.internal.method.cliquegraph.SolverGraph;
 import io.github.alecredmond.internal.method.cliquegraph.factory.SolverGraphFactory;
 import io.github.alecredmond.internal.method.constraints.strategy.ConstraintSolver;
@@ -43,8 +43,25 @@ public abstract class AbstractIPFPSolver implements IPFPSolver {
   }
 
   private IPFPResults performSolverRun(SolverGraph solverGraph) {
-    boolean writeLogs = configs.isLogSolverProgress();
-    Instant start = Instant.now();
+    final boolean writeLogs = configs.isLogSolverProgress();
+    final int timeLimitSeconds = configs.getTimeLimitSeconds();
+    final int logIntervalSeconds = configs.getLogIntervalSeconds();
+    final int cycleLimit = configs.getCyclesLimit();
+    final double convergeThreshold = configs.getConvergeThreshold();
+
+    final Instant start = Instant.now();
+    final Instant endTime = start.plus(timeLimitSeconds, ChronoUnit.SECONDS);
+    Instant now = start;
+    Instant nextLogTime = now.plus(logIntervalSeconds, ChronoUnit.SECONDS);
+
+    double lastError;
+    double error = Double.MAX_VALUE;
+    double converge = Double.MAX_VALUE;
+
+    boolean thresholdReached = false;
+    boolean timeLimitReached = false;
+
+    Map<Clique, List<ConstraintSolver>> solversPerClique = solverGraph.getSolversPerClique();
 
     if (writeLogs) {
       log.info("STARTING SOLVER IN MODE = {}", algorithmName());
@@ -52,27 +69,14 @@ public abstract class AbstractIPFPSolver implements IPFPSolver {
 
     solverGraph.normalizeTables();
 
-    double lastError;
-    double error = Double.MAX_VALUE;
-    double converge = Double.MAX_VALUE;
-
-    Instant now = Instant.now();
-    Instant endTime = now.plus(configs.getTimeLimitSeconds(), ChronoUnit.SECONDS);
-    Instant nextLogTime = now.plus(configs.getLogIntervalSeconds(), ChronoUnit.SECONDS);
-
-    Map<Clique, List<ConstraintSolver>> solversPerClique = solverGraph.getSolversPerClique();
-
-    boolean thresholdReached = false;
-    boolean timeLimitReached = false;
     int cycle;
-
-    for (cycle = 0; cycle < configs.getCyclesLimit(); cycle++) {
+    for (cycle = 0; cycle < cycleLimit; cycle++) {
       lastError = error;
       error = runSolverCycleAndReturnError(solverGraph, solversPerClique);
       converge = error - lastError;
 
       now = Instant.now();
-      thresholdReached = Math.abs(converge) <= configs.getConvergeThreshold();
+      thresholdReached = Math.abs(converge) <= convergeThreshold;
       timeLimitReached = now.isAfter(endTime);
 
       if (thresholdReached || timeLimitReached || Double.isNaN(error)) {
@@ -80,7 +84,7 @@ public abstract class AbstractIPFPSolver implements IPFPSolver {
       }
 
       if (writeLogs && now.isAfter(nextLogTime)) {
-        nextLogTime = now.plus(configs.getLogIntervalSeconds(), ChronoUnit.SECONDS);
+        nextLogTime = now.plus(logIntervalSeconds, ChronoUnit.SECONDS);
         logCycleComplete(cycle, converge, error);
       }
     }
@@ -89,7 +93,7 @@ public abstract class AbstractIPFPSolver implements IPFPSolver {
       logEndStatement(
           thresholdReached,
           timeLimitReached,
-          cycle >= configs.getCyclesLimit(),
+          cycle + 1 == cycleLimit,
           now.toEpochMilli() - start.toEpochMilli());
       logCycleComplete(cycle, converge, error);
     }
@@ -110,9 +114,9 @@ public abstract class AbstractIPFPSolver implements IPFPSolver {
     return sum;
   }
 
-  @SuppressWarnings("StringConcatenationArgumentToLogCall")
   private void logCycleComplete(int cycle, double loss, double error) {
-    log.info(String.format("CYCLE %d : LOSS = %1.2e : ERROR = %1.2e", cycle, loss, error));
+    String logString = String.format("CYCLE %d : LOSS = %1.2e : ERROR = %1.2e", cycle, loss, error);
+    log.info(logString);
   }
 
   private void logEndStatement(

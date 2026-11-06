@@ -1,8 +1,8 @@
 package io.github.alecredmond.internal.method.cliquegraph.implementation;
 
-import io.github.alecredmond.internal.application.cliquegraph.Clique;
 import io.github.alecredmond.internal.application.cliquegraph.GraphDataSolver;
-import io.github.alecredmond.internal.application.cliquegraph.Separator;
+import io.github.alecredmond.internal.method.cliquegraph.Clique;
+import io.github.alecredmond.internal.method.cliquegraph.Separator;
 import io.github.alecredmond.internal.method.cliquegraph.SolverGraph;
 import io.github.alecredmond.internal.method.cliquegraph.externalwriters.SolverExternalWriter;
 import io.github.alecredmond.internal.method.constraints.strategy.ConstraintSolver;
@@ -34,6 +34,6 @@ public class SolverGraphImpl extends CliqueGraph<GraphDataSolver> implements Sol
   @Override
   public void normalizeTables() {
     Arrays.stream(data.getCliques()).forEach(Clique::normalizeTable);
-    Arrays.stream(data.getSeparators()).forEach(Separator::resetSeparator);
+    Arrays.stream(data.getSeparators()).forEach(Separator::resetPotentials);
   }
 }

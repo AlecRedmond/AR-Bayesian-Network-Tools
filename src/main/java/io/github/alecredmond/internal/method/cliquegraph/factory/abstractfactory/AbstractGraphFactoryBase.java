@@ -4,12 +4,15 @@ import io.github.alecredmond.export.network.BayesianNetwork;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.probabilitytables.NetworkTable;
 import io.github.alecredmond.export.probabilitytables.ProbabilityTable;
-import io.github.alecredmond.internal.application.cliquegraph.Clique;
+import io.github.alecredmond.internal.application.cliquegraph.CliqueData;
 import io.github.alecredmond.internal.application.cliquegraph.GraphData;
+import io.github.alecredmond.internal.method.cliquegraph.Clique;
+import io.github.alecredmond.internal.method.cliquegraph.factory.cliquefactory.CliqueFactory;
 import io.github.alecredmond.internal.method.probabilitytables.JunctionTreeTable;
 import io.github.alecredmond.internal.method.probabilitytables.tabletransfer.factory.TransferIteratorFactory;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Map;
 import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 
@@ -28,10 +31,11 @@ public abstract class AbstractGraphFactoryBase<T, U extends GraphData> {
     return constructCliqueGraph();
   }
 
-  protected void commonBuildLogic() {
-    buildCliques(cliqueGraphData);
-    buildWritersToExternalTables();
+  protected Map<Clique, CliqueData> commonBuildLogic() {
+    Map<Clique, CliqueData> cliqueDataMap = getCliqueFactory().buildCliques(cliqueGraphData);
+    buildWritersToExternalTables(cliqueDataMap);
     buildCollectionDistributionPlaceholders();
+    return cliqueDataMap;
   }
 
   private void logBuilt() {
@@ -45,9 +49,9 @@ public abstract class AbstractGraphFactoryBase<T, U extends GraphData> {
 
   protected abstract T constructCliqueGraph();
 
-  protected abstract void buildCliques(U cliqueGraphData);
+  protected abstract CliqueFactory getCliqueFactory();
 
-  private void buildWritersToExternalTables() {
+  private void buildWritersToExternalTables(Map<Clique, CliqueData> cliqueDataMap) {
     Clique[] cliques = cliqueGraphData.getCliques();
     ProbabilityTable[] writeBackTables = getWriteBackTables();
     int length = networkTables.length;
@@ -55,13 +59,14 @@ public abstract class AbstractGraphFactoryBase<T, U extends GraphData> {
       NetworkTable multiplyInFrom = networkTables[nodeOrdinal];
       ProbabilityTable writeBackTo = writeBackTables[nodeOrdinal];
       Clique bestClique = getContainsScope(cliques, multiplyInFrom.getNodes());
-      JunctionTreeTable bestCliqueTable = bestClique.getTable();
+      CliqueData cliqueData = cliqueDataMap.get(bestClique);
+      JunctionTreeTable bestCliqueTable = cliqueData.getTable();
 
-      bestClique
+      cliqueData
           .getWriteFromCPTs()
           .add(iteratorFactory.buildMultiplyInTransfer(multiplyInFrom, bestCliqueTable));
 
-      bestClique
+      cliqueData
           .getWriteToExternal()
           .add(iteratorFactory.buildMarginalTransfer(bestCliqueTable, writeBackTo));
     }
