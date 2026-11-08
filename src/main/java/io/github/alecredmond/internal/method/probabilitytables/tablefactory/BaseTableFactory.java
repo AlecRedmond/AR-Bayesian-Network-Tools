@@ -1,15 +1,12 @@
 package io.github.alecredmond.internal.method.probabilitytables.tablefactory;
 
-import static java.util.Collections.unmodifiableMap;
 import static java.util.Collections.unmodifiableSet;
 
 import io.github.alecredmond.export.node.Node;
-import io.github.alecredmond.export.node.NodeState;
 import io.github.alecredmond.export.probabilitytables.ProbabilityTable;
 import io.github.alecredmond.export.probabilitytables.ProbabilityVector;
 import io.github.alecredmond.internal.method.probabilitytables.TableUtils;
 import io.github.alecredmond.internal.method.probabilitytables.probabilityvector.ProbabilityVectorFactory;
-import java.io.Serializable;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -47,8 +44,6 @@ public abstract class BaseTableFactory<T extends ProbabilityTable> implements Ta
     data.setEvents(unmodifiableSet(new LinkedHashSet<>(events)));
     data.setConditions(unmodifiableSet(new LinkedHashSet<>(conditions)));
     data.setNodes(joinEventsAndConditions(events, conditions));
-    data.setNodeStateIDMap(buildNodeStateIDMap(data.getNodes()));
-    data.setNodeIDMap(buildNodeIDMap(data.getNodes()));
     data.setVector(buildProbabilityVector(data.getNodes()));
     data.setTableName(buildTableName(data));
     data.setEventNode(buildEventNode(data));
@@ -62,24 +57,6 @@ public abstract class BaseTableFactory<T extends ProbabilityTable> implements Ta
         Stream.concat(conditions.stream(), events.stream())
             .collect(Collectors.toCollection(LinkedHashSet::new));
     return unmodifiableSet(nodes);
-  }
-
-  private static Map<Serializable, NodeState> buildNodeStateIDMap(Collection<Node> nodes) {
-    Map<Serializable, NodeState> map =
-        nodes.stream()
-            .map(Node::getStates)
-            .flatMap(Collection::stream)
-            .map(ns -> Map.entry(ns.getId(), ns))
-            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-    return unmodifiableMap(map);
-  }
-
-  private static Map<Serializable, Node> buildNodeIDMap(Collection<Node> nodes) {
-    Map<Serializable, Node> map =
-        nodes.stream()
-            .map(n -> Map.entry(n.getId(), n))
-            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-    return unmodifiableMap(map);
   }
 
   protected final ProbabilityVector buildProbabilityVector(Collection<Node> nodes) {

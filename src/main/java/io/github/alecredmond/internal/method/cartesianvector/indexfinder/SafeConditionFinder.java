@@ -10,6 +10,7 @@ import io.github.alecredmond.internal.application.cartesianvector.CartesianVecto
 import io.github.alecredmond.internal.method.utils.CollectionToString;
 import java.util.Collection;
 import java.util.function.Function;
+import java.util.function.IntFunction;
 
 public class SafeConditionFinder<N extends CartesianVariable, S extends CartesianState>
     extends SafeIndexFinder<N, S> {
@@ -22,8 +23,9 @@ public class SafeConditionFinder<N extends CartesianVariable, S extends Cartesia
       CartesianVector<N, S> vector,
       Function<S, N> getNodeFn,
       Function<S, Integer> statePositionFinder,
-      Function<N, Integer> nodeIndexFinder) {
-    super(vector, getNodeFn, statePositionFinder, nodeIndexFinder);
+      Function<N, Integer> nodeIndexFinder,
+      IntFunction<S[]> stateArrayBuilder) {
+    super(vector, getNodeFn, statePositionFinder, nodeIndexFinder, stateArrayBuilder);
   }
 
   @Override

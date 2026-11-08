@@ -22,7 +22,7 @@ public class ConditionalMatrixGenerator extends PrinterMatrixGeneratorBase
     int rows = table.getProbabilities().length / cols;
     int conditionSize = table.getConditions().size();
 
-    String tableName = table.getTableName().toString();
+    String tableName = table.getTableName();
     NodeState[][] rowStates = new NodeState[rows][conditionSize];
     NodeState[][] colStates = new NodeState[1][cols];
     double[][] probabilities2D = new double[rows][cols];

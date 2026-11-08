@@ -10,7 +10,7 @@ import io.github.alecredmond.internal.application.probabilitytables.ObservedTabl
 import io.github.alecredmond.internal.method.probabilitytables.printerformat.PrinterMatrixGeneratorBase;
 import io.github.alecredmond.internal.method.probabilitytables.printerformat.UnconditionalMatrixGenerator;
 import io.github.alecredmond.internal.method.probabilitytables.tablefactory.ObservedTableFactory;
-import java.io.Serializable;
+
 import java.util.List;
 import java.util.Map;
 import lombok.EqualsAndHashCode;
@@ -50,11 +50,6 @@ public class ObservedTableImpl extends ProbabilityTableBase<ObservedTableData>
   @Override
   public Double getProbability(NodeState state) {
     return super.getProbability(List.of(state));
-  }
-
-  @Override
-  public Double getProbabilityById(Serializable stateId) {
-    return super.getProbabilityFromIDs(List.of(stateId));
   }
 
   @Override

@@ -12,7 +12,6 @@ import io.github.alecredmond.internal.method.probabilitytables.printerformat.Pri
 import io.github.alecredmond.internal.method.probabilitytables.tablefactory.ConditionalTableFactory;
 import io.github.alecredmond.internal.method.vectoriterator.misciterators.CptConditionIterator;
 import io.github.alecredmond.internal.method.vectoriterator.misciterators.TableNormalizer;
-import java.io.Serializable;
 import java.util.*;
 import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
@@ -53,18 +52,7 @@ public class ConditionalTableImpl extends NetworkTableBase<ConditionalTableData>
     return new ConditionalMatrixGenerator(this);
   }
 
-  @Override
-  protected CptConditionIterator supplyConditionIterator() {
-    return new CptConditionIterator(this);
-  }
-
-  @Override
-  public <S extends Serializable> Map<NodeState, Double> getConditionalProbByIds(
-      Collection<S> conditionIDs) {
-    return getConditionalProb(getStates(conditionIDs));
-  }
-
-  @Override
+    @Override
   public Map<NodeState, Double> getConditionalProb(Collection<NodeState> conditionStates) {
     try {
       Map<NodeState, Double> map = new LinkedHashMap<>();
@@ -78,5 +66,10 @@ public class ConditionalTableImpl extends NetworkTableBase<ConditionalTableData>
       log.error(e.getMessage());
       return new HashMap<>();
     }
+  }
+
+  @Override
+  protected CptConditionIterator supplyConditionIterator() {
+    return new CptConditionIterator(this);
   }
 }

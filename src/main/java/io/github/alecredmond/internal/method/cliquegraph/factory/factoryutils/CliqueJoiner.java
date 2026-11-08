@@ -63,7 +63,7 @@ public class CliqueJoiner {
       if (rootOfB.equals(rootOfA)) continue;
 
       mergeAndRemoveShorterBranch(branches, branchRoots, rootOfA, rootOfB);
-      Separator separator = separatorFactory.buildSeparator(cliqueA, cliqueB,cliqueDataMap);
+      Separator separator = separatorFactory.buildSeparator(cliqueA, cliqueB, cliqueDataMap);
       cliqueDataMap.get(cliqueA).getSeparatorMap().put(cliqueB, separator);
       cliqueDataMap.get(cliqueB).getSeparatorMap().put(cliqueA, separator);
     }

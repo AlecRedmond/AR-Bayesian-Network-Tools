@@ -13,7 +13,6 @@ import io.github.alecredmond.internal.method.probabilitytables.probabilityvector
 import io.github.alecredmond.internal.method.vectoriterator.misciterators.StateCombinationGenerator;
 import io.github.alecredmond.networkscenario.NetworkScenario;
 import io.github.alecredmond.networkscenario.NetworkScenarioType;
-import java.io.Serializable;
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Predicate;
@@ -138,14 +137,6 @@ class TableQueryToolTest {
   }
 
   @ParameterizedTest
-  @MethodSource("provideGetProbArgs")
-  void getProbabilityFromIDs_shouldSucceed(NetworkTable table, ProbabilityConstraint constraint) {
-    List<Serializable> stateIds = NodeUtils.getNodeStateIds(constraint.getAllStates());
-    assertEquals(
-        constraint.getProbability(), table.getProbabilityFromIDs(stateIds), DOUBLE_EQUALITY);
-  }
-
-  @ParameterizedTest
   @MethodSource("provideCopyTableArgs")
   void copyTable(NetworkTable networkTable) {
     NetworkTable copied = networkTable.copyTable();
@@ -174,19 +165,6 @@ class TableQueryToolTest {
       Map<NodeState, ProbabilityConstraint> constraintMap,
       Collection<NodeState> conditionStates) {
     Map<NodeState, Double> probs = networkTable.getConditionalProb(conditionStates);
-    constraintMap.forEach(
-        (event, constraint) ->
-            assertEquals(constraint.getProbability(), probs.get(event), DOUBLE_EQUALITY));
-  }
-
-  @ParameterizedTest
-  @MethodSource("provideGetConditionProbArgs")
-  void getConditionalProbByIds(
-      NetworkTable networkTable,
-      Map<NodeState, ProbabilityConstraint> constraintMap,
-      Collection<NodeState> conditionStates) {
-    Map<NodeState, Double> probs =
-        networkTable.getConditionalProbByIds(NodeUtils.getNodeStateIds(conditionStates));
     constraintMap.forEach(
         (event, constraint) ->
             assertEquals(constraint.getProbability(), probs.get(event), DOUBLE_EQUALITY));

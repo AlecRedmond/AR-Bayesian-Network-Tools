@@ -7,7 +7,6 @@ import io.github.alecredmond.internal.method.probabilitytables.printerformat.Pri
 import io.github.alecredmond.internal.method.probabilitytables.printerformat.UnconditionalMatrixGenerator;
 import io.github.alecredmond.internal.method.probabilitytables.tablefactory.RootNodeTableFactory;
 import io.github.alecredmond.internal.method.vectoriterator.misciterators.CptConditionIterator;
-import java.io.Serializable;
 import java.util.*;
 import lombok.EqualsAndHashCode;
 
@@ -29,13 +28,7 @@ public class RootNodeTableImpl extends NetworkTableBase<RootNodeTableData>
     return buildProbabilityMap();
   }
 
-  @Override
-  public <S extends Serializable> Map<NodeState, Double> getConditionalProbByIds(
-      Collection<S> conditionIDs) {
-    return buildProbabilityMap();
-  }
-
-  @Override
+    @Override
   public Map<NodeState, Double> buildProbabilityMap() {
     return TableUtils.buildMarginalProbMap(tableData);
   }
@@ -50,12 +43,7 @@ public class RootNodeTableImpl extends NetworkTableBase<RootNodeTableData>
     return super.getProbability(List.of(state));
   }
 
-  @Override
-  public Double getProbabilityById(Serializable stateId) {
-    return super.getProbabilityFromIDs(List.of(stateId));
-  }
-
-  @Override
+    @Override
   protected PrinterMatrixGeneratorBase buildMatrixGenerator() {
     return new UnconditionalMatrixGenerator(tableData);
   }

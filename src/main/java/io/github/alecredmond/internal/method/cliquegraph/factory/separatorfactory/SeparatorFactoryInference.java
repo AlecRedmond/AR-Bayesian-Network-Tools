@@ -11,8 +11,8 @@ public class SeparatorFactoryInference extends AbstractSeparatorFactory {
   }
 
   @Override
-  protected TableTransfer buildTableTransfer(JunctionTreeTable read, JunctionTreeTable write, JunctionTreeTable separator) {
-    return iteratorFactory.buildMessagePassTransfer(
-        read, write, separator);
+  protected TableTransfer buildTableTransfer(
+      JunctionTreeTable read, JunctionTreeTable write, JunctionTreeTable separator) {
+    return iteratorFactory.buildMessagePassTransfer(read, write, separator);
   }
 }

@@ -2,9 +2,7 @@ package io.github.alecredmond.export.probabilitytables;
 
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
-import java.io.Serializable;
 import java.util.Collection;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -20,22 +18,6 @@ import java.util.Set;
  * @author Alec Redmond
  */
 public interface ProbabilityTable {
-
-  /**
-   * Returns an unmodifiable map linking each state identifier to its corresponding {@link
-   * NodeState} instance within this table.
-   *
-   * @return a map from node state identifiers to state instances.
-   */
-  Map<Serializable, NodeState> getNodeStateIDMap();
-
-  /**
-   * Returns an unmodifiable map linking each node identifier to its corresponding {@link Node}
-   * instance within this table.
-   *
-   * @return a map from node identifiers to node instances.
-   */
-  Map<Serializable, Node> getNodeIDMap();
 
   /**
    * Returns the {@link ProbabilityVector} which stores probability values for this instance. A
@@ -80,7 +62,7 @@ public interface ProbabilityTable {
    *
    * @return the serialized name of this table.
    */
-  Serializable getTableName();
+  String getTableName();
 
   /**
    * Returns the flat probability array backing this table. The array size matches the Cartesian
@@ -105,23 +87,6 @@ public interface ProbabilityTable {
    *     validation fails.
    */
   Double getProbability(Collection<NodeState> states);
-
-  /**
-   * Returns the probability associated with all the given states in the form {@code
-   * P(e1,...,en|c1,...,cm)} where {@code e1,...,en} are the event states, and {@code c1,...,cm} the
-   * condition states. The input collection {@code {id(e1),...,id(en),id(c1),...,id(cn)}} is not
-   * required to be ordered.
-   *
-   * <p><b>This method is affected by Safe Mode.</b> When Safe Mode is enabled, this requires one
-   * {@link NodeState} for every {@link Node} within the table, otherwise {@code null} will be
-   * returned.
-   *
-   * @param <S> the class of the {@link NodeState} identifiers.
-   * @param stateIds the collection of all {@link NodeState} identifiers to be queried.
-   * @return the probability table entry associated with the input states, or {@code null} if safe
-   *     mode validation fails.
-   */
-  <S extends Serializable> Double getProbabilityFromIDs(Collection<S> stateIds);
 
   /**
    * Builds a copy of this {@code ProbabilityTable}. This deep-copies everything except the {@link

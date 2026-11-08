@@ -2,7 +2,7 @@ package io.github.alecredmond.internal.method.cartesianvector.indexfinder;
 
 import io.github.alecredmond.internal.application.cartesianvector.CartesianState;
 import java.util.Collection;
-import java.util.Set;
+import java.util.function.Supplier;
 
 public interface VectorIndexFinder<S extends CartesianState> {
   default int getIndexFromStates(Collection<S> states) {
@@ -13,11 +13,19 @@ public interface VectorIndexFinder<S extends CartesianState> {
 
   int[] getPositionsFromStates(Collection<S> states);
 
-  default Set<S> getStatesFromIndex(int index) {
+  default S[] getStatesFromIndex(int index) {
     return getStatesFromPositions(getPositionsFromIndex(index));
   }
 
-  Set<S> getStatesFromPositions(int[] positions);
+  S[] getStatesFromPositions(int[] positions);
 
   int[] getPositionsFromIndex(int index);
+
+  default <T extends Collection<S>, U extends T> T getStatesFromIndex(
+      int index, Supplier<U> collector) {
+    return getStatesFromPositions(getPositionsFromIndex(index), collector);
+  }
+
+  <T extends Collection<S>, U extends T> T getStatesFromPositions(
+      int[] positions, Supplier<U> collectionSupplier);
 }

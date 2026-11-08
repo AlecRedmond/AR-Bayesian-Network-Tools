@@ -5,7 +5,6 @@ import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
 import io.github.alecredmond.export.probabilitytables.cptentry.CptEntry;
 import io.github.alecredmond.export.probabilitytables.cptentry.CptRow;
-import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -63,23 +62,6 @@ public interface NetworkTable extends ProbabilityTable {
    *     conditions, or an empty {@link HashMap} if Safe Mode validation failed.
    */
   Map<NodeState, Double> getConditionalProb(Collection<NodeState> condition);
-
-  /**
-   * Returns a cross-section of probabilities for every {@link NodeState} in the Network {@link
-   * Node}, under the given conditions.
-   *
-   * <p><b>This method is affected by Safe Mode.</b> When Safe Mode is enabled, the input must
-   * contain a {@link NodeState} for every {@link Node} value in {@link
-   * NetworkTable#getConditions()}, otherwise the method will return an empty {@link HashMap}.
-   *
-   * @param <S> the class of the {@link NodeState} identifiers.
-   * @param conditionIDs a collection of identifiers, each linked to a {@link NodeState} value which
-   *     defines a condition within the table
-   * @return a new map of each Network node's {@link NodeState} and its probability under the given
-   *     conditions, or an empty {@link HashMap} if Safe Mode validation failed.
-   */
-  <S extends Serializable> Map<NodeState, Double> getConditionalProbByIds(
-      Collection<S> conditionIDs);
 
   /**
    * Consumes an operation for every condition state combination within this {@code NetworkTable}.

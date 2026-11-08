@@ -1,9 +1,7 @@
 package io.github.alecredmond.internal.application.cartesianvector;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
 
-@AllArgsConstructor
 @Data
 public abstract class CartesianVector<N extends CartesianVariable, S extends CartesianState> {
   protected final N[] orderedNodes;

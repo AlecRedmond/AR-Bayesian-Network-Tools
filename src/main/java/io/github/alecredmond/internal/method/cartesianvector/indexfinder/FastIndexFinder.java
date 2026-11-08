@@ -8,6 +8,7 @@ import io.github.alecredmond.internal.application.cartesianvector.CartesianVaria
 import io.github.alecredmond.internal.application.cartesianvector.CartesianVector;
 import java.util.Collection;
 import java.util.function.Function;
+import java.util.function.IntFunction;
 
 public class FastIndexFinder<N extends CartesianVariable, S extends CartesianState>
     extends AbstractIndexFinder<N, S> {
@@ -20,8 +21,9 @@ public class FastIndexFinder<N extends CartesianVariable, S extends CartesianSta
       CartesianVector<N, S> vector,
       Function<S, N> getNodeFn,
       Function<S, Integer> statePositionFinder,
-      Function<N, Integer> nodeIndexFinder) {
-    super(vector, getNodeFn, statePositionFinder, nodeIndexFinder);
+      Function<N, Integer> nodeIndexFinder,
+      IntFunction<S[]> stateArrayBuilder) {
+    super(vector, getNodeFn, statePositionFinder, nodeIndexFinder, stateArrayBuilder);
   }
 
   @Override
