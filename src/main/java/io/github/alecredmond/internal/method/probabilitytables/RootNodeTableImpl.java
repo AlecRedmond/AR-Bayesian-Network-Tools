@@ -28,7 +28,7 @@ public class RootNodeTableImpl extends NetworkTableBase<RootNodeTableData>
     return buildProbabilityMap();
   }
 
-    @Override
+  @Override
   public Map<NodeState, Double> buildProbabilityMap() {
     return TableUtils.buildMarginalProbMap(tableData);
   }
@@ -43,7 +43,7 @@ public class RootNodeTableImpl extends NetworkTableBase<RootNodeTableData>
     return super.getProbability(List.of(state));
   }
 
-    @Override
+  @Override
   protected PrinterMatrixGeneratorBase buildMatrixGenerator() {
     return new UnconditionalMatrixGenerator(tableData);
   }

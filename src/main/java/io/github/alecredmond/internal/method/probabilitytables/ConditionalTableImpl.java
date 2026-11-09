@@ -42,9 +42,7 @@ public class ConditionalTableImpl extends NetworkTableBase<ConditionalTableData>
   public void setSafeMode(boolean safeMode) {
     super.setSafeMode(safeMode);
     this.conditionIndexFinder =
-        safeMode
-            ? SafeConditionFinder.create(tableData.getVector())
-            : FastIndexFinder.create(tableData.getVector());
+        safeMode ? SafeConditionFinder.create(tableData) : FastIndexFinder.create(tableData);
   }
 
   @Override
@@ -52,7 +50,7 @@ public class ConditionalTableImpl extends NetworkTableBase<ConditionalTableData>
     return new ConditionalMatrixGenerator(this);
   }
 
-    @Override
+  @Override
   public Map<NodeState, Double> getConditionalProb(Collection<NodeState> conditionStates) {
     try {
       Map<NodeState, Double> map = new LinkedHashMap<>();

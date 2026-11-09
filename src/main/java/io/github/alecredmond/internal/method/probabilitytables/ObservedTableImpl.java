@@ -10,7 +10,6 @@ import io.github.alecredmond.internal.application.probabilitytables.ObservedTabl
 import io.github.alecredmond.internal.method.probabilitytables.printerformat.PrinterMatrixGeneratorBase;
 import io.github.alecredmond.internal.method.probabilitytables.printerformat.UnconditionalMatrixGenerator;
 import io.github.alecredmond.internal.method.probabilitytables.tablefactory.ObservedTableFactory;
-
 import java.util.List;
 import java.util.Map;
 import lombok.EqualsAndHashCode;

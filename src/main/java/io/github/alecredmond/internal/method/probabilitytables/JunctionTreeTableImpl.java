@@ -47,7 +47,7 @@ public class JunctionTreeTableImpl extends ProbabilityTableBase<JunctionTreeTabl
 
   @Override
   public ProbabilityVector getVector() {
-    return tableData.getVector();
+    return tableData;
   }
 
   @Override

@@ -31,13 +31,11 @@ public abstract class ProbabilityTableBase<D extends ProbabilityTableData> {
   public void setSafeMode(boolean safeMode) {
     this.safeMode = safeMode;
     this.indexFinder =
-        safeMode
-            ? SafeIndexFinder.create(tableData.getVector())
-            : FastIndexFinder.create(tableData.getVector());
+        safeMode ? SafeIndexFinder.create(tableData) : FastIndexFinder.create(tableData);
   }
 
   public ProbabilityVector getVector() {
-    return tableData.getVector();
+    return tableData;
   }
 
   public Set<Node> getNodes() {
@@ -67,7 +65,7 @@ public abstract class ProbabilityTableBase<D extends ProbabilityTableData> {
   public Double getProbability(Collection<NodeState> states) {
     try {
       int idx = indexFinder.getIndexFromStates(states);
-      return tableData.getVector().getProbabilities()[idx];
+      return tableData.getProbabilities()[idx];
     } catch (ProbabilityTableRequestException e) {
       log.error(e.getMessage());
       return null;
@@ -98,5 +96,4 @@ public abstract class ProbabilityTableBase<D extends ProbabilityTableData> {
   }
 
   protected abstract PrinterMatrixGeneratorBase buildMatrixGenerator();
-
 }

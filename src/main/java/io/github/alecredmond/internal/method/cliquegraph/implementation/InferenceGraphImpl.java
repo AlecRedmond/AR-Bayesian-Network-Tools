@@ -12,7 +12,7 @@ import io.github.alecredmond.export.observable.ObservationStatus;
 import io.github.alecredmond.export.probabilitytables.ObservedTable;
 import io.github.alecredmond.internal.application.cliquegraph.GraphDataInference;
 import io.github.alecredmond.internal.method.cliquegraph.Clique;
-import io.github.alecredmond.internal.method.cliquegraph.CliqueGraphTable;
+import io.github.alecredmond.internal.method.cliquegraph.InferenceTable;
 import io.github.alecredmond.internal.method.cliquegraph.InferenceGraph;
 import io.github.alecredmond.internal.method.cliquegraph.Separator;
 import io.github.alecredmond.internal.method.cliquegraph.externalwriters.InferenceExternalWriter;
@@ -80,9 +80,9 @@ public class InferenceGraphImpl extends CliqueGraph<GraphDataInference> implemen
     return cliqueSums / separatorSums;
   }
 
-  private <T extends CliqueGraphTable> double productOfSums(T[] array) {
+  private <T extends InferenceTable> double productOfSums(T[] array) {
     return Arrays.stream(array)
-        .mapToDouble(CliqueGraphTable::sumPotentials)
+        .mapToDouble(InferenceTable::sumPotentials)
         .reduce(1.0, (x, y) -> x * y);
   }
 
