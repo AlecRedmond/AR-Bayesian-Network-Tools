@@ -1,6 +1,8 @@
 package io.github.alecredmond.internal.method.inference;
 
+import io.github.alecredmond.export.inference.Clique;
 import io.github.alecredmond.export.inference.InferenceEngine;
+import io.github.alecredmond.export.inference.Separator;
 import io.github.alecredmond.export.network.BayesianNetwork;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
@@ -42,6 +44,21 @@ public abstract class InferenceEngineImpl implements InferenceEngine {
   @Override
   public InferenceEngine setObserved(Map<Node, NodeObservation> observations) {
     return eliminateStates(ObservableUtils.convertToEliminations(this, network, observations));
+  }
+
+  @Override
+  public Clique getRootClique() {
+    return inferenceGraph.getRootClique();
+  }
+
+  @Override
+  public Clique[] getCliques() {
+    return inferenceGraph.getCliques();
+  }
+
+  @Override
+  public Separator[] getSeparators() {
+    return inferenceGraph.getSeparators();
   }
 
   @Override

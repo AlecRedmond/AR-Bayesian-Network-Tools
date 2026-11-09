@@ -7,7 +7,7 @@ import io.github.alecredmond.export.probabilitytables.ObservedTable;
 import io.github.alecredmond.export.probabilitytables.ProbabilityTable;
 import io.github.alecredmond.internal.application.cliquegraph.CliqueData;
 import io.github.alecredmond.internal.application.cliquegraph.GraphDataInference;
-import io.github.alecredmond.internal.method.cliquegraph.Clique;
+import io.github.alecredmond.export.inference.Clique;
 import io.github.alecredmond.internal.method.cliquegraph.InferenceGraph;
 import io.github.alecredmond.internal.method.cliquegraph.externalwriters.InferenceExternalWriter;
 import io.github.alecredmond.internal.method.cliquegraph.factory.InferenceGraphFactory;

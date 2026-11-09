@@ -1,5 +1,7 @@
 package io.github.alecredmond.internal.method.cliquegraph;
 
+import io.github.alecredmond.export.inference.Clique;
+import io.github.alecredmond.export.inference.Separator;
 import io.github.alecredmond.export.network.BayesianNetwork;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
@@ -22,4 +24,10 @@ public interface InferenceGraph {
   void resetObservations();
 
   double getPosteriorProbability(Map<Node, Set<NodeState>> measureRequest);
+
+  Clique getRootClique();
+
+  Clique[] getCliques();
+
+  Separator[] getSeparators();
 }

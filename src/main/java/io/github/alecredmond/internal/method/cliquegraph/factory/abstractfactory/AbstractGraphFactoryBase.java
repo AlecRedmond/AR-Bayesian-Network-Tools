@@ -6,7 +6,7 @@ import io.github.alecredmond.export.probabilitytables.NetworkTable;
 import io.github.alecredmond.export.probabilitytables.ProbabilityTable;
 import io.github.alecredmond.internal.application.cliquegraph.CliqueData;
 import io.github.alecredmond.internal.application.cliquegraph.GraphData;
-import io.github.alecredmond.internal.method.cliquegraph.Clique;
+import io.github.alecredmond.export.inference.Clique;
 import io.github.alecredmond.internal.method.cliquegraph.factory.cliquefactory.CliqueFactory;
 import io.github.alecredmond.internal.method.probabilitytables.JunctionTreeTable;
 import io.github.alecredmond.internal.method.probabilitytables.tabletransfer.factory.TransferIteratorFactory;

@@ -4,6 +4,9 @@ import static io.github.alecredmond.export.observable.NodeObservation.eliminate;
 import static io.github.alecredmond.export.observable.NodeObservation.observe;
 import static io.github.alecredmond.export.observable.ObservationStatus.*;
 
+import io.github.alecredmond.export.inference.Clique;
+import io.github.alecredmond.export.inference.InferenceTable;
+import io.github.alecredmond.export.inference.Separator;
 import io.github.alecredmond.export.network.BayesianNetwork;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
@@ -11,10 +14,7 @@ import io.github.alecredmond.export.observable.NodeObservation;
 import io.github.alecredmond.export.observable.ObservationStatus;
 import io.github.alecredmond.export.probabilitytables.ObservedTable;
 import io.github.alecredmond.internal.application.cliquegraph.GraphDataInference;
-import io.github.alecredmond.internal.method.cliquegraph.Clique;
 import io.github.alecredmond.internal.method.cliquegraph.InferenceGraph;
-import io.github.alecredmond.internal.method.cliquegraph.InferenceTable;
-import io.github.alecredmond.internal.method.cliquegraph.Separator;
 import io.github.alecredmond.internal.method.cliquegraph.externalwriters.InferenceExternalWriter;
 import java.util.*;
 
@@ -43,6 +43,21 @@ public class InferenceGraphImpl extends CliqueGraph<GraphDataInference> implemen
     double joint = modifyGraphState(observe(priorEvidence, measureRequest));
     modifyGraphState(priorEvidence);
     return joint / prior;
+  }
+
+  @Override
+  public Clique getRootClique() {
+    return data.getCliques()[0];
+  }
+
+  @Override
+  public Clique[] getCliques() {
+    return Arrays.copyOf(data.getCliques(), data.getCliques().length);
+  }
+
+  @Override
+  public Separator[] getSeparators() {
+    return Arrays.copyOf(data.getSeparators(), data.getSeparators().length);
   }
 
   private boolean negatesPriorEvidence(

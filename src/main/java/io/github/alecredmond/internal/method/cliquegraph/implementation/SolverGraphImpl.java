@@ -1,8 +1,8 @@
 package io.github.alecredmond.internal.method.cliquegraph.implementation;
 
 import io.github.alecredmond.internal.application.cliquegraph.GraphDataSolver;
-import io.github.alecredmond.internal.method.cliquegraph.Clique;
-import io.github.alecredmond.internal.method.cliquegraph.Separator;
+import io.github.alecredmond.export.inference.Clique;
+import io.github.alecredmond.export.inference.Separator;
 import io.github.alecredmond.internal.method.cliquegraph.SolverGraph;
 import io.github.alecredmond.internal.method.cliquegraph.externalwriters.SolverExternalWriter;
 import io.github.alecredmond.internal.method.constraints.strategy.ConstraintSolver;

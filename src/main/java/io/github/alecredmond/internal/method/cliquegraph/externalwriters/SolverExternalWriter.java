@@ -2,7 +2,7 @@ package io.github.alecredmond.internal.method.cliquegraph.externalwriters;
 
 import io.github.alecredmond.export.probabilitytables.NetworkTable;
 import io.github.alecredmond.internal.application.cliquegraph.GraphDataSolver;
-import io.github.alecredmond.internal.method.cliquegraph.Clique;
+import io.github.alecredmond.export.inference.Clique;
 import java.util.Arrays;
 
 public class SolverExternalWriter extends AbstractExternalTableWriter<GraphDataSolver> {

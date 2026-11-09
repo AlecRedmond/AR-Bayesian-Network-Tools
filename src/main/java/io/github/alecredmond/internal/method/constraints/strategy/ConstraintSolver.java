@@ -1,7 +1,7 @@
 package io.github.alecredmond.internal.method.constraints.strategy;
 
 import io.github.alecredmond.export.constraints.ProbabilityConstraint;
-import io.github.alecredmond.internal.method.cliquegraph.Clique;
+import io.github.alecredmond.export.inference.Clique;
 import java.util.Map;
 import java.util.Set;
 

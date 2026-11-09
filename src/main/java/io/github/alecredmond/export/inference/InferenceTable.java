@@ -1,4 +1,4 @@
-package io.github.alecredmond.internal.method.cliquegraph;
+package io.github.alecredmond.export.inference;
 
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;

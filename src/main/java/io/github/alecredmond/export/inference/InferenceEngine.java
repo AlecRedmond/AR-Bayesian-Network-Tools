@@ -231,6 +231,12 @@ public interface InferenceEngine extends Observable {
    */
   InferenceEngine setObserved(Map<Node, NodeObservation> observations);
 
+  Clique getRootClique();
+
+  Clique[] getCliques();
+
+  Separator[] getSeparators();
+
   default InferenceEngine eliminateStatesById(Serializable... toEliminateIds) {
     return eliminateStatesById(Arrays.asList(toEliminateIds));
   }
