@@ -1,11 +1,11 @@
 package io.github.alecredmond.internal.method.cliquegraph.implementation;
 
+import io.github.alecredmond.export.inference.Clique;
+import io.github.alecredmond.export.inference.Separator;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
 import io.github.alecredmond.export.probabilitytables.ProbabilityVector;
 import io.github.alecredmond.internal.application.cliquegraph.SeparatorData;
-import io.github.alecredmond.export.inference.Clique;
-import io.github.alecredmond.export.inference.Separator;
 import io.github.alecredmond.internal.method.probabilitytables.JunctionTreeTable;
 import java.util.Arrays;
 import java.util.Collection;

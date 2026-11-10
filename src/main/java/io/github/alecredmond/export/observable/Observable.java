@@ -6,6 +6,7 @@ import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
 import io.github.alecredmond.export.sampler.MonteCarloSampler;
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 
@@ -16,12 +17,13 @@ import java.util.Map;
  * previous observations). All probability functions will be conditional on only the non-eliminated
  * {@link NodeState} values currently active.
  *
+ * @param <T> the type of the observable, for instance chaining.
  * @see InferenceEngine
  * @see MonteCarloSampler
  * @see NodeObservation
  * @author Alec Redmond
  */
-public interface Observable {
+public interface Observable<T extends Observable<T>> {
 
   /**
    * Returns the {@link BayesianNetwork} measured by this {@code Observable}.
@@ -46,7 +48,7 @@ public interface Observable {
    *
    * @return this instance for chaining.
    */
-  Observable resetObservations();
+  T resetObservations();
 
   /**
    * Sets the observed state to match the given input. This method will only apply key-value pairs
@@ -57,7 +59,7 @@ public interface Observable {
    * @param observations the observation map to set.
    * @return this instance for chaining.
    */
-  Observable setObserved(Map<Node, NodeObservation> observations);
+  T setObserved(Map<Node, NodeObservation> observations);
 
   /**
    * Replaces the current observed states in the inference network with the given states. Each
@@ -71,7 +73,9 @@ public interface Observable {
    * @param observedStates the collection of states to be observed.
    * @return this instance for chaining.
    */
-  Observable setObserved(Collection<NodeState> observedStates);
+  default T setObserved(NodeState... observedStates) {
+    return setObserved(Arrays.asList(observedStates));
+  }
 
   /**
    * Replaces the current observed states in the inference network with the given states. Each
@@ -85,23 +89,7 @@ public interface Observable {
    * @param observedStates the collection of states to be observed.
    * @return this instance for chaining.
    */
-  Observable setObserved(NodeState... observedStates);
-
-  /**
-   * Replaces the current observed states in the inference network with the given states. Each
-   * {@link NodeState} will lock its associated {@link Node} to measure only itself and any other
-   * sibling states declared in the collection. This will change all measured probability values in
-   * this instance to posterior probabilities, conditional on these states.
-   *
-   * <p><i>NOTE: This method calls {@link #resetObservations()} before applying the new
-   * observations.</i>
-   *
-   * @param observedStateIDs the collection of identifiers associated with the states to be
-   *     observed.
-   * @param <T> the type of the state identifiers.
-   * @return this instance for chaining.
-   */
-  <T extends Serializable> Observable setObservedById(Collection<T> observedStateIDs);
+  T setObserved(Collection<NodeState> observedStates);
 
   /**
    * Replaces the current observed states in the inference network with the given states. Each
@@ -116,7 +104,25 @@ public interface Observable {
    *     observed.
    * @return this instance for chaining.
    */
-  Observable setObservedById(Serializable... observedStateIds);
+  default T setObservedById(Serializable... observedStateIds) {
+    return setObservedById(Arrays.asList(observedStateIds));
+  }
+
+  /**
+   * Replaces the current observed states in the inference network with the given states. Each
+   * {@link NodeState} will lock its associated {@link Node} to measure only itself and any other
+   * sibling states declared in the collection. This will change all measured probability values in
+   * this instance to posterior probabilities, conditional on these states.
+   *
+   * <p><i>NOTE: This method calls {@link #resetObservations()} before applying the new
+   * observations.</i>
+   *
+   * @param observedStateIDs the collection of identifiers associated with the states to be
+   *     observed.
+   * @param <S> the type of the state identifiers.
+   * @return this instance for chaining.
+   */
+  <S extends Serializable> T setObservedById(Collection<S> observedStateIDs);
 
   /**
    * Subtracts the input {@link NodeState} values from the observable pool. This will remove these
@@ -127,7 +133,9 @@ public interface Observable {
    * @param toEliminate a collection of {@link NodeState}s to eliminate.
    * @return this instance for chaining.
    */
-  Observable eliminateStates(Collection<NodeState> toEliminate);
+  default T eliminateStates(NodeState... toEliminate) {
+    return eliminateStates(Arrays.asList(toEliminate));
+  }
 
   /**
    * Subtracts the input {@link NodeState} values from the observable pool. This will remove these
@@ -138,19 +146,7 @@ public interface Observable {
    * @param toEliminate a collection of {@link NodeState}s to eliminate.
    * @return this instance for chaining.
    */
-  Observable eliminateStates(NodeState... toEliminate);
-
-  /**
-   * Subtracts the input {@link NodeState} values from the observable pool. This will remove these
-   * states from consideration when measuring probability values. The final probability values will
-   * be conditional on these states not being present, as well as the effects of any observations or
-   * eliminations declared since the last reset.
-   *
-   * @param toEliminateIDs a collection of identifiers for {@link NodeState}s to eliminate.
-   * @param <T> the type of the state identifiers.
-   * @return this instance for chaining.
-   */
-  <T extends Serializable> Observable eliminateStatesById(Collection<T> toEliminateIDs);
+  T eliminateStates(Collection<NodeState> toEliminate);
 
   /**
    * Subtracts the input {@link NodeState} values from the observable pool. This will remove these
@@ -161,5 +157,19 @@ public interface Observable {
    * @param toEliminateIds a collection of identifiers for {@link NodeState}s to eliminate.
    * @return this instance for chaining.
    */
-  Observable eliminateStatesById(Serializable... toEliminateIds);
+  default T eliminateStatesById(Serializable... toEliminateIds) {
+    return eliminateStatesById(Arrays.asList(toEliminateIds));
+  }
+
+  /**
+   * Subtracts the input {@link NodeState} values from the observable pool. This will remove these
+   * states from consideration when measuring probability values. The final probability values will
+   * be conditional on these states not being present, as well as the effects of any observations or
+   * eliminations declared since the last reset.
+   *
+   * @param toEliminateIDs a collection of identifiers for {@link NodeState}s to eliminate.
+   * @param <S> the type of the state identifiers.
+   * @return this instance for chaining.
+   */
+  <S extends Serializable> T eliminateStatesById(Collection<S> toEliminateIDs);
 }

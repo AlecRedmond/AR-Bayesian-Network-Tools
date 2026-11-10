@@ -1,7 +1,7 @@
 package io.github.alecredmond.internal.application.cliquegraph;
 
-import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.inference.Clique;
+import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.internal.method.probabilitytables.JunctionTreeTable;
 import io.github.alecredmond.internal.method.probabilitytables.tabletransfer.TableTransfer;
 import java.util.HashMap;

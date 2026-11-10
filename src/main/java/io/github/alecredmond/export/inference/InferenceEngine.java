@@ -4,16 +4,13 @@ import io.github.alecredmond.exceptions.NetworkPrinterException;
 import io.github.alecredmond.export.network.BayesianNetwork;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
-import io.github.alecredmond.export.observable.NodeObservation;
 import io.github.alecredmond.export.observable.Observable;
-import io.github.alecredmond.export.observable.ObservationStatus;
 import io.github.alecredmond.export.probabilitytables.ObservedTable;
 import io.github.alecredmond.export.sampler.MonteCarloSampler;
 import io.github.alecredmond.export.solver.BayesSolver;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Map;
 
 /**
  * {@code InferenceEngine} provides utilities for running direct inference on a solved {@link
@@ -36,7 +33,7 @@ import java.util.Map;
  * @author Alec Redmond
  */
 @SuppressWarnings("UnusedReturnValue")
-public interface InferenceEngine extends Observable {
+public interface InferenceEngine extends Observable<InferenceEngine> {
 
   /**
    * Returns an {@link ObservedTable} associated with a {@link Node}. This is a table containing
@@ -197,112 +194,9 @@ public interface InferenceEngine extends Observable {
    */
   InferenceEngine printObserved(Node node);
 
-  /**
-   * Returns the {@link BayesianNetwork} measured by this {@code InferenceEngine}.
-   *
-   * @return the {@link BayesianNetwork} associated with this {@code InferenceEngine}.
-   */
-  BayesianNetwork getNetwork();
-
-  /**
-   * Returns a map of each {@link Node} and its current {@link NodeObservation}. A {@link
-   * NodeObservation} records the current observed and unobserved {@link NodeState}s in the node,
-   * and its {@link ObservationStatus}.
-   *
-   * @return a map of the current observations on this instance.
-   */
-  Map<Node, NodeObservation> getCurrentObservations();
-
-  /**
-   * Removes any observed states from the inference network, returning it to its unobserved
-   * configuration. All measured probability values in this configuration will become prior
-   * (unconditional) probabilities.
-   *
-   * @return this instance for chaining.
-   */
-  InferenceEngine resetObservations();
-
-  /**
-   * Returns a map of each {@link Node} and its current {@link NodeObservation}. A {@link
-   * NodeObservation} records the current observed and unobserved {@link NodeState}s in the node,
-   * and its {@link ObservationStatus}.
-   *
-   * @return a map of the current observations on this instance.
-   */
-  InferenceEngine setObserved(Map<Node, NodeObservation> observations);
-
   Clique getRootClique();
 
   Clique[] getCliques();
 
   Separator[] getSeparators();
-
-  default InferenceEngine eliminateStatesById(Serializable... toEliminateIds) {
-    return eliminateStatesById(Arrays.asList(toEliminateIds));
-  }
-
-  default InferenceEngine eliminateStates(NodeState... toEliminate) {
-    return eliminateStates(Arrays.asList(toEliminate));
-  }
-
-  default InferenceEngine setObservedById(Serializable... observedStateIds) {
-    return setObservedById(Arrays.asList(observedStateIds));
-  }
-
-  default InferenceEngine setObserved(NodeState... observedStates) {
-    return setObserved(Arrays.asList(observedStates));
-  }
-
-  /**
-   * Replaces the current observed states in the inference network with the given states. Each
-   * {@link NodeState} will lock its associated {@link Node} to measure only itself and any other
-   * sibling states declared in the collection. This will change all measured probability values in
-   * this instance to posterior probabilities, conditional on these states.
-   *
-   * <p><i>NOTE: This method calls {@link #resetObservations()} before applying the new
-   * observations.</i>
-   *
-   * @param observedStates the collection of states to be observed.
-   * @return this instance for chaining.
-   */
-  InferenceEngine setObserved(Collection<NodeState> observedStates);
-
-  /**
-   * Replaces the current observed states in the inference network with the given states. Each
-   * {@link NodeState} will lock its associated {@link Node} to measure only itself and any other
-   * sibling states declared in the collection. This will change all measured probability values in
-   * this instance to posterior probabilities, conditional on these states.
-   *
-   * <p><i>NOTE: This method calls {@link #resetObservations()} before applying the new
-   * observations.</i>
-   *
-   * @param observedStateIDs the collection of identifiers associated with the states to be
-   *     observed.
-   * @param <T> the type of the state identifiers.
-   * @return this instance for chaining.
-   */
-  <T extends Serializable> InferenceEngine setObservedById(Collection<T> observedStateIDs);
-
-  /**
-   * Subtracts the input {@link NodeState} values from the observable pool. This will remove these
-   * states from consideration when measuring probability values. The final probability values will
-   * be conditional on these states not being present, as well as the effects of any observations or
-   * eliminations declared since the last reset.
-   *
-   * @param toEliminate a collection of {@link NodeState}s to eliminate.
-   * @return this instance for chaining.
-   */
-  InferenceEngine eliminateStates(Collection<NodeState> toEliminate);
-
-  /**
-   * Subtracts the input {@link NodeState} values from the observable pool. This will remove these
-   * states from consideration when measuring probability values. The final probability values will
-   * be conditional on these states not being present, as well as the effects of any observations or
-   * eliminations declared since the last reset.
-   *
-   * @param toEliminateIDs a collection of identifiers for {@link NodeState}s to eliminate.
-   * @param <T> the type of the state identifiers.
-   * @return this instance for chaining.
-   */
-  <T extends Serializable> InferenceEngine eliminateStatesById(Collection<T> toEliminateIDs);
 }

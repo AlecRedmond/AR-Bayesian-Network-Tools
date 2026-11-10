@@ -7,6 +7,7 @@ import io.github.alecredmond.export.node.NodeState;
 import io.github.alecredmond.export.observable.NodeObservation;
 import io.github.alecredmond.export.sampler.MonteCarloSampler;
 import io.github.alecredmond.export.sampler.SampleCollection;
+import io.github.alecredmond.internal.method.node.NodeUtils;
 import io.github.alecredmond.internal.method.observable.ObservableUtils;
 import java.io.Serializable;
 import java.util.*;
@@ -26,18 +27,20 @@ public abstract class MonteCarloSamplerImpl implements MonteCarloSampler {
 
   @Override
   public MonteCarloSampler resetObservations() {
-    this.observations = NodeObservation.createUnobservedMap(network);
+    this.observations = ObservableUtils.buildUnobservedNetwork(network);
     return this;
   }
 
   @Override
   public MonteCarloSampler setObserved(Map<Node, NodeObservation> observations) {
-    return eliminateStates(ObservableUtils.convertToEliminations(this, network, observations));
+    resetObservations();
+    return eliminateStates(ObservableUtils.convertToEliminations(network, observations));
   }
 
   @Override
   public MonteCarloSampler eliminateStates(Collection<NodeState> toEliminate) {
-    this.observations = NodeObservation.eliminate(observations, toEliminate);
+    Map<Node, Set<NodeState>> toEliminateRequest = NodeUtils.generateMultiRequest(toEliminate);
+    this.observations = ObservableUtils.buildFromEliminatedStates(observations, toEliminateRequest);
     return this;
   }
 
@@ -69,7 +72,9 @@ public abstract class MonteCarloSamplerImpl implements MonteCarloSampler {
   public MonteCarloSampler setObserved(Collection<NodeState> observedStates) {
     resetObservations();
     if (!observedStates.isEmpty()) {
-      this.observations = NodeObservation.observe(this.observations, observedStates);
+      this.observations =
+          ObservableUtils.buildFromObservedStates(
+              this.observations, NodeUtils.generateMultiRequest(observedStates));
     }
     return this;
   }

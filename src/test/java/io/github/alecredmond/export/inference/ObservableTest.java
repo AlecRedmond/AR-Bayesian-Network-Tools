@@ -12,6 +12,8 @@ import io.github.alecredmond.export.node.NodeState;
 import io.github.alecredmond.export.observable.NodeObservation;
 import io.github.alecredmond.export.observable.ObservationStatus;
 import io.github.alecredmond.export.probabilitytables.ObservedTable;
+import io.github.alecredmond.internal.method.node.NodeUtils;
+import io.github.alecredmond.internal.method.observable.ObservableUtils;
 import io.github.alecredmond.networkscenario.NetworkScenario;
 import io.github.alecredmond.networkscenario.NetworkScenarioType;
 import java.util.*;
@@ -114,7 +116,7 @@ class ObservableTest {
       BiConsumer<InferenceEngine, Map<Node, NodeObservation>> applyObservations) {
     InferenceEngine observedEngine = network.buildInferenceEngine();
     InferenceEngine unobservedEngine = network.buildInferenceEngine();
-    Map<Node, NodeObservation> defaultObsMap = NodeObservation.createUnobservedMap(network);
+    Map<Node, NodeObservation> defaultObsMap = ObservableUtils.buildUnobservedNetwork(network);
     List<Node> nodes = network.getNodes(ArrayList::new);
     Map<Node, List<ObservationRecord>> recordMap = new LinkedHashMap<>();
     nodes.forEach(node -> recordMap.put(node, recursiveObservationFinder(node)));
@@ -152,7 +154,8 @@ class ObservableTest {
           nodes,
           unobservedEngine,
           observedEngine,
-          NodeObservation.eliminate(obsMap, r.eliminated),
+          ObservableUtils.buildFromEliminatedStates(
+              obsMap, NodeUtils.generateMultiRequest(r.eliminated)),
           depth + 1,
           nodeSize,
           recordMap,

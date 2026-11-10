@@ -2,13 +2,13 @@ package io.github.alecredmond.internal.method.cliquegraph.implementation;
 
 import static io.github.alecredmond.export.observable.ObservationStatus.UNOBSERVED;
 
+import io.github.alecredmond.export.inference.Clique;
+import io.github.alecredmond.export.inference.Separator;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
 import io.github.alecredmond.export.observable.NodeObservation;
 import io.github.alecredmond.export.probabilitytables.ProbabilityVector;
 import io.github.alecredmond.internal.application.cliquegraph.CliqueData;
-import io.github.alecredmond.export.inference.Clique;
-import io.github.alecredmond.export.inference.Separator;
 import io.github.alecredmond.internal.method.probabilitytables.tabletransfer.TableTransfer;
 import java.util.*;
 import java.util.function.Supplier;

@@ -43,7 +43,20 @@ public abstract class InferenceEngineImpl implements InferenceEngine {
 
   @Override
   public InferenceEngine setObserved(Map<Node, NodeObservation> observations) {
-    return eliminateStates(ObservableUtils.convertToEliminations(this, network, observations));
+    resetObservations();
+    return eliminateStates(ObservableUtils.convertToEliminations(network, observations));
+  }
+
+  @Override
+  public InferenceEngine eliminateStates(Collection<NodeState> toEliminate) {
+    inferenceGraph.eliminateStates(NodeUtils.generateMultiRequest(toEliminate));
+    return this;
+  }
+
+  @Override
+  public <T extends Serializable> InferenceEngine eliminateStatesById(
+      Collection<T> toEliminateIDs) {
+    return eliminateStates(network.getNodeStatesById(toEliminateIDs));
   }
 
   @Override
@@ -59,18 +72,6 @@ public abstract class InferenceEngineImpl implements InferenceEngine {
   @Override
   public Separator[] getSeparators() {
     return inferenceGraph.getSeparators();
-  }
-
-  @Override
-  public InferenceEngine eliminateStates(Collection<NodeState> toEliminate) {
-    inferenceGraph.eliminateStates(NodeUtils.generateMultiRequest(toEliminate));
-    return this;
-  }
-
-  @Override
-  public <T extends Serializable> InferenceEngine eliminateStatesById(
-      Collection<T> toEliminateIDs) {
-    return eliminateStates(network.getNodeStatesById(toEliminateIDs));
   }
 
   @Override

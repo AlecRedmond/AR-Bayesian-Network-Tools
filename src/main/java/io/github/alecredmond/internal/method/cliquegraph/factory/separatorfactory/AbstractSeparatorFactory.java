@@ -1,12 +1,12 @@
 package io.github.alecredmond.internal.method.cliquegraph.factory.separatorfactory;
 
+import io.github.alecredmond.export.inference.Clique;
+import io.github.alecredmond.export.inference.Separator;
 import io.github.alecredmond.export.network.BayesianNetwork;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.internal.application.cliquegraph.CliqueData;
 import io.github.alecredmond.internal.application.cliquegraph.GraphData;
 import io.github.alecredmond.internal.application.cliquegraph.SeparatorData;
-import io.github.alecredmond.export.inference.Clique;
-import io.github.alecredmond.export.inference.Separator;
 import io.github.alecredmond.internal.method.cliquegraph.implementation.SeparatorImpl;
 import io.github.alecredmond.internal.method.node.NodeUtils;
 import io.github.alecredmond.internal.method.probabilitytables.JunctionTreeTable;

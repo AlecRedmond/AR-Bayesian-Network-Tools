@@ -1,7 +1,5 @@
 package io.github.alecredmond.internal.method.cliquegraph.implementation;
 
-import static io.github.alecredmond.export.observable.NodeObservation.eliminate;
-import static io.github.alecredmond.export.observable.NodeObservation.observe;
 import static io.github.alecredmond.export.observable.ObservationStatus.*;
 
 import io.github.alecredmond.export.inference.Clique;
@@ -16,6 +14,8 @@ import io.github.alecredmond.export.probabilitytables.ObservedTable;
 import io.github.alecredmond.internal.application.cliquegraph.GraphDataInference;
 import io.github.alecredmond.internal.method.cliquegraph.InferenceGraph;
 import io.github.alecredmond.internal.method.cliquegraph.externalwriters.InferenceExternalWriter;
+import io.github.alecredmond.internal.method.observable.ObservableUtils;
+
 import java.util.*;
 
 public class InferenceGraphImpl extends CliqueGraph<GraphDataInference> implements InferenceGraph {
@@ -40,7 +40,8 @@ public class InferenceGraphImpl extends CliqueGraph<GraphDataInference> implemen
     if (prior == 0.0) return prior;
     Map<Node, NodeObservation> priorEvidence = data.getObservedEvidence();
     if (negatesPriorEvidence(priorEvidence, measureRequest)) return 0.0;
-    double joint = modifyGraphState(observe(priorEvidence, measureRequest));
+    double joint =
+        modifyGraphState(ObservableUtils.buildFromObservedStates(priorEvidence, measureRequest));
     modifyGraphState(priorEvidence);
     return joint / prior;
   }
@@ -103,7 +104,8 @@ public class InferenceGraphImpl extends CliqueGraph<GraphDataInference> implemen
 
   @Override
   public void setObservedStates(Map<Node, Set<NodeState>> observedStateRequest) {
-    Map<Node, NodeObservation> newState = observe(data.getUnobservedBackup(), observedStateRequest);
+    Map<Node, NodeObservation> newState =
+        ObservableUtils.buildFromObservedStates(data.getUnobservedBackup(), observedStateRequest);
     double jointProb = modifyGraphState(newState);
     data.setJointProbability(jointProb);
     data.setObservedEvidence(newState);
@@ -113,7 +115,9 @@ public class InferenceGraphImpl extends CliqueGraph<GraphDataInference> implemen
   @Override
   public void eliminateStates(Map<Node, Set<NodeState>> toEliminateRequest) {
     if (toEliminateRequest.isEmpty()) return;
-    Map<Node, NodeObservation> newState = eliminate(getObservedEvidence(), toEliminateRequest);
+    Map<Node, NodeObservation> currentObservations = getObservedEvidence();
+    Map<Node, NodeObservation> newState =
+        ObservableUtils.buildFromEliminatedStates(currentObservations, toEliminateRequest);
     double jointProb = modifyGraphState(newState);
     data.setObservedEvidence(newState);
     data.setJointProbability(jointProb);
