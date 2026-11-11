@@ -5,14 +5,14 @@ import io.github.alecredmond.internal.application.sampler.SamplePickerFactoryDat
 public abstract class AbstractSamplePicker implements SamplePicker {
   protected final int[] conditionIndexesInSampleArray;
   protected final int eventNodeIndexInSampleArray;
-  protected final int[] eventStatePositions;
+  protected final int[] observedStatePositions;
   protected final int[] strideLengths;
   protected final double[] cptProbabilities;
   protected final double[] sampleWeighting;
 
   protected AbstractSamplePicker(SamplePickerFactoryData factoryData) {
     this.conditionIndexesInSampleArray = factoryData.getConditionIndexesInSampleArray();
-    this.eventStatePositions = factoryData.getEventStatePositions();
+    this.observedStatePositions = factoryData.getEventStatePositions();
     this.eventNodeIndexInSampleArray = factoryData.getEventNodeIndexInSampleArray();
     this.strideLengths = factoryData.getStrideLengths();
     this.cptProbabilities = factoryData.getCptProbabilities();
@@ -21,8 +21,9 @@ public abstract class AbstractSamplePicker implements SamplePicker {
 
   protected final int randomIndex(double[] weights, double totalWeight) {
     double randomValue = RANDOM.nextDouble() * totalWeight;
+    final int bound = weights.length;
     int i;
-    for (i = 0; i < weights.length; i++) {
+    for (i = 0; i < bound; i++) {
       randomValue -= weights[i];
       if (randomValue <= 0.0) break;
     }

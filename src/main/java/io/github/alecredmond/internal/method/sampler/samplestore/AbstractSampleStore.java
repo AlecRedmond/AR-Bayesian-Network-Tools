@@ -20,9 +20,13 @@ public abstract class AbstractSampleStore<N extends Number> implements SampleSto
   }
 
   @Override
+  public void clear() {
+    weights.clear();
+  }
+
+  @Override
   public void storeSample(int[] statePositions, double weight) {
-    N virtualIndex = convertToVirtualIndex(statePositions);
-    weights.merge(virtualIndex, weight, Double::sum);
+    weights.merge(convertToVirtualIndex(statePositions), weight, Double::sum);
   }
 
   protected abstract N convertToVirtualIndex(int[] statePositions);

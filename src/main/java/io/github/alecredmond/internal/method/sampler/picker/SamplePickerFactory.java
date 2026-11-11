@@ -1,10 +1,10 @@
 package io.github.alecredmond.internal.method.sampler.picker;
 
+import io.github.alecredmond.export.network.BayesianNetwork;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
 import io.github.alecredmond.export.observable.NodeObservation;
 import io.github.alecredmond.export.probabilitytables.NetworkTable;
-import io.github.alecredmond.internal.application.sampler.LikelihoodWeightingSamplerData;
 import io.github.alecredmond.internal.application.sampler.SamplePickerFactoryData;
 import io.github.alecredmond.internal.method.node.NodeUtils;
 import java.util.Arrays;
@@ -15,10 +15,10 @@ import java.util.stream.IntStream;
 
 public class SamplePickerFactory {
 
-  public SamplePicker[] create(LikelihoodWeightingSamplerData samplerData) {
-    NetworkTable[] tables = samplerData.getTables();
-    Node[] nodes = samplerData.getNodes();
-    Map<Node, NodeObservation> observationMap = samplerData.getObservations();
+  public SamplePicker[] createArray(
+      BayesianNetwork network, Map<Node, NodeObservation> observationMap) {
+    Node[] nodes = network.getNodes();
+    NetworkTable[] tables = network.getNetworkTables();
     Map<Node, Integer> nodeIndexMap = NodeUtils.buildNodeIndexMap(nodes);
     return IntStream.range(0, tables.length)
         .mapToObj(i -> create(observationMap.get(nodes[i]), tables[i], nodeIndexMap))

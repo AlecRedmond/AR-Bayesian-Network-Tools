@@ -1,9 +1,9 @@
 package io.github.alecredmond.internal.method.sampler.picker;
 
-import java.util.Random;
+import java.util.random.RandomGenerator;
 
 public interface SamplePicker {
-  Random RANDOM = new Random();
+  RandomGenerator RANDOM = RandomGenerator.of("Xoroshiro128PlusPlus");
 
   double selectStateAndReturnWeight(int[] statePositions);
 }

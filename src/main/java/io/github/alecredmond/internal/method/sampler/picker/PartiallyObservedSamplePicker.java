@@ -10,16 +10,19 @@ public class PartiallyObservedSamplePicker extends AbstractSamplePicker {
 
   @Override
   public double selectStateAndReturnWeight(int[] sampleStatePositions) {
-    int cptIndex = super.getInitialCptIndex(sampleStatePositions);
-    int index = 0;
+    int conditionIndex = super.getInitialCptIndex(sampleStatePositions);
+    int nthObserved = 0;
     double totalWeight = 0.0;
-    for (int statePosition : eventStatePositions) {
-      double weight = cptProbabilities[cptIndex + statePosition];
+    // Traverse all N observed states in the node, by their position P
+    for (int position : observedStatePositions) {
+      double weight = cptProbabilities[conditionIndex + position];
       totalWeight += weight;
-      sampleWeighting[index++] = weight;
+      sampleWeighting[nthObserved++] = weight;
     }
-    int pickedIndex = randomIndex(sampleWeighting, totalWeight);
-    sampleStatePositions[eventNodeIndexInSampleArray] = eventStatePositions[pickedIndex];
-    return sampleWeighting[pickedIndex] == 0.0 ? 0.0 : totalWeight;
+    // Randomly select the Nth Observed state.
+    nthObserved = randomIndex(sampleWeighting, totalWeight);
+    // Convert Nth observed state to Pth actual state
+    sampleStatePositions[eventNodeIndexInSampleArray] = observedStatePositions[nthObserved];
+    return sampleWeighting[nthObserved] == 0.0 ? 0.0 : totalWeight;
   }
 }

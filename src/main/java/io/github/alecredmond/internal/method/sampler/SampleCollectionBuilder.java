@@ -19,28 +19,22 @@ public class SampleCollectionBuilder {
 
   public SampleCollection build(
       int numberOfSamples,
-      Map<SampleImpl, Integer> sampleMap,
+      List<Sample> samples,
       Map<Node, NodeObservation> observations,
-      Node[] nodeArray,
       BayesianNetwork network) {
-
-    if (sampleMap.isEmpty()) numberOfSamples = 0;
-    else setCounts(sampleMap);
+    Node[] nodeArray = network.getNodes();
+    if (samples.isEmpty()) numberOfSamples = 0;
 
     SampleCollectionData collectionData =
         SampleCollectionData.builder()
             .totalSamples(numberOfSamples)
-            .samples(radixSort(sampleMap.keySet(), observations, nodeArray))
+            .samples(radixSort(samples, observations, nodeArray))
             .networkObservations(Collections.unmodifiableMap(observations))
             .nodes(nodeArray)
             .nodeIndexMap(NodeUtils.buildNodeIndexMap(nodeArray))
             .build();
 
     return new SampleCollectionImpl(collectionData, network);
-  }
-
-  private void setCounts(Map<SampleImpl, Integer> sampleMap) {
-    sampleMap.forEach((sample, integer) -> sample.getSampleData().setCount(integer));
   }
 
   private <T extends Sample> List<Sample> radixSort(

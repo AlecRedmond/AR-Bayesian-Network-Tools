@@ -1,6 +1,5 @@
 package io.github.alecredmond.internal.method.sampler;
 
-import io.github.alecredmond.exceptions.SampleValidationException;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
 import io.github.alecredmond.export.sampler.Sample;
@@ -16,16 +15,9 @@ import lombok.extern.slf4j.Slf4j;
 public class SampleImpl implements Sample {
   private final SampleData sampleData;
 
-  public SampleImpl(Set<NodeState> states) {
-    if (states instanceof LinkedHashSet<NodeState> ordered) {
-      this.sampleData = new SampleData(ordered);
-    } else {
-      throw new SampleValidationException("Attempted to create a sample from an unordered set!");
-    }
-  }
-
-  public SampleImpl(NodeState[] states) {
-    this.sampleData = new SampleData(states);
+  public SampleImpl(NodeState[] states, int count) {
+    sampleData = new SampleData(states);
+    sampleData.setCount(count);
   }
 
   public int count() {
