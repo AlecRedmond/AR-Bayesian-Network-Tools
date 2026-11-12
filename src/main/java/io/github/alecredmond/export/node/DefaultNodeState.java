@@ -1,7 +1,5 @@
-package io.github.alecredmond.export.node.implementation;
+package io.github.alecredmond.export.node;
 
-import io.github.alecredmond.export.node.Node;
-import io.github.alecredmond.export.node.NodeState;
 import java.io.Serializable;
 import java.util.Objects;
 

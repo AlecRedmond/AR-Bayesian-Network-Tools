@@ -1,8 +1,8 @@
 package io.github.alecredmond.export.serializer;
 
+import io.github.alecredmond.export.node.DefaultNodeState;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
-import io.github.alecredmond.export.node.implementation.DefaultNodeState;
 import io.github.alecredmond.export.node.serialized.SerializedNode;
 import java.io.Serializable;
 import java.util.List;

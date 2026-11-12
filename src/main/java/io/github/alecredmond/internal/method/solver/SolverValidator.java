@@ -6,7 +6,6 @@ import io.github.alecredmond.export.node.NodeState;
 import io.github.alecredmond.export.probabilitytables.NetworkTable;
 import io.github.alecredmond.export.probabilitytables.ProbabilityVector;
 import io.github.alecredmond.internal.method.constraints.strategy.ValidatedConstraint;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -19,16 +18,8 @@ public class SolverValidator {
   }
 
   public void validateDataBuilt() {
-    resetNetworkTables();
     if (checkNetworkBuilt()) return;
     throw new IllegalStateException("Network data not correctly built!");
-  }
-
-  private void resetNetworkTables() {
-    for (NetworkTable table : network.getNetworkTables()) {
-      Arrays.fill(table.getProbabilities(), 1.0);
-      table.normalizeTable();
-    }
   }
 
   private boolean checkNetworkBuilt() {

@@ -8,12 +8,12 @@ import io.github.alecredmond.export.network.serialized.SerializedBayesianNetwork
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
 import io.github.alecredmond.export.probabilitytables.NetworkTable;
+import io.github.alecredmond.export.sampler.LikelihoodWeightingSampler;
 import io.github.alecredmond.export.sampler.MonteCarloSampler;
 import io.github.alecredmond.export.serializer.NodeSerializer;
 import io.github.alecredmond.internal.application.network.BayesianNetworkData;
 import io.github.alecredmond.internal.fileio.NetworkFileIO;
 import io.github.alecredmond.internal.method.printer.NetworkPrinter;
-import io.github.alecredmond.internal.method.sampler.LikelihoodWeightingSampler;
 import io.github.alecredmond.internal.serialization.BayesianNetworkSerializer;
 import java.io.File;
 import java.io.Serializable;

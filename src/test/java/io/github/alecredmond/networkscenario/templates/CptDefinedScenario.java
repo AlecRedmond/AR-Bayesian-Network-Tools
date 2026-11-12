@@ -2,8 +2,8 @@ package io.github.alecredmond.networkscenario.templates;
 
 import io.github.alecredmond.export.network.BayesianNetworkBuilder;
 import io.github.alecredmond.export.network.cptdefinition.*;
+import io.github.alecredmond.export.node.BinaryNode;
 import io.github.alecredmond.export.node.Node;
-import io.github.alecredmond.export.node.implementation.BinaryNode;
 import io.github.alecredmond.export.solver.BayesSolver;
 import io.github.alecredmond.export.solver.DirectCptSolver;
 import java.io.Serializable;

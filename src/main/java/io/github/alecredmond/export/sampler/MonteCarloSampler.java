@@ -6,7 +6,6 @@ import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
 import io.github.alecredmond.export.observable.NodeObservation;
 import io.github.alecredmond.export.observable.Observable;
-import io.github.alecredmond.internal.method.sampler.LikelihoodWeightingSampler;
 import java.util.Random;
 
 /**

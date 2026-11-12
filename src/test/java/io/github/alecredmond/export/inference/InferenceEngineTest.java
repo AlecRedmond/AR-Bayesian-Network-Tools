@@ -6,9 +6,9 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import io.github.alecredmond.export.network.BayesianNetwork;
 import io.github.alecredmond.export.network.BayesianNetworkBuilder;
+import io.github.alecredmond.export.node.BinaryNode;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
-import io.github.alecredmond.export.node.implementation.BinaryNode;
 import io.github.alecredmond.export.observable.NodeObservation;
 import io.github.alecredmond.export.observable.ObservationStatus;
 import io.github.alecredmond.export.probabilitytables.ObservedTable;

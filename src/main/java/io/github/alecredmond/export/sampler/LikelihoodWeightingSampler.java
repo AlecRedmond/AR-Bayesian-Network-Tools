@@ -1,7 +1,8 @@
-package io.github.alecredmond.internal.method.sampler;
+package io.github.alecredmond.export.sampler;
 
 import io.github.alecredmond.export.network.BayesianNetwork;
 import io.github.alecredmond.export.node.NodeState;
+import io.github.alecredmond.internal.method.sampler.AbstractMonteCarloSampler;
 import io.github.alecredmond.internal.method.sampler.picker.SamplePicker;
 import io.github.alecredmond.internal.method.sampler.picker.SamplePickerFactory;
 import io.github.alecredmond.internal.method.sampler.samplestore.SampleStore;
@@ -38,6 +39,6 @@ public class LikelihoodWeightingSampler extends AbstractMonteCarloSampler {
   }
 
   private Map<NodeState[], Integer> distributeStates(int numberOfSamples) {
-    return WeightedAllocator.allocate(sampleStore.getWeightedSamples(), numberOfSamples);
+    return WeightedAllocator.allocate(sampleStore.returnWeightsAndClear(), numberOfSamples);
   }
 }

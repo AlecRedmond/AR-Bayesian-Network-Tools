@@ -12,6 +12,7 @@ module BayesSolver {
   requires java.sql;
   requires java.rmi;
   requires org.apache.commons.lang3;
+  requires com.carrotsearch.hppc;
 
   exports io.github.alecredmond.exceptions;
   exports io.github.alecredmond.export.constraints;
@@ -21,7 +22,6 @@ module BayesSolver {
   exports io.github.alecredmond.export.network.cptdefinition;
   exports io.github.alecredmond.export.network.serialized;
   exports io.github.alecredmond.export.node;
-  exports io.github.alecredmond.export.node.implementation;
   exports io.github.alecredmond.export.node.serialized;
   exports io.github.alecredmond.export.observable;
   exports io.github.alecredmond.export.probabilitytables;

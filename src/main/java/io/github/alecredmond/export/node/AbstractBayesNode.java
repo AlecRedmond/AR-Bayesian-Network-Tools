@@ -1,7 +1,5 @@
-package io.github.alecredmond.export.node.implementation;
+package io.github.alecredmond.export.node;
 
-import io.github.alecredmond.export.node.Node;
-import io.github.alecredmond.export.node.NodeState;
 import io.github.alecredmond.internal.method.node.NodeUtils;
 import java.io.Serializable;
 import java.util.*;
@@ -24,7 +22,7 @@ import lombok.ToString;
 @NoArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @ToString(onlyExplicitlyIncluded = true)
-public abstract class AbstractBayesNode implements Node {
+abstract class AbstractBayesNode implements Node {
   @EqualsAndHashCode.Include @ToString.Include protected Serializable id;
   @EqualsAndHashCode.Include @ToString.Include protected String name;
   @EqualsAndHashCode.Include @ToString.Include protected List<NodeState> states;

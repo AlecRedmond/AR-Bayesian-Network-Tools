@@ -120,6 +120,6 @@ public record NodeObservationImpl(
       format = "%s=={%s}";
       stringStates = CollectionToString.apply(observedStates, NodeState::getName);
     }
-    return format.formatted(node, stringStates);
+    return format.formatted(node.getName(), stringStates);
   }
 }

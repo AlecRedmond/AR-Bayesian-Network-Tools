@@ -1,21 +1,22 @@
 package io.github.alecredmond.export.sampler;
 
 import static io.github.alecredmond.TestConfigs.*;
-import static io.github.alecredmond.export.node.implementation.BinaryNode.StateOrder.TRUE_FIRST;
+import static io.github.alecredmond.export.node.BinaryNode.StateOrder.TRUE_FIRST;
 import static io.github.alecredmond.networkscenario.NetworkScenarioType.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 import io.github.alecredmond.export.inference.InferenceEngine;
 import io.github.alecredmond.export.inference.JunctionTreeAlgorithm;
 import io.github.alecredmond.export.network.BayesianNetwork;
+import io.github.alecredmond.export.node.BinaryNode;
+import io.github.alecredmond.export.node.DefaultBinaryNode;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
-import io.github.alecredmond.export.node.implementation.BinaryNode;
-import io.github.alecredmond.export.node.implementation.DefaultBinaryNode;
 import io.github.alecredmond.export.observable.NodeObservation;
 import io.github.alecredmond.export.observable.ObservationStatus;
 import io.github.alecredmond.export.solver.IPFPJunctionTreeSolver;
 import io.github.alecredmond.internal.method.node.NodeUtils;
+import io.github.alecredmond.internal.method.utils.CollectionToString;
 import io.github.alecredmond.networkscenario.NetworkScenario;
 import io.github.alecredmond.networkscenario.NetworkScenarioType;
 import java.io.Serializable;
@@ -53,7 +54,7 @@ class SampleCollectionTest {
   private static Stream<SamplePackage> buildPackages(NetworkScenario scenario) {
     BayesianNetwork network = scenario.buildNetwork();
     return scenario.buildObservationPackages().stream()
-        .map(p -> new SamplePackage(network, NUMBER_OF_SAMPLES, p, PRINT_TABLES, INFERENCE));
+        .map(p -> new SamplePackage(network, NUMBER_OF_SAMPLES, p, false, INFERENCE));
   }
 
   @Nested
@@ -65,21 +66,23 @@ class SampleCollectionTest {
     @ParameterizedTest
     @MethodSource("provideSamplePackages")
     void getObservations(SamplePackage samplePackage) {
-      Map<Node, NodeState> observed =
-          samplePackage.getObservedStates().stream()
-              .map(ns -> Map.entry(ns.getNode(), ns))
-              .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+      Map<Node, Set<NodeState>> declaredEvidence =
+          NodeUtils.generateMultiRequest(samplePackage.getObservedStates());
 
       Map<Node, NodeObservation> observations = samplePackage.getTest().getObservations();
 
-      observations.forEach(
-          (node, observation) -> {
-            if (observed.containsKey(node)) {
-              assertEquals(ObservationStatus.OBSERVED, observation.status());
-              NodeState singleState = observation.observedStates().iterator().next();
-              assertEquals(singleState, observed.get(node));
+      declaredEvidence.forEach(
+          (node, evidence) -> {
+            assertTrue(observations.containsKey(node));
+            NodeObservation observation = observations.get(node);
+            ObservationStatus status = observation.status();
+            assertNotEquals(ObservationStatus.UNOBSERVED, status);
+            assertNotEquals(ObservationStatus.NEGATED, status);
+            assertEquals(evidence, observation.observedStates());
+            if (status.equals(ObservationStatus.OBSERVED)) {
+              assertEquals(1, evidence.size());
             } else {
-              assertEquals(ObservationStatus.UNOBSERVED, observation.status());
+              assertTrue(evidence.size() > 1);
             }
           });
     }
@@ -373,15 +376,27 @@ class SampleCollectionTest {
       Set<Node> exportNodes = samplePackage.getExportNodes();
       test.setDisplayedNodes(exportNodes);
       Set<NodeState> observedStates = samplePackage.getObservedStates();
+
+      System.out.println(
+          "OBSERVING: " + CollectionToString.apply(observedStates, NodeState::getName));
+      System.out.println("OBSERVED IN COLLECTION: " + CollectionToString.apply(test.getObservations().values()));
+      Map<Node, Set<NodeState>> multi = NodeUtils.generateMultiRequest(observedStates);
       test.getSamples()
           .forEach(
               sample -> {
+                Map<Node, NodeState> sampled =
+                    NodeUtils.generateRequest(Arrays.asList(sample.getAllStates()));
+
+                System.out.println(
+                    CollectionToString.apply(
+                        Arrays.asList(sample.getDisplayedStates()), NodeState::getName));
+
                 assertTrue(
                     Arrays.stream(sample.getDisplayedStates())
                         .map(NodeState::getNode)
                         .allMatch(exportNodes::contains));
 
-                assertTrue(sample.containsAll(observedStates));
+                multi.forEach((node, evidence) -> assertTrue(evidence.contains(sampled.get(node))));
               });
     }
   }

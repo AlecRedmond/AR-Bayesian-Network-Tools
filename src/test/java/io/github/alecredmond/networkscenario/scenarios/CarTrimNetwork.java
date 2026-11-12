@@ -1,11 +1,13 @@
 package io.github.alecredmond.networkscenario.scenarios;
 
 import io.github.alecredmond.export.node.Node;
-import io.github.alecredmond.export.solver.BayesSolver;
-import io.github.alecredmond.export.solver.IPFPJunctionTreeSolver;
 import io.github.alecredmond.networkscenario.ObservationPackage;
 import io.github.alecredmond.networkscenario.templates.AbstractNetworkScenario;
+import java.util.Arrays;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class CarTrimNetwork extends AbstractNetworkScenario {
   //          TRIM LEVEL---------
@@ -34,7 +36,10 @@ public class CarTrimNetwork extends AbstractNetworkScenario {
         defaultNode(
             "PRICE", List.of("£20k", "£40k", "£80k", "£250k"), engine, gearbox, interior, trim);
 
-    // CONSTRAINTS
+    addConstraints();
+  }
+
+  private void addConstraints() {
     addConstraint(
         List.of(
             state(engine, "3.0 V6"),
@@ -95,13 +100,18 @@ public class CarTrimNetwork extends AbstractNetworkScenario {
   }
 
   @Override
-  public BayesSolver getDefaultSolver() {
-    return new IPFPJunctionTreeSolver();
-  }
-
-  @Override
-  protected String getNetworkName() {
-    return "CAR MODEL VARIANTS";
+  public List<ObservationPackage> buildObservationPackages() {
+    Set<Node> nodes =
+        Arrays.stream(getOrderedNodes()).collect(Collectors.toCollection(LinkedHashSet::new));
+    return List.of(
+        //        new ObservationPackage(
+        //            nodes,
+        //            Set.of(state(trim, "STANDARD")),
+        //            Set.of(state(engine, "1L ECO"), state(engine, "2.0 DIESEL"))),
+        new ObservationPackage(
+            nodes,
+            Set.of(state(engine, "1L ECO"), state(engine, "2.0 DIESEL")),
+            Set.of(state(trim, "STANDARD"))));
   }
 
   @Override
@@ -110,7 +120,7 @@ public class CarTrimNetwork extends AbstractNetworkScenario {
   }
 
   @Override
-  public List<ObservationPackage> buildObservationPackages() {
-    return List.of();
+  protected String getNetworkName() {
+    return "CAR MODEL VARIANTS";
   }
 }

@@ -15,7 +15,6 @@ import io.github.alecredmond.internal.application.cliquegraph.GraphDataInference
 import io.github.alecredmond.internal.method.cliquegraph.InferenceGraph;
 import io.github.alecredmond.internal.method.cliquegraph.externalwriters.InferenceExternalWriter;
 import io.github.alecredmond.internal.method.observable.ObservableUtils;
-
 import java.util.*;
 
 public class InferenceGraphImpl extends CliqueGraph<GraphDataInference> implements InferenceGraph {

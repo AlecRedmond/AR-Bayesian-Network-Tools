@@ -1,9 +1,8 @@
-package io.github.alecredmond.export.node.implementation;
+package io.github.alecredmond.export.node;
 
-import io.github.alecredmond.export.node.Node;
-import io.github.alecredmond.export.node.NodeState;
 import java.io.Serializable;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import lombok.*;
 
@@ -28,17 +27,14 @@ public class DefaultBinaryNode extends AbstractBayesNode implements BinaryNode {
   }
 
   private void setStatesByOrder(StateOrder stateOrder) {
-    switch (stateOrder) {
-      case FALSE_FIRST -> {
-        setStates(NodeState.createStates(this, FALSE_STATE_NAME, TRUE_STATE_NAME));
-        this.falseState = getStates().getFirst();
-        this.trueState = getStates().getLast();
-      }
-      case TRUE_FIRST -> {
-        setStates(NodeState.createStates(this, TRUE_STATE_NAME, FALSE_STATE_NAME));
-        this.falseState = getStates().getLast();
-        this.trueState = getStates().getFirst();
-      }
+    if (Objects.requireNonNull(stateOrder) == StateOrder.FALSE_FIRST) {
+      setStates(NodeState.createStates(this, FALSE_STATE_NAME, TRUE_STATE_NAME));
+      this.falseState = getStates().getFirst();
+      this.trueState = getStates().getLast();
+    } else if (stateOrder == StateOrder.TRUE_FIRST) {
+      setStates(NodeState.createStates(this, TRUE_STATE_NAME, FALSE_STATE_NAME));
+      this.falseState = getStates().getLast();
+      this.trueState = getStates().getFirst();
     }
   }
 

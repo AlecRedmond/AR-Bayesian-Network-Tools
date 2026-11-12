@@ -1,8 +1,8 @@
 package io.github.alecredmond.internal.method.vectoriterator.misciterators;
 
+import io.github.alecredmond.export.node.BinaryNode;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
-import io.github.alecredmond.export.node.implementation.BinaryNode;
 import io.github.alecredmond.export.probabilitytables.ProbabilityVector;
 import io.github.alecredmond.internal.method.vectoriterator.standardtemplate.ProbabilityIteratorTemplate;
 import io.github.alecredmond.internal.method.vectoriterator.standardtemplate.StandardCartesianIterator;

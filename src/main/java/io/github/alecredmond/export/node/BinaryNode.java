@@ -1,7 +1,4 @@
-package io.github.alecredmond.export.node.implementation;
-
-import io.github.alecredmond.export.node.Node;
-import io.github.alecredmond.export.node.NodeState;
+package io.github.alecredmond.export.node;
 
 /**
  * A {@link Node} with only two states: "TRUE" and "FALSE". This interface allows additional actions

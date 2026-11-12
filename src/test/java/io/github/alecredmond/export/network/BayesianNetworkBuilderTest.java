@@ -1,6 +1,6 @@
 package io.github.alecredmond.export.network;
 
-import static io.github.alecredmond.export.node.implementation.BinaryNode.StateOrder.TRUE_FIRST;
+import static io.github.alecredmond.export.node.BinaryNode.StateOrder.TRUE_FIRST;
 import static org.junit.jupiter.api.Assertions.*;
 
 import io.github.alecredmond.exceptions.BayesNetIDException;
@@ -10,12 +10,12 @@ import io.github.alecredmond.export.constraints.ConditionalConstraint;
 import io.github.alecredmond.export.constraints.JointProbabilityConstraint;
 import io.github.alecredmond.export.constraints.MarginalConstraint;
 import io.github.alecredmond.export.constraints.ProbabilityConstraint;
+import io.github.alecredmond.export.node.BinaryNode;
+import io.github.alecredmond.export.node.DefaultBinaryNode;
+import io.github.alecredmond.export.node.DefaultNode;
+import io.github.alecredmond.export.node.DefaultNodeState;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
-import io.github.alecredmond.export.node.implementation.BinaryNode;
-import io.github.alecredmond.export.node.implementation.DefaultBinaryNode;
-import io.github.alecredmond.export.node.implementation.DefaultNode;
-import io.github.alecredmond.export.node.implementation.DefaultNodeState;
 import io.github.alecredmond.export.solver.BayesSolver;
 import io.github.alecredmond.export.solver.IPFPJunctionTreeSolver;
 import io.github.alecredmond.internal.method.constraints.types.marginalconstraint.ValidatedMarginalConstraint;

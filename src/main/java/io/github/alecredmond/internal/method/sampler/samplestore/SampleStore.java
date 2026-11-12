@@ -9,7 +9,7 @@ public interface SampleStore {
 
   void storeSample(int[] statePositions, double weight);
 
-  Map<NodeState[], Double> getWeightedSamples();
+  Map<NodeState[], Double> returnWeightsAndClear();
 
   static SampleStore create(BayesianNetwork bayesianNetwork) {
     return new SampleStoreFactory().buildSampleStore(bayesianNetwork);

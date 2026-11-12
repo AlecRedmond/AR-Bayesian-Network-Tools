@@ -1,10 +1,10 @@
 package io.github.alecredmond.networkscenario.scenarios;
 
-import static io.github.alecredmond.export.node.implementation.BinaryNode.StateOrder.*;
+import static io.github.alecredmond.export.node.BinaryNode.StateOrder.*;
 
+import io.github.alecredmond.export.node.BinaryNode;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
-import io.github.alecredmond.export.node.implementation.BinaryNode;
 import io.github.alecredmond.networkscenario.ObservationPackage;
 import io.github.alecredmond.networkscenario.templates.BinaryNodeScenario;
 import io.github.alecredmond.networkscenario.templates.CptDefinedScenario;

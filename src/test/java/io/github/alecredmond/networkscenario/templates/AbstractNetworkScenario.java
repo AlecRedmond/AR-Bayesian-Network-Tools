@@ -2,10 +2,11 @@ package io.github.alecredmond.networkscenario.templates;
 
 import io.github.alecredmond.export.network.BayesianNetwork;
 import io.github.alecredmond.export.network.BayesianNetworkBuilder;
+import io.github.alecredmond.export.node.DefaultNode;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
-import io.github.alecredmond.export.node.implementation.DefaultNode;
 import io.github.alecredmond.export.solver.BayesSolver;
+import io.github.alecredmond.export.solver.MultiStageSolver;
 import io.github.alecredmond.networkscenario.ConstraintData;
 import io.github.alecredmond.networkscenario.NetworkScenario;
 import java.util.*;
@@ -52,7 +53,9 @@ public abstract class AbstractNetworkScenario implements NetworkScenario {
     return getBuilder().build(getDefaultSolver()).orElseThrow();
   }
 
-  public abstract BayesSolver getDefaultSolver();
+  public BayesSolver getDefaultSolver() {
+    return new MultiStageSolver();
+  }
 
   @Override
   public BayesianNetworkBuilder getBuilder() {

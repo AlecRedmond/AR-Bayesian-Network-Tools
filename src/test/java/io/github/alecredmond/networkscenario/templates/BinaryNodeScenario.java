@@ -1,8 +1,8 @@
 package io.github.alecredmond.networkscenario.templates;
 
+import io.github.alecredmond.export.node.BinaryNode;
+import io.github.alecredmond.export.node.DefaultBinaryNode;
 import io.github.alecredmond.export.node.Node;
-import io.github.alecredmond.export.node.implementation.BinaryNode;
-import io.github.alecredmond.export.node.implementation.DefaultBinaryNode;
 import java.util.Arrays;
 
 public interface BinaryNodeScenario {

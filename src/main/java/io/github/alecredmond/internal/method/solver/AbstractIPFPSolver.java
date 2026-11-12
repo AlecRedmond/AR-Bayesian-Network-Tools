@@ -3,6 +3,7 @@ package io.github.alecredmond.internal.method.solver;
 import io.github.alecredmond.export.constraints.ProbabilityConstraint;
 import io.github.alecredmond.export.inference.Clique;
 import io.github.alecredmond.export.network.BayesianNetwork;
+import io.github.alecredmond.export.probabilitytables.NetworkTable;
 import io.github.alecredmond.export.solver.IPFPSolver;
 import io.github.alecredmond.export.solver.ipfpresults.IPFPResults;
 import io.github.alecredmond.internal.application.solver.SolverConfigs;
@@ -33,12 +34,20 @@ public abstract class AbstractIPFPSolver implements IPFPSolver {
     try {
       configs.updateConfigs();
       new SolverValidator(bayesianNetwork).validateDataBuilt();
+      resetNetworkTables(bayesianNetwork);
       results = performSolverRun(solverGraphFactory.build(bayesianNetwork));
       return Optional.of(bayesianNetwork);
     } catch (Exception e) {
       results = null;
       log.error(e.getLocalizedMessage(), e);
       return Optional.empty();
+    }
+  }
+
+  private void resetNetworkTables(BayesianNetwork bayesianNetwork) {
+    for (NetworkTable table : bayesianNetwork.getNetworkTables()) {
+      Arrays.fill(table.getProbabilities(), 1.0);
+      table.normalizeTable();
     }
   }
 
@@ -161,5 +170,19 @@ public abstract class AbstractIPFPSolver implements IPFPSolver {
       log.warn("NO RESULTS FROM CURRENT SOLVER");
     }
     return results;
+  }
+
+  @Override
+  public Optional<BayesianNetwork> solveFromCurrentValues(BayesianNetwork bayesianNetwork) {
+    try {
+      configs.updateConfigs();
+      new SolverValidator(bayesianNetwork).validateDataBuilt();
+      results = performSolverRun(solverGraphFactory.build(bayesianNetwork));
+      return Optional.of(bayesianNetwork);
+    } catch (Exception e) {
+      results = null;
+      log.error(e.getLocalizedMessage(), e);
+      return Optional.empty();
+    }
   }
 }
