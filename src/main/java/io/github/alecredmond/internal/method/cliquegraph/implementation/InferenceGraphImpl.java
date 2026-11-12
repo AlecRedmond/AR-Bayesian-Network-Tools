@@ -24,6 +24,24 @@ public class InferenceGraphImpl extends CliqueGraph<GraphDataInference> implemen
   }
 
   @Override
+  public ObservedTable[] getObservedTables() {
+    return data.getObservedTables();
+  }
+
+  @Override
+  public BayesianNetwork getNetwork() {
+    return data.getNetwork();
+  }
+
+  @Override
+  public void setNewObservations(Map<Node, NodeObservation> newObservations) {
+    double jointProb = modifyGraphState(newObservations);
+    data.setObservedEvidence(newObservations);
+    data.setJointProbability(jointProb);
+    externalWriter.writeToExternal();
+  }
+
+  @Override
   public void resetObservations() {
     Arrays.stream(data.getCliques()).forEach(Clique::resetPotentials);
     Arrays.stream(data.getSeparators()).forEach(Separator::resetPotentials);
@@ -99,42 +117,5 @@ public class InferenceGraphImpl extends CliqueGraph<GraphDataInference> implemen
     return Arrays.stream(array)
         .mapToDouble(InferenceTable::sumPotentials)
         .reduce(1.0, (x, y) -> x * y);
-  }
-
-  @Override
-  public void setObservedStates(Map<Node, Set<NodeState>> observedStateRequest) {
-    Map<Node, NodeObservation> newState =
-        ObservableUtils.buildFromObservedStates(data.getUnobservedBackup(), observedStateRequest);
-    double jointProb = modifyGraphState(newState);
-    data.setJointProbability(jointProb);
-    data.setObservedEvidence(newState);
-    externalWriter.writeToExternal();
-  }
-
-  @Override
-  public void eliminateStates(Map<Node, Set<NodeState>> toEliminateRequest) {
-    if (toEliminateRequest.isEmpty()) return;
-    Map<Node, NodeObservation> currentObservations = getObservedEvidence();
-    Map<Node, NodeObservation> newState =
-        ObservableUtils.buildFromEliminatedStates(currentObservations, toEliminateRequest);
-    double jointProb = modifyGraphState(newState);
-    data.setObservedEvidence(newState);
-    data.setJointProbability(jointProb);
-    externalWriter.writeToExternal();
-  }
-
-  @Override
-  public Map<Node, NodeObservation> getObservedEvidence() {
-    return data.getObservedEvidence();
-  }
-
-  @Override
-  public ObservedTable[] getObservedTables() {
-    return data.getObservedTables();
-  }
-
-  @Override
-  public BayesianNetwork getNetwork() {
-    return data.getNetwork();
   }
 }

@@ -13,7 +13,7 @@ import io.github.alecredmond.internal.method.cliquegraph.InferenceGraph;
 import io.github.alecredmond.internal.method.cliquegraph.factory.InferenceGraphFactory;
 import io.github.alecredmond.internal.method.network.BayesNetIdConverter;
 import io.github.alecredmond.internal.method.node.NodeUtils;
-import io.github.alecredmond.internal.method.observable.ObservableUtils;
+import io.github.alecredmond.internal.method.observable.AbstractObservable;
 import io.github.alecredmond.internal.method.printer.NetworkPrinter;
 import java.io.Serializable;
 import java.util.*;
@@ -22,41 +22,28 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Getter
-public abstract class InferenceEngineImpl implements InferenceEngine {
-  private final BayesianNetwork network;
+public abstract class AbstractInferenceEngine extends AbstractObservable<InferenceEngine>
+    implements InferenceEngine {
   private final BayesNetIdConverter converter;
   private final InferenceGraph inferenceGraph;
 
-  protected InferenceEngineImpl(
+  protected AbstractInferenceEngine(
       BayesianNetwork network, InferenceGraphFactory inferenceGraphFactory) {
-    this.network = network;
+    super(network);
     this.converter = new BayesNetIdConverter(network);
     this.inferenceGraph = inferenceGraphFactory.build(network);
     resetObservations();
   }
 
   @Override
-  public InferenceEngineImpl resetObservations() {
-    inferenceGraph.resetObservations();
+  protected final InferenceEngine observationsUpdatedLogic() {
+    inferenceGraph.setNewObservations(observations);
     return this;
   }
 
   @Override
-  public InferenceEngine setObserved(Map<Node, NodeObservation> observations) {
-    resetObservations();
-    return eliminateStates(ObservableUtils.convertToEliminations(network, observations));
-  }
-
-  @Override
-  public InferenceEngine eliminateStates(Collection<NodeState> toEliminate) {
-    inferenceGraph.eliminateStates(NodeUtils.generateMultiRequest(toEliminate));
+  protected final InferenceEngine returnThis() {
     return this;
-  }
-
-  @Override
-  public <T extends Serializable> InferenceEngine eliminateStatesById(
-      Collection<T> toEliminateIDs) {
-    return eliminateStates(network.getNodeStatesById(toEliminateIDs));
   }
 
   @Override
@@ -72,22 +59,6 @@ public abstract class InferenceEngineImpl implements InferenceEngine {
   @Override
   public Separator[] getSeparators() {
     return inferenceGraph.getSeparators();
-  }
-
-  @Override
-  public InferenceEngineImpl setObserved(Collection<NodeState> observed) {
-    inferenceGraph.setObservedStates(NodeUtils.generateMultiRequest(observed));
-    return this;
-  }
-
-  @Override
-  public <T extends Serializable> InferenceEngine setObservedById(Collection<T> observedStateIDs) {
-    return this.setObserved(network.getNodeStatesById(observedStateIDs));
-  }
-
-  @Override
-  public Map<Node, NodeObservation> getCurrentObservations() {
-    return new LinkedHashMap<>(inferenceGraph.getObservedEvidence());
   }
 
   @Override
@@ -122,7 +93,7 @@ public abstract class InferenceEngineImpl implements InferenceEngine {
   }
 
   @Override
-  public double getPosteriorProbability(Collection<NodeState> measuredStates) {
+  public final double getPosteriorProbability(Collection<NodeState> measuredStates) {
     return inferenceGraph.getPosteriorProbability(NodeUtils.generateMultiRequest(measuredStates));
   }
 

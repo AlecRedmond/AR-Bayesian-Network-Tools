@@ -8,48 +8,18 @@ import io.github.alecredmond.export.observable.ObservationStatus;
 import io.github.alecredmond.export.sampler.MonteCarloSampler;
 import io.github.alecredmond.export.sampler.Sample;
 import io.github.alecredmond.export.sampler.SampleCollection;
-import io.github.alecredmond.internal.method.node.NodeUtils;
-import io.github.alecredmond.internal.method.observable.ObservableUtils;
+import io.github.alecredmond.internal.method.observable.AbstractObservable;
 import io.github.alecredmond.internal.method.utils.CollectionToString;
-import java.io.Serializable;
 import java.util.*;
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@Getter
-public abstract class AbstractMonteCarloSampler implements MonteCarloSampler {
-  protected final BayesianNetwork network;
-  protected Map<Node, NodeObservation> observations;
+public abstract class AbstractMonteCarloSampler extends AbstractObservable<MonteCarloSampler>
+    implements MonteCarloSampler {
 
   protected AbstractMonteCarloSampler(BayesianNetwork network) {
-    this.network = network;
+    super(network);
     resetObservations();
-  }
-
-  @Override
-  public MonteCarloSampler resetObservations() {
-    this.observations = ObservableUtils.buildUnobservedNetwork(network);
-    return this;
-  }
-
-  @Override
-  public MonteCarloSampler setObserved(Map<Node, NodeObservation> observations) {
-    resetObservations();
-    return eliminateStates(ObservableUtils.convertToEliminations(network, observations));
-  }
-
-  @Override
-  public MonteCarloSampler eliminateStates(Collection<NodeState> toEliminate) {
-    Map<Node, Set<NodeState>> toEliminateRequest = NodeUtils.generateMultiRequest(toEliminate);
-    this.observations = ObservableUtils.buildFromEliminatedStates(observations, toEliminateRequest);
-    return this;
-  }
-
-  @Override
-  public <T extends Serializable> MonteCarloSampler eliminateStatesById(
-      Collection<T> toEliminateIDs) {
-    return eliminateStates(network.getNodeStatesById(toEliminateIDs));
   }
 
   @Override
@@ -88,24 +58,12 @@ public abstract class AbstractMonteCarloSampler implements MonteCarloSampler {
   }
 
   @Override
-  public Map<Node, NodeObservation> getCurrentObservations() {
-    return observations;
-  }
-
-  @Override
-  public MonteCarloSampler setObserved(Collection<NodeState> observedStates) {
-    resetObservations();
-    if (!observedStates.isEmpty()) {
-      this.observations =
-          ObservableUtils.buildFromObservedStates(
-              this.observations, NodeUtils.generateMultiRequest(observedStates));
-    }
+  protected final MonteCarloSampler observationsUpdatedLogic() {
     return this;
   }
 
   @Override
-  public <T extends Serializable> MonteCarloSampler setObservedById(
-      Collection<T> observedStateIDs) {
-    return this.setObserved(network.getNodeStatesById(observedStateIDs));
+  protected final MonteCarloSampler returnThis() {
+    return this;
   }
 }

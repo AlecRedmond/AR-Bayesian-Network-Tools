@@ -11,15 +11,12 @@ import java.util.Map;
 import java.util.Set;
 
 public interface InferenceGraph {
-  Map<Node, NodeObservation> getObservedEvidence();
 
   ObservedTable[] getObservedTables();
 
   BayesianNetwork getNetwork();
 
-  void setObservedStates(Map<Node, Set<NodeState>> observedStateRequest);
-
-  void eliminateStates(Map<Node, Set<NodeState>> toEliminateRequest);
+  void setNewObservations(Map<Node, NodeObservation> newObservations);
 
   void resetObservations();
 

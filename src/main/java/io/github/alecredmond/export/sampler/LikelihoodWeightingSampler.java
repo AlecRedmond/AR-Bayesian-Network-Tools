@@ -9,7 +9,7 @@ import io.github.alecredmond.internal.method.sampler.samplestore.SampleStore;
 import io.github.alecredmond.internal.method.utils.WeightedAllocator;
 import java.util.*;
 
-public class LikelihoodWeightingSampler extends AbstractMonteCarloSampler {
+public final class LikelihoodWeightingSampler extends AbstractMonteCarloSampler {
   private final SampleStore sampleStore;
 
   public LikelihoodWeightingSampler(BayesianNetwork network) {

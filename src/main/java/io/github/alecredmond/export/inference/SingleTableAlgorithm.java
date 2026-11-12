@@ -2,7 +2,7 @@ package io.github.alecredmond.export.inference;
 
 import io.github.alecredmond.export.network.BayesianNetwork;
 import io.github.alecredmond.internal.method.cliquegraph.factory.InferenceGraphFactorySTA;
-import io.github.alecredmond.internal.method.inference.InferenceEngineImpl;
+import io.github.alecredmond.internal.method.inference.AbstractInferenceEngine;
 
 /**
  * The Single Table Algorithm (STA) for Bayesian inference. STA maps the Cartesian product of all
@@ -12,7 +12,7 @@ import io.github.alecredmond.internal.method.inference.InferenceEngineImpl;
  * queries. The absolute upper limit for this variant is a table length of 2<sup>31</sup>&minus;1
  * entries, the maximum length of a Java array.
  */
-public class SingleTableAlgorithm extends InferenceEngineImpl {
+public final class SingleTableAlgorithm extends AbstractInferenceEngine {
   public SingleTableAlgorithm(BayesianNetwork network) {
     super(network, new InferenceGraphFactorySTA());
   }

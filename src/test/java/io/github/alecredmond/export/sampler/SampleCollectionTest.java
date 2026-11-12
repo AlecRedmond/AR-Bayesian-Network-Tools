@@ -16,7 +16,6 @@ import io.github.alecredmond.export.observable.NodeObservation;
 import io.github.alecredmond.export.observable.ObservationStatus;
 import io.github.alecredmond.export.solver.IPFPJunctionTreeSolver;
 import io.github.alecredmond.internal.method.node.NodeUtils;
-import io.github.alecredmond.internal.method.utils.CollectionToString;
 import io.github.alecredmond.networkscenario.NetworkScenario;
 import io.github.alecredmond.networkscenario.NetworkScenarioType;
 import java.io.Serializable;
@@ -376,20 +375,12 @@ class SampleCollectionTest {
       Set<Node> exportNodes = samplePackage.getExportNodes();
       test.setDisplayedNodes(exportNodes);
       Set<NodeState> observedStates = samplePackage.getObservedStates();
-
-      System.out.println(
-          "OBSERVING: " + CollectionToString.apply(observedStates, NodeState::getName));
-      System.out.println("OBSERVED IN COLLECTION: " + CollectionToString.apply(test.getObservations().values()));
       Map<Node, Set<NodeState>> multi = NodeUtils.generateMultiRequest(observedStates);
       test.getSamples()
           .forEach(
               sample -> {
                 Map<Node, NodeState> sampled =
                     NodeUtils.generateRequest(Arrays.asList(sample.getAllStates()));
-
-                System.out.println(
-                    CollectionToString.apply(
-                        Arrays.asList(sample.getDisplayedStates()), NodeState::getName));
 
                 assertTrue(
                     Arrays.stream(sample.getDisplayedStates())
