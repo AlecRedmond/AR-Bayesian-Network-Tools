@@ -1,9 +1,9 @@
 package io.github.alecredmond.internal.method.cliquegraph.factory.abstractfactory;
 
-import io.github.alecredmond.export.inference.Clique;
+import io.github.alecredmond.export.inference.NodeObservation;
+import io.github.alecredmond.export.inference.direct.Clique;
 import io.github.alecredmond.export.network.BayesianNetwork;
 import io.github.alecredmond.export.node.Node;
-import io.github.alecredmond.export.observable.NodeObservation;
 import io.github.alecredmond.export.probabilitytables.ObservedTable;
 import io.github.alecredmond.export.probabilitytables.ProbabilityTable;
 import io.github.alecredmond.internal.application.cliquegraph.CliqueData;
@@ -12,7 +12,7 @@ import io.github.alecredmond.internal.method.cliquegraph.InferenceGraph;
 import io.github.alecredmond.internal.method.cliquegraph.externalwriters.InferenceExternalWriter;
 import io.github.alecredmond.internal.method.cliquegraph.factory.InferenceGraphFactory;
 import io.github.alecredmond.internal.method.cliquegraph.implementation.InferenceGraphImpl;
-import io.github.alecredmond.internal.method.observable.ObservableUtils;
+import io.github.alecredmond.internal.method.inference.ObservableUtils;
 import io.github.alecredmond.internal.method.probabilitytables.tablefactory.ObservedTableFactory;
 import java.util.Map;
 

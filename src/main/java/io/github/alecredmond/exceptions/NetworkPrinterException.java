@@ -1,6 +1,6 @@
 package io.github.alecredmond.exceptions;
 
-import io.github.alecredmond.export.inference.InferenceEngine;
+import io.github.alecredmond.export.inference.direct.InferenceEngine;
 import io.github.alecredmond.export.network.BayesianNetwork;
 import java.io.IOException;
 

@@ -1,17 +1,17 @@
 package io.github.alecredmond.internal.method.cliquegraph.factory.abstractfactory;
 
-import io.github.alecredmond.export.constraints.ProbabilityConstraint;
-import io.github.alecredmond.export.inference.Clique;
+import io.github.alecredmond.export.inference.direct.Clique;
 import io.github.alecredmond.export.network.BayesianNetwork;
 import io.github.alecredmond.export.probabilitytables.ProbabilityTable;
+import io.github.alecredmond.export.solver.constraint.ProbabilityConstraint;
 import io.github.alecredmond.internal.application.cliquegraph.CliqueData;
 import io.github.alecredmond.internal.application.cliquegraph.GraphDataSolver;
 import io.github.alecredmond.internal.method.cliquegraph.SolverGraph;
 import io.github.alecredmond.internal.method.cliquegraph.externalwriters.SolverExternalWriter;
 import io.github.alecredmond.internal.method.cliquegraph.factory.SolverGraphFactory;
 import io.github.alecredmond.internal.method.cliquegraph.implementation.SolverGraphImpl;
-import io.github.alecredmond.internal.method.constraints.ConstraintRegistry;
-import io.github.alecredmond.internal.method.constraints.strategy.ConstraintSolver;
+import io.github.alecredmond.internal.method.solver.constraint.ConstraintRegistry;
+import io.github.alecredmond.internal.method.solver.constraint.strategy.ConstraintSolver;
 import java.util.*;
 import java.util.stream.Collectors;
 import lombok.NonNull;

@@ -1,7 +1,7 @@
 package io.github.alecredmond.internal.method.cliquegraph.factory.factoryutils;
 
-import io.github.alecredmond.export.inference.Clique;
-import io.github.alecredmond.export.inference.Separator;
+import io.github.alecredmond.export.inference.direct.Clique;
+import io.github.alecredmond.export.inference.direct.Separator;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.internal.application.cliquegraph.CliqueData;
 import io.github.alecredmond.internal.application.cliquegraph.GraphData;

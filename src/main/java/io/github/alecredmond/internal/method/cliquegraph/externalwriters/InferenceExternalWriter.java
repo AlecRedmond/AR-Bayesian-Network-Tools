@@ -1,8 +1,8 @@
 package io.github.alecredmond.internal.method.cliquegraph.externalwriters;
 
-import io.github.alecredmond.export.inference.Clique;
+import io.github.alecredmond.export.inference.NodeObservation;
+import io.github.alecredmond.export.inference.direct.Clique;
 import io.github.alecredmond.export.node.Node;
-import io.github.alecredmond.export.observable.NodeObservation;
 import io.github.alecredmond.export.probabilitytables.ObservedTable;
 import io.github.alecredmond.internal.application.cliquegraph.GraphDataInference;
 import io.github.alecredmond.internal.method.probabilitytables.ObservedTableImpl;

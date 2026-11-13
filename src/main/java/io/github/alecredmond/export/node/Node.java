@@ -1,7 +1,7 @@
 package io.github.alecredmond.export.node;
 
-import io.github.alecredmond.export.constraints.ProbabilityConstraint;
 import io.github.alecredmond.export.network.BayesianNetwork;
+import io.github.alecredmond.export.solver.constraint.ProbabilityConstraint;
 import io.github.alecredmond.internal.application.cartesianvector.CartesianVariable;
 import java.io.Serializable;
 import java.util.List;

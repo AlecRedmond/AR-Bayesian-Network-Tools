@@ -1,6 +1,6 @@
 package io.github.alecredmond.exceptions;
 
-import io.github.alecredmond.export.inference.InferenceEngine;
+import io.github.alecredmond.export.inference.direct.InferenceEngine;
 import io.github.alecredmond.export.probabilitytables.ProbabilityTable;
 import io.github.alecredmond.export.solver.BayesSolver;
 

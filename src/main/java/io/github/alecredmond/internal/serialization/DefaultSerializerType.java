@@ -1,8 +1,8 @@
 package io.github.alecredmond.internal.serialization;
 
-import io.github.alecredmond.export.serializer.DefaultBinaryNodeSerializer;
-import io.github.alecredmond.export.serializer.DefaultNodeSerializer;
-import io.github.alecredmond.export.serializer.NodeSerializer;
+import io.github.alecredmond.export.node.serialization.DefaultBinaryNodeSerializer;
+import io.github.alecredmond.export.node.serialization.DefaultNodeSerializer;
+import io.github.alecredmond.export.node.serialization.NodeSerializer;
 import java.util.function.Supplier;
 import lombok.Getter;
 

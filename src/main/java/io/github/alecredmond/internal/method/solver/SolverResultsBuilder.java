@@ -1,8 +1,8 @@
 package io.github.alecredmond.internal.method.solver;
 
-import io.github.alecredmond.export.constraints.ProbabilityConstraint;
-import io.github.alecredmond.export.solver.ipfpresults.IPFPConstraintResult;
-import io.github.alecredmond.export.solver.ipfpresults.IPFPResults;
+import io.github.alecredmond.export.solver.constraint.ProbabilityConstraint;
+import io.github.alecredmond.export.solver.ipfp.IPFPConstraintResult;
+import io.github.alecredmond.export.solver.ipfp.IPFPResults;
 import java.time.Duration;
 import java.util.Comparator;
 import java.util.LinkedHashMap;

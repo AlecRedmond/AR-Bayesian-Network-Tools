@@ -1,12 +1,12 @@
 package io.github.alecredmond.internal.method.solver.cptmapper.iterator;
 
-import io.github.alecredmond.export.constraints.ProbabilityConstraint;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
 import io.github.alecredmond.export.probabilitytables.NetworkTable;
+import io.github.alecredmond.export.solver.constraint.ProbabilityConstraint;
 import io.github.alecredmond.internal.application.solver.CptMappingReport;
-import io.github.alecredmond.internal.method.constraints.strategy.CPTConstraintValidator;
-import io.github.alecredmond.internal.method.constraints.strategy.ValidatedConstraint;
+import io.github.alecredmond.internal.method.solver.constraint.strategy.CPTConstraintValidator;
+import io.github.alecredmond.internal.method.solver.constraint.strategy.ValidatedConstraint;
 import io.github.alecredmond.internal.method.solver.cptmapper.constraintsorter.CptConstraintSorter;
 import io.github.alecredmond.internal.method.utils.DoublePrecision;
 import io.github.alecredmond.internal.method.vectoriterator.standardtemplate.*;

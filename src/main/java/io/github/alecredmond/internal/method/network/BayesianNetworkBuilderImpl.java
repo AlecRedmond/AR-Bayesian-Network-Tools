@@ -2,7 +2,6 @@ package io.github.alecredmond.internal.method.network;
 
 import static org.apache.commons.lang3.ArrayUtils.isSorted;
 
-import io.github.alecredmond.export.constraints.ProbabilityConstraint;
 import io.github.alecredmond.export.network.BayesianNetwork;
 import io.github.alecredmond.export.network.BayesianNetworkBuilder;
 import io.github.alecredmond.export.network.cptdefinition.CptDefinition;
@@ -10,12 +9,13 @@ import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
 import io.github.alecredmond.export.probabilitytables.NetworkTable;
 import io.github.alecredmond.export.solver.BayesSolver;
+import io.github.alecredmond.export.solver.constraint.ProbabilityConstraint;
 import io.github.alecredmond.internal.application.network.BayesianNetworkData;
-import io.github.alecredmond.internal.method.constraints.ConstraintFactory;
 import io.github.alecredmond.internal.method.network.validator.ValidatorType;
 import io.github.alecredmond.internal.method.node.NodeComparator;
 import io.github.alecredmond.internal.method.node.NodeUtils;
 import io.github.alecredmond.internal.method.probabilitytables.tablefactory.NetworkTableFactory;
+import io.github.alecredmond.internal.method.solver.constraint.ConstraintFactory;
 import io.github.alecredmond.internal.method.vectoriterator.misciterators.ConstraintBuilderIterator;
 import java.io.Serializable;
 import java.util.*;

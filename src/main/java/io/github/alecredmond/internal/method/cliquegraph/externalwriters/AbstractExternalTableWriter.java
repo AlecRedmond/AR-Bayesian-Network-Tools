@@ -1,7 +1,7 @@
 package io.github.alecredmond.internal.method.cliquegraph.externalwriters;
 
-import io.github.alecredmond.export.inference.Clique;
-import io.github.alecredmond.export.inference.Separator;
+import io.github.alecredmond.export.inference.direct.Clique;
+import io.github.alecredmond.export.inference.direct.Separator;
 import io.github.alecredmond.internal.application.cliquegraph.GraphData;
 import lombok.extern.slf4j.Slf4j;
 

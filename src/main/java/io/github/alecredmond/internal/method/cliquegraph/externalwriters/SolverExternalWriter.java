@@ -1,6 +1,6 @@
 package io.github.alecredmond.internal.method.cliquegraph.externalwriters;
 
-import io.github.alecredmond.export.inference.Clique;
+import io.github.alecredmond.export.inference.direct.Clique;
 import io.github.alecredmond.export.probabilitytables.NetworkTable;
 import io.github.alecredmond.internal.application.cliquegraph.GraphDataSolver;
 import java.util.Arrays;

@@ -5,16 +5,19 @@ import static io.github.alecredmond.export.node.BinaryNode.StateOrder.TRUE_FIRST
 import static io.github.alecredmond.networkscenario.NetworkScenarioType.*;
 import static org.junit.jupiter.api.Assertions.*;
 
-import io.github.alecredmond.export.inference.InferenceEngine;
-import io.github.alecredmond.export.inference.JunctionTreeAlgorithm;
+import io.github.alecredmond.export.inference.NodeObservation;
+import io.github.alecredmond.export.inference.ObservationStatus;
+import io.github.alecredmond.export.inference.direct.InferenceEngine;
+import io.github.alecredmond.export.inference.direct.JunctionTreeAlgorithm;
+import io.github.alecredmond.export.inference.indirect.MonteCarloSampler;
+import io.github.alecredmond.export.inference.indirect.Sample;
+import io.github.alecredmond.export.inference.indirect.SampleCollection;
 import io.github.alecredmond.export.network.BayesianNetwork;
 import io.github.alecredmond.export.node.BinaryNode;
 import io.github.alecredmond.export.node.DefaultBinaryNode;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
-import io.github.alecredmond.export.observable.NodeObservation;
-import io.github.alecredmond.export.observable.ObservationStatus;
-import io.github.alecredmond.export.solver.IPFPJunctionTreeSolver;
+import io.github.alecredmond.export.solver.ipfp.IPFPJunctionTreeSolver;
 import io.github.alecredmond.internal.method.node.NodeUtils;
 import io.github.alecredmond.networkscenario.NetworkScenario;
 import io.github.alecredmond.networkscenario.NetworkScenarioType;

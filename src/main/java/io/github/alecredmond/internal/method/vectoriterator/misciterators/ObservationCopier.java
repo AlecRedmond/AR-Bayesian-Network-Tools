@@ -1,11 +1,11 @@
 package io.github.alecredmond.internal.method.vectoriterator.misciterators;
 
-import static io.github.alecredmond.export.observable.ObservationStatus.*;
+import static io.github.alecredmond.export.inference.ObservationStatus.*;
 
+import io.github.alecredmond.export.inference.NodeObservation;
+import io.github.alecredmond.export.inference.ObservationStatus;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
-import io.github.alecredmond.export.observable.NodeObservation;
-import io.github.alecredmond.export.observable.ObservationStatus;
 import io.github.alecredmond.export.probabilitytables.ProbabilityVector;
 import io.github.alecredmond.internal.method.probabilitytables.JunctionTreeTable;
 import io.github.alecredmond.internal.method.vectoriterator.standardtemplate.ProbabilityIteratorTemplate;

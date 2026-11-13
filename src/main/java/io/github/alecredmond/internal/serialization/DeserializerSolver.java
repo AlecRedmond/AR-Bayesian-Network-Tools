@@ -4,7 +4,7 @@ import io.github.alecredmond.exceptions.NetworkStructureException;
 import io.github.alecredmond.export.network.BayesianNetwork;
 import io.github.alecredmond.export.network.serialized.SerializedBayesianNetwork;
 import io.github.alecredmond.export.node.Node;
-import io.github.alecredmond.export.node.serialized.SerializedNode;
+import io.github.alecredmond.export.node.serialization.SerializedNode;
 import io.github.alecredmond.export.probabilitytables.NetworkTable;
 import io.github.alecredmond.export.solver.BayesSolver;
 import java.util.Optional;

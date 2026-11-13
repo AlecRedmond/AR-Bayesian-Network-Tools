@@ -1,15 +1,15 @@
 package io.github.alecredmond.internal.method.solver;
 
-import io.github.alecredmond.export.constraints.ProbabilityConstraint;
-import io.github.alecredmond.export.inference.Clique;
+import io.github.alecredmond.export.inference.direct.Clique;
 import io.github.alecredmond.export.network.BayesianNetwork;
 import io.github.alecredmond.export.probabilitytables.NetworkTable;
-import io.github.alecredmond.export.solver.IPFPSolver;
-import io.github.alecredmond.export.solver.ipfpresults.IPFPResults;
+import io.github.alecredmond.export.solver.constraint.ProbabilityConstraint;
+import io.github.alecredmond.export.solver.ipfp.IPFPResults;
+import io.github.alecredmond.export.solver.ipfp.IPFPSolver;
 import io.github.alecredmond.internal.application.solver.SolverConfigs;
 import io.github.alecredmond.internal.method.cliquegraph.SolverGraph;
 import io.github.alecredmond.internal.method.cliquegraph.factory.SolverGraphFactory;
-import io.github.alecredmond.internal.method.constraints.strategy.ConstraintSolver;
+import io.github.alecredmond.internal.method.solver.constraint.strategy.ConstraintSolver;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;

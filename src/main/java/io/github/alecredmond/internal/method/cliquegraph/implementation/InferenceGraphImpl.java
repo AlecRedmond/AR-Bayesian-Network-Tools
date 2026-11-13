@@ -1,20 +1,20 @@
 package io.github.alecredmond.internal.method.cliquegraph.implementation;
 
-import static io.github.alecredmond.export.observable.ObservationStatus.*;
+import static io.github.alecredmond.export.inference.ObservationStatus.*;
 
-import io.github.alecredmond.export.inference.Clique;
-import io.github.alecredmond.export.inference.InferenceTable;
-import io.github.alecredmond.export.inference.Separator;
+import io.github.alecredmond.export.inference.NodeObservation;
+import io.github.alecredmond.export.inference.ObservationStatus;
+import io.github.alecredmond.export.inference.direct.Clique;
+import io.github.alecredmond.export.inference.direct.InferenceTable;
+import io.github.alecredmond.export.inference.direct.Separator;
 import io.github.alecredmond.export.network.BayesianNetwork;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
-import io.github.alecredmond.export.observable.NodeObservation;
-import io.github.alecredmond.export.observable.ObservationStatus;
 import io.github.alecredmond.export.probabilitytables.ObservedTable;
 import io.github.alecredmond.internal.application.cliquegraph.GraphDataInference;
 import io.github.alecredmond.internal.method.cliquegraph.InferenceGraph;
 import io.github.alecredmond.internal.method.cliquegraph.externalwriters.InferenceExternalWriter;
-import io.github.alecredmond.internal.method.observable.ObservableUtils;
+import io.github.alecredmond.internal.method.inference.ObservableUtils;
 import java.util.*;
 
 public class InferenceGraphImpl extends CliqueGraph<GraphDataInference> implements InferenceGraph {

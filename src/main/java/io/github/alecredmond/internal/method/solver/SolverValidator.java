@@ -5,7 +5,7 @@ import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
 import io.github.alecredmond.export.probabilitytables.NetworkTable;
 import io.github.alecredmond.export.probabilitytables.ProbabilityVector;
-import io.github.alecredmond.internal.method.constraints.strategy.ValidatedConstraint;
+import io.github.alecredmond.internal.method.solver.constraint.strategy.ValidatedConstraint;
 import java.util.HashSet;
 import java.util.Set;
 

@@ -1,7 +1,10 @@
 package io.github.alecredmond.export.solver;
 
 import io.github.alecredmond.export.network.BayesianNetwork;
-import io.github.alecredmond.export.solver.ipfpresults.IPFPResults;
+import io.github.alecredmond.export.solver.directinput.DirectCptSolver;
+import io.github.alecredmond.export.solver.ipfp.IPFPJunctionTreeSolver;
+import io.github.alecredmond.export.solver.ipfp.IPFPResults;
+import io.github.alecredmond.export.solver.ipfp.IPFPSolver;
 import java.util.Optional;
 
 public class MultiStageSolver implements IPFPSolver {

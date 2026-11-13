@@ -1,14 +1,14 @@
 package io.github.alecredmond.export.network;
 
-import io.github.alecredmond.export.constraints.ProbabilityConstraint;
-import io.github.alecredmond.export.inference.InferenceEngine;
+import io.github.alecredmond.export.inference.direct.InferenceEngine;
+import io.github.alecredmond.export.inference.indirect.MonteCarloSampler;
 import io.github.alecredmond.export.network.serialized.SerializedBayesianNetwork;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
+import io.github.alecredmond.export.node.serialization.NodeSerializer;
 import io.github.alecredmond.export.probabilitytables.NetworkTable;
-import io.github.alecredmond.export.sampler.MonteCarloSampler;
-import io.github.alecredmond.export.serializer.NodeSerializer;
 import io.github.alecredmond.export.solver.BayesSolver;
+import io.github.alecredmond.export.solver.constraint.ProbabilityConstraint;
 import io.github.alecredmond.internal.fileio.NetworkFileIO;
 import io.github.alecredmond.internal.method.network.BayesianNetworkBuilderImpl;
 import io.github.alecredmond.internal.serialization.BayesianNetworkSerializer;

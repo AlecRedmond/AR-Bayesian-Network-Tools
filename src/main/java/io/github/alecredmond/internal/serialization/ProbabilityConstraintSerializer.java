@@ -1,12 +1,12 @@
 package io.github.alecredmond.internal.serialization;
 
 import io.github.alecredmond.exceptions.ConstraintValidationException;
-import io.github.alecredmond.export.constraints.ProbabilityConstraint;
-import io.github.alecredmond.export.constraints.serialized.SerializedProbabilityConstraint;
 import io.github.alecredmond.export.network.serialized.SerializedBayesianNetwork;
-import io.github.alecredmond.internal.method.constraints.ConstraintRegistry;
-import io.github.alecredmond.internal.method.constraints.strategy.ConstraintSerializer;
-import io.github.alecredmond.internal.method.constraints.strategy.ConstraintStrategy;
+import io.github.alecredmond.export.solver.constraint.ProbabilityConstraint;
+import io.github.alecredmond.export.solver.constraint.serialized.SerializedProbabilityConstraint;
+import io.github.alecredmond.internal.method.solver.constraint.ConstraintRegistry;
+import io.github.alecredmond.internal.method.solver.constraint.strategy.ConstraintSerializer;
+import io.github.alecredmond.internal.method.solver.constraint.strategy.ConstraintStrategy;
 import java.util.*;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;

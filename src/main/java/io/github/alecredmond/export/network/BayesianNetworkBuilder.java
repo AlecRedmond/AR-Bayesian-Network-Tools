@@ -1,12 +1,12 @@
 package io.github.alecredmond.export.network;
 
 import io.github.alecredmond.exceptions.ConstraintValidationException;
-import io.github.alecredmond.export.constraints.MarginalConstraint;
-import io.github.alecredmond.export.constraints.ProbabilityConstraint;
 import io.github.alecredmond.export.network.cptdefinition.CptDefinition;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
 import io.github.alecredmond.export.solver.BayesSolver;
+import io.github.alecredmond.export.solver.constraint.MarginalConstraint;
+import io.github.alecredmond.export.solver.constraint.ProbabilityConstraint;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
@@ -14,6 +14,10 @@ import java.util.Set;
 public interface BayesianNetworkBuilder {
 
   BayesianNetworkBuilder setNetworkName(String networkName);
+
+  default Optional<BayesianNetwork> build() {
+    return build(BayesSolver.create());
+  }
 
   Optional<BayesianNetwork> build(BayesSolver solver);
 

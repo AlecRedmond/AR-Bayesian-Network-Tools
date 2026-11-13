@@ -1,9 +1,9 @@
 package io.github.alecredmond.internal.method.network.validator;
 
 import io.github.alecredmond.exceptions.ConstraintValidationException;
-import io.github.alecredmond.export.constraints.ProbabilityConstraint;
+import io.github.alecredmond.export.solver.constraint.ProbabilityConstraint;
 import io.github.alecredmond.internal.application.network.BayesianNetworkData;
-import io.github.alecredmond.internal.method.constraints.strategy.ValidatedConstraint;
+import io.github.alecredmond.internal.method.solver.constraint.strategy.ValidatedConstraint;
 import lombok.NoArgsConstructor;
 
 @NoArgsConstructor

@@ -80,11 +80,6 @@ abstract class AbstractBayesNode implements Node {
     return stateNameMap.get(stateName);
   }
 
-  @Override
-  public NodeState getStateById(Serializable stateId) {
-    return stateIdMap.get(stateId);
-  }
-
   public void setParents(List<Node> parents) {
     this.parents = Collections.unmodifiableList(parents);
   }

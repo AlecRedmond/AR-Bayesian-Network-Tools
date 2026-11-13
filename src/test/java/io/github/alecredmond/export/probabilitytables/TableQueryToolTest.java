@@ -3,11 +3,11 @@ package io.github.alecredmond.export.probabilitytables;
 import static io.github.alecredmond.TestConfigs.DOUBLE_EQUALITY;
 import static org.junit.jupiter.api.Assertions.*;
 
-import io.github.alecredmond.export.constraints.ProbabilityConstraint;
 import io.github.alecredmond.export.network.BayesianNetwork;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
 import io.github.alecredmond.export.probabilitytables.cptentry.CptEntry;
+import io.github.alecredmond.export.solver.constraint.ProbabilityConstraint;
 import io.github.alecredmond.internal.method.node.NodeUtils;
 import io.github.alecredmond.internal.method.probabilitytables.probabilityvector.ProbabilityVectorFactory;
 import io.github.alecredmond.internal.method.vectoriterator.misciterators.StateCombinationGenerator;

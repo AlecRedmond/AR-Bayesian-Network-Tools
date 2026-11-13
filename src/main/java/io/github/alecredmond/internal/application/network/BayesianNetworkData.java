@@ -1,10 +1,10 @@
 package io.github.alecredmond.internal.application.network;
 
-import io.github.alecredmond.export.constraints.ProbabilityConstraint;
 import io.github.alecredmond.export.network.BayesianNetwork;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
 import io.github.alecredmond.export.probabilitytables.NetworkTable;
+import io.github.alecredmond.export.solver.constraint.ProbabilityConstraint;
 import java.io.Serializable;
 import java.util.*;
 import lombok.Data;

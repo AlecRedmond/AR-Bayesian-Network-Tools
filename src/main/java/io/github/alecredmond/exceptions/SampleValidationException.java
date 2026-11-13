@@ -1,6 +1,6 @@
 package io.github.alecredmond.exceptions;
 
-import io.github.alecredmond.export.sampler.MonteCarloSampler;
+import io.github.alecredmond.export.inference.indirect.MonteCarloSampler;
 
 /** Thrown if samples generated in {@link MonteCarloSampler} failed validation. */
 public class SampleValidationException extends RuntimeException {

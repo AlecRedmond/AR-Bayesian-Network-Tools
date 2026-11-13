@@ -1,12 +1,12 @@
 package io.github.alecredmond.export.network.serialized;
 
-import io.github.alecredmond.export.constraints.ProbabilityConstraint;
-import io.github.alecredmond.export.constraints.serialized.SerializedProbabilityConstraint;
 import io.github.alecredmond.export.network.BayesianNetwork;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
-import io.github.alecredmond.export.node.serialized.SerializedNode;
+import io.github.alecredmond.export.node.serialization.SerializedNode;
 import io.github.alecredmond.export.probabilitytables.serialized.SerializedNetworkTable;
+import io.github.alecredmond.export.solver.constraint.ProbabilityConstraint;
+import io.github.alecredmond.export.solver.constraint.serialized.SerializedProbabilityConstraint;
 import java.io.Serializable;
 
 /**

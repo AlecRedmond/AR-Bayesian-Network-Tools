@@ -5,7 +5,7 @@ import io.github.alecredmond.export.network.cptdefinition.*;
 import io.github.alecredmond.export.node.BinaryNode;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.solver.BayesSolver;
-import io.github.alecredmond.export.solver.DirectCptSolver;
+import io.github.alecredmond.export.solver.directinput.DirectCptSolver;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;

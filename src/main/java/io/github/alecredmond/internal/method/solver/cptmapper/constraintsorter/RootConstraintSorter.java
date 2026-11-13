@@ -1,8 +1,8 @@
 package io.github.alecredmond.internal.method.solver.cptmapper.constraintsorter;
 
-import io.github.alecredmond.export.constraints.MarginalConstraint;
-import io.github.alecredmond.export.constraints.ProbabilityConstraint;
 import io.github.alecredmond.export.probabilitytables.RootNodeTable;
+import io.github.alecredmond.export.solver.constraint.MarginalConstraint;
+import io.github.alecredmond.export.solver.constraint.ProbabilityConstraint;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.function.Predicate;

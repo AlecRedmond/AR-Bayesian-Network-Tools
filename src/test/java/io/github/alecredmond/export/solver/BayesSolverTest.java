@@ -3,7 +3,6 @@ package io.github.alecredmond.export.solver;
 import static io.github.alecredmond.TestConfigs.DOUBLE_EQUALITY;
 import static org.junit.jupiter.api.Assertions.*;
 
-import io.github.alecredmond.export.constraints.ProbabilityConstraint;
 import io.github.alecredmond.export.network.BayesianNetwork;
 import io.github.alecredmond.export.network.BayesianNetworkBuilder;
 import io.github.alecredmond.export.node.Node;
@@ -11,6 +10,10 @@ import io.github.alecredmond.export.probabilitytables.ConditionalTable;
 import io.github.alecredmond.export.probabilitytables.NetworkTable;
 import io.github.alecredmond.export.probabilitytables.RootNodeTable;
 import io.github.alecredmond.export.probabilitytables.cptentry.CptEntry;
+import io.github.alecredmond.export.solver.constraint.ProbabilityConstraint;
+import io.github.alecredmond.export.solver.directinput.DirectCptSolver;
+import io.github.alecredmond.export.solver.ipfp.IPFPJunctionTreeSolver;
+import io.github.alecredmond.export.solver.ipfp.IPFPSingleTableSolver;
 import io.github.alecredmond.internal.method.solver.cptmapper.constraintsorter.ConditionalTableConstraintSorter;
 import io.github.alecredmond.internal.method.solver.cptmapper.constraintsorter.CptConstraintSorter;
 import io.github.alecredmond.internal.method.solver.cptmapper.constraintsorter.RootConstraintSorter;

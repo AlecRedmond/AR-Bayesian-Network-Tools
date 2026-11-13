@@ -1,7 +1,7 @@
 package io.github.alecredmond.internal.method.cliquegraph.factory.cliquefactory;
 
-import io.github.alecredmond.export.constraints.ProbabilityConstraint;
 import io.github.alecredmond.export.node.Node;
+import io.github.alecredmond.export.solver.constraint.ProbabilityConstraint;
 import io.github.alecredmond.internal.application.cliquegraph.GraphData;
 import io.github.alecredmond.internal.method.cliquegraph.factory.separatorfactory.SeparatorFactory;
 import io.github.alecredmond.internal.method.cliquegraph.factory.separatorfactory.SeparatorFactorySolver;
