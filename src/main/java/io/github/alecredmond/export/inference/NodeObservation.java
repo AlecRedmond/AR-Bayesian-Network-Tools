@@ -7,12 +7,12 @@ import io.github.alecredmond.export.node.NodeState;
 import java.util.*;
 
 /**
- * An observed configuration of a single {@link Node} within an {@link Observable} instance. This
- * measures which {@link NodeState} values in the given {@link Node}'s state list are observed and
- * eliminated. Typically, this will be given in a map as the value, with the key being the measured
- * {@link Node}.
+ * An observed configuration of a single {@link Node} within an {@link BayesianInference} instance.
+ * This measures which {@link NodeState} values in the given {@link Node}'s state list are observed
+ * and eliminated. Typically, this will be given in a map as the value, with the key being the
+ * measured {@link Node}.
  *
- * @see Observable
+ * @see BayesianInference
  * @see InferenceEngine
  * @see MonteCarloSampler
  * @author Alec Redmond
@@ -48,13 +48,14 @@ public interface NodeObservation {
    *
    * <ul>
    *   <li>{@code UNOBSERVED}: All {@link NodeState}s associated with the {@link Node} are active
-   *       within the {@link Observable}.
+   *       within the {@link BayesianInference}.
    *   <li>{@code PARTIALLY_OBSERVED}: Some {@link NodeState}s associated with the {@link Node} have
    *       been eliminated, but more than one active state remains.
    *   <li>{@code OBSERVED}: A single {@link NodeState} associated with the {@link Node} remains
    *       active, with all other states eliminated.
    *   <li>{@code NEGATED}: All {@link NodeState}s associated with the {@link Node} have been
-   *       eliminated. This will set the joint probability of the entire {@link Observable} to 0.
+   *       eliminated. This will set the joint probability of the entire {@link BayesianInference}
+   *       to 0.
    * </ul>
    *
    * @return the {@link ObservationStatus} of this {@code NodeObservation}.

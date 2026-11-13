@@ -24,7 +24,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 @Slf4j
-class ObservableCoherenceTest {
+class BayesianInferenceCoherenceTest {
   private static final boolean PERFORM_SAMPLE_CHECK = false;
   private static final double SAMPLE_BAYES_RULE_CUTOFF_PROBABILITY = 1e-3;
   private static final int TABLE_MAX_ENTRIES_FOR_SAMPLING = 10;
@@ -34,7 +34,7 @@ class ObservableCoherenceTest {
     return Arrays.stream(NetworkScenarioType.values())
         .map(NetworkScenarioType::get)
         .map(NetworkScenario::buildNetwork)
-        .map(ObservableCoherenceTest::createArguments);
+        .map(BayesianInferenceCoherenceTest::createArguments);
   }
 
   private static Arguments createArguments(BayesianNetwork network) {

@@ -1,7 +1,7 @@
 package io.github.alecredmond.export.inference.indirect;
 
+import io.github.alecredmond.export.inference.BayesianInference;
 import io.github.alecredmond.export.inference.NodeObservation;
-import io.github.alecredmond.export.inference.Observable;
 import io.github.alecredmond.export.inference.direct.InferenceEngine;
 import io.github.alecredmond.export.network.BayesianNetwork;
 import io.github.alecredmond.export.node.Node;
@@ -29,7 +29,7 @@ import java.util.Random;
  * @see BayesianNetwork
  * @author Alec Redmond
  */
-public interface MonteCarloSampler extends Observable<MonteCarloSampler> {
+public interface MonteCarloSampler extends BayesianInference<MonteCarloSampler> {
 
   /**
    * Creates a new {@code MonteCarloSampler} for the given {@link BayesianNetwork}.

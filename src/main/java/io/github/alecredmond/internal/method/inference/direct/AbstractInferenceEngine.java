@@ -11,7 +11,7 @@ import io.github.alecredmond.export.node.NodeState;
 import io.github.alecredmond.export.probabilitytables.ObservedTable;
 import io.github.alecredmond.internal.method.cliquegraph.InferenceGraph;
 import io.github.alecredmond.internal.method.cliquegraph.factory.InferenceGraphFactory;
-import io.github.alecredmond.internal.method.inference.AbstractObservable;
+import io.github.alecredmond.internal.method.inference.AbstractBayesianInference;
 import io.github.alecredmond.internal.method.network.BayesNetIdConverter;
 import io.github.alecredmond.internal.method.node.NodeUtils;
 import io.github.alecredmond.internal.method.printer.NetworkPrinter;
@@ -22,7 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Getter
-public abstract class AbstractInferenceEngine extends AbstractObservable<InferenceEngine>
+public abstract class AbstractInferenceEngine extends AbstractBayesianInference<InferenceEngine>
     implements InferenceEngine {
   private final BayesNetIdConverter converter;
   private final InferenceGraph inferenceGraph;

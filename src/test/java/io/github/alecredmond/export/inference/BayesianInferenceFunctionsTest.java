@@ -24,7 +24,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-class ObservableFunctionsTest {
+class BayesianInferenceFunctionsTest {
   private static final int LONG_TEST_LOG2_WIDTH = 8;
   private static final int SHORT_TEST_LOG2_WIDTH = 6;
   private static final double MAX_LOG_WIDTH = getMaxLogWidth();
@@ -37,7 +37,7 @@ class ObservableFunctionsTest {
     return Arrays.stream(NetworkScenarioType.values())
         .map(NetworkScenarioType::get)
         .map(NetworkScenario::buildNetwork)
-        .filter(ObservableFunctionsTest::suitableTreeWidth)
+        .filter(BayesianInferenceFunctionsTest::suitableTreeWidth)
         .map(Arguments::of);
   }
 

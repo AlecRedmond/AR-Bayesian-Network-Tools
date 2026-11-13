@@ -1,7 +1,7 @@
 package io.github.alecredmond.export.inference.direct;
 
 import io.github.alecredmond.exceptions.NetworkPrinterException;
-import io.github.alecredmond.export.inference.Observable;
+import io.github.alecredmond.export.inference.BayesianInference;
 import io.github.alecredmond.export.inference.indirect.MonteCarloSampler;
 import io.github.alecredmond.export.network.BayesianNetwork;
 import io.github.alecredmond.export.node.Node;
@@ -33,7 +33,7 @@ import java.util.Collection;
  * @author Alec Redmond
  */
 @SuppressWarnings("UnusedReturnValue")
-public interface InferenceEngine extends Observable<InferenceEngine> {
+public interface InferenceEngine extends BayesianInference<InferenceEngine> {
 
   /**
    * Returns an {@link ObservedTable} associated with a {@link Node}. This is a table containing

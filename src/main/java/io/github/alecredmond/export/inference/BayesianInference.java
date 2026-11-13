@@ -23,7 +23,7 @@ import java.util.Map;
  * @see NodeObservation
  * @author Alec Redmond
  */
-public interface Observable<T extends Observable<T>> {
+public interface BayesianInference<T extends BayesianInference<T>> {
 
   /**
    * Returns the {@link BayesianNetwork} measured by this {@code Observable}.

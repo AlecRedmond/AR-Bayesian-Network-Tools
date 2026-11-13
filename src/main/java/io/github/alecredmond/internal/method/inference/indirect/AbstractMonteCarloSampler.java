@@ -8,13 +8,13 @@ import io.github.alecredmond.export.inference.indirect.SampleCollection;
 import io.github.alecredmond.export.network.BayesianNetwork;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
-import io.github.alecredmond.internal.method.inference.AbstractObservable;
+import io.github.alecredmond.internal.method.inference.AbstractBayesianInference;
 import io.github.alecredmond.internal.method.utils.CollectionToString;
 import java.util.*;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public abstract class AbstractMonteCarloSampler extends AbstractObservable<MonteCarloSampler>
+public abstract class AbstractMonteCarloSampler extends AbstractBayesianInference<MonteCarloSampler>
     implements MonteCarloSampler {
 
   protected AbstractMonteCarloSampler(BayesianNetwork network) {

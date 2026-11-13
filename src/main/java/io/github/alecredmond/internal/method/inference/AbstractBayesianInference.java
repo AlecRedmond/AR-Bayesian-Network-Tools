@@ -1,7 +1,7 @@
 package io.github.alecredmond.internal.method.inference;
 
+import io.github.alecredmond.export.inference.BayesianInference;
 import io.github.alecredmond.export.inference.NodeObservation;
-import io.github.alecredmond.export.inference.Observable;
 import io.github.alecredmond.export.network.BayesianNetwork;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
@@ -12,11 +12,12 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
-public abstract class AbstractObservable<T extends Observable<T>> implements Observable<T> {
+public abstract class AbstractBayesianInference<T extends BayesianInference<T>>
+    implements BayesianInference<T> {
   protected final BayesianNetwork network;
   protected Map<Node, NodeObservation> observations;
 
-  protected AbstractObservable(BayesianNetwork network) {
+  protected AbstractBayesianInference(BayesianNetwork network) {
     this.network = network;
   }
 
