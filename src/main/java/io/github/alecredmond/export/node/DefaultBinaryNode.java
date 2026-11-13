@@ -53,6 +53,11 @@ public class DefaultBinaryNode extends AbstractBayesNode implements BinaryNode {
   }
 
   @Override
+  public NodeState getStateById(Serializable stateId) {
+    return stateIdMap.get(stateId);
+  }
+
+  @Override
   public NodeState trueState() {
     return trueState;
   }

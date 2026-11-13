@@ -12,7 +12,7 @@ import io.github.alecredmond.internal.method.cliquegraph.InferenceGraph;
 import io.github.alecredmond.internal.method.cliquegraph.externalwriters.InferenceExternalWriter;
 import io.github.alecredmond.internal.method.cliquegraph.factory.InferenceGraphFactory;
 import io.github.alecredmond.internal.method.cliquegraph.implementation.InferenceGraphImpl;
-import io.github.alecredmond.internal.method.inference.ObservableUtils;
+import io.github.alecredmond.internal.method.inference.NodeObservationFactory;
 import io.github.alecredmond.internal.method.probabilitytables.tablefactory.ObservedTableFactory;
 import java.util.Map;
 
@@ -56,7 +56,7 @@ public abstract class AbstractInferenceGraphFactory
     }
     cliqueGraphData.setObservedTables(observedTables);
     Map<Node, NodeObservation> defaultObservations =
-        ObservableUtils.buildUnobservedNetwork(network);
+        new NodeObservationFactory().initializeFromNetwork(network);
     cliqueGraphData.setObservedEvidence(defaultObservations);
     cliqueGraphData.setUnobservedBackup(defaultObservations);
   }

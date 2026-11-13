@@ -24,4 +24,9 @@ public class DefaultNode extends AbstractBayesNode {
     setParents(parents);
     setStates(NodeState.createStates(this, stateNames));
   }
+
+  @Override
+  public NodeState getStateById(Serializable stateId) {
+    return stateIdMap.get(stateId);
+  }
 }

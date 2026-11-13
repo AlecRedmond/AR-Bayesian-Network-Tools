@@ -11,8 +11,9 @@ import io.github.alecredmond.export.network.BayesianNetwork;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
 import io.github.alecredmond.export.probabilitytables.ObservedTable;
-import io.github.alecredmond.internal.method.inference.ObservableUtils;
+import io.github.alecredmond.internal.method.inference.NodeObservationFactory;
 import io.github.alecredmond.internal.method.node.NodeUtils;
+import io.github.alecredmond.internal.method.utils.CollectionToString;
 import io.github.alecredmond.networkscenario.NetworkScenario;
 import io.github.alecredmond.networkscenario.NetworkScenarioType;
 import java.util.*;
@@ -28,6 +29,22 @@ class BayesianInferenceFunctionsTest {
   private static final int LONG_TEST_LOG2_WIDTH = 8;
   private static final int SHORT_TEST_LOG2_WIDTH = 6;
   private static final double MAX_LOG_WIDTH = getMaxLogWidth();
+  private static final NodeObservationFactory OBSERVATION_FACTORY = new NodeObservationFactory();
+
+  private static Map<Node, NodeObservation> buildFromEliminatedStates(
+      Map<Node, NodeObservation> existingObservations,
+      Map<Node, Set<NodeState>> eliminatedStateMap) {
+    if (eliminatedStateMap.isEmpty()) return existingObservations;
+    Map<Node, NodeObservation> newObservations = new LinkedHashMap<>(existingObservations);
+    for (Map.Entry<Node, NodeObservation> entry : newObservations.entrySet()) {
+      Node node = entry.getKey();
+      if (!eliminatedStateMap.containsKey(node)) continue;
+      Set<NodeState> toEliminate = eliminatedStateMap.get(node);
+      NodeObservation oldObs = entry.getValue();
+      entry.setValue(OBSERVATION_FACTORY.eliminateStates(oldObs, toEliminate));
+    }
+    return Collections.unmodifiableMap(newObservations);
+  }
 
   private static double getMaxLogWidth() {
     return Math.log(2) * (SOLVE_LONG_TESTS ? LONG_TEST_LOG2_WIDTH : SHORT_TEST_LOG2_WIDTH);
@@ -53,13 +70,20 @@ class BayesianInferenceFunctionsTest {
     return logWidth <= MAX_LOG_WIDTH;
   }
 
-  private void negatedObservationsHaveProbabilityZero(InferenceEngine engine) {
+  private void negatedObservationsHaveProbabilityZero(
+      InferenceEngine engine, Map<Node, NodeObservation> obsMap) {
     double totalProb =
         Arrays.stream(engine.getObservedTables())
             .map(ObservedTable::getProbabilities)
             .flatMapToDouble(Arrays::stream)
             .sum();
-    assertEquals(0.0, totalProb, DOUBLE_EQUALITY);
+    assertEquals(
+        0.0,
+        totalProb,
+        DOUBLE_EQUALITY,
+        CollectionToString.apply(engine.getCurrentObservations().values())
+            + "\n"
+            + CollectionToString.apply(obsMap.values()));
     engine.resetObservations();
   }
 
@@ -115,7 +139,7 @@ class BayesianInferenceFunctionsTest {
       BiConsumer<InferenceEngine, Map<Node, NodeObservation>> applyObservations) {
     InferenceEngine observedEngine = network.buildInferenceEngine();
     InferenceEngine unobservedEngine = network.buildInferenceEngine();
-    Map<Node, NodeObservation> defaultObsMap = ObservableUtils.buildUnobservedNetwork(network);
+    Map<Node, NodeObservation> defaultObsMap = OBSERVATION_FACTORY.initializeFromNetwork(network);
     List<Node> nodes = network.getNodes(ArrayList::new);
     Map<Node, List<ObservationRecord>> recordMap = new LinkedHashMap<>();
     nodes.forEach(node -> recordMap.put(node, recursiveObservationFinder(node)));
@@ -153,8 +177,7 @@ class BayesianInferenceFunctionsTest {
           nodes,
           unobservedEngine,
           observedEngine,
-          ObservableUtils.buildFromEliminatedStates(
-              obsMap, NodeUtils.generateMultiRequest(r.eliminated)),
+          buildFromEliminatedStates(obsMap, NodeUtils.generateMultiRequest(r.eliminated)),
           depth + 1,
           nodeSize,
           recordMap,
@@ -170,7 +193,7 @@ class BayesianInferenceFunctionsTest {
       BiConsumer<InferenceEngine, Map<Node, NodeObservation>> applyObservations) {
     applyObservations.accept(engine, obsMap);
     if (observationsNegated(obsMap)) {
-      negatedObservationsHaveProbabilityZero(engine);
+      negatedObservationsHaveProbabilityZero(engine, obsMap);
       return;
     }
     eliminatedStatesHaveProbabilityZero(engine, obsMap);

@@ -14,10 +14,11 @@ import io.github.alecredmond.export.probabilitytables.ObservedTable;
 import io.github.alecredmond.internal.application.cliquegraph.GraphDataInference;
 import io.github.alecredmond.internal.method.cliquegraph.InferenceGraph;
 import io.github.alecredmond.internal.method.cliquegraph.externalwriters.InferenceExternalWriter;
-import io.github.alecredmond.internal.method.inference.ObservableUtils;
+import io.github.alecredmond.internal.method.inference.NodeObservationFactory;
 import java.util.*;
 
 public class InferenceGraphImpl extends CliqueGraph<GraphDataInference> implements InferenceGraph {
+  private final NodeObservationFactory observationFactory = new NodeObservationFactory();
 
   public InferenceGraphImpl(GraphDataInference data, InferenceExternalWriter externalWriter) {
     super(data, externalWriter);
@@ -46,7 +47,7 @@ public class InferenceGraphImpl extends CliqueGraph<GraphDataInference> implemen
     Arrays.stream(data.getCliques()).forEach(Clique::resetPotentials);
     Arrays.stream(data.getSeparators()).forEach(Separator::resetPotentials);
     passMessages();
-    data.setObservedEvidence(data.getUnobservedBackup());
+    data.setObservedEvidence(observationFactory.initializeFromNetwork(data.getNetwork()));
     data.setJointProbability(calculateJointProbability());
     externalWriter.writeToExternal();
   }
@@ -57,8 +58,7 @@ public class InferenceGraphImpl extends CliqueGraph<GraphDataInference> implemen
     if (prior == 0.0) return prior;
     Map<Node, NodeObservation> priorEvidence = data.getObservedEvidence();
     if (negatesPriorEvidence(priorEvidence, measureRequest)) return 0.0;
-    double joint =
-        modifyGraphState(ObservableUtils.buildFromObservedStates(priorEvidence, measureRequest));
+    double joint = modifyGraphState(appendObservations(priorEvidence, measureRequest));
     modifyGraphState(priorEvidence);
     return joint / prior;
   }
@@ -91,6 +91,17 @@ public class InferenceGraphImpl extends CliqueGraph<GraphDataInference> implemen
       }
     }
     return false;
+  }
+
+  private Map<Node, NodeObservation> appendObservations(
+      Map<Node, NodeObservation> priorEvidence, Map<Node, Set<NodeState>> request) {
+    Map<Node, NodeObservation> evidence = new LinkedHashMap<>(priorEvidence);
+    request.forEach(
+        ((node, toObserve) -> {
+          if (!evidence.containsKey(node)) return;
+          evidence.put(node, observationFactory.observeStates(node, toObserve));
+        }));
+    return evidence;
   }
 
   private double modifyGraphState(Map<Node, NodeObservation> finalInferenceState) {
