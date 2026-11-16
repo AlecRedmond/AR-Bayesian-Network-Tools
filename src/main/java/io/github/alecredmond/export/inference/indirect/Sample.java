@@ -3,6 +3,7 @@ package io.github.alecredmond.export.inference.indirect;
 import io.github.alecredmond.export.network.BayesianNetwork;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.function.Supplier;
 
@@ -89,14 +90,20 @@ public interface Sample {
    *     Sample}.
    * @see #displayAllNodes()
    */
-  void setDisplayedNodes(Collection<Node> nodes);
+  @SuppressWarnings("unused")
+  default void setDisplayedNodes(Node... nodes) {
+    setDisplayedNodes(Arrays.asList(nodes));
+  }
 
   /**
-   * Returns {@code true} if this {@code Sample} contains all provided {@link NodeState}s, or {@code
-   * false} otherwise.
+   * Restricts the displayed {@link Node}s in this {@code Sample} to the given collection.
+   * Subsequent calls to {@link #getDisplayedStates(Supplier)} and {@link #getDisplayedStates()}
+   * will only return the {@link NodeState} values associated with the specified {@link Node}s. This
+   * restriction can be reset by calling {@link #displayAllNodes()}.
    *
-   * @param states a collection of {@link NodeState} objects to query.
-   * @return {@code true} if this {@code Sample} contains all in {@code states}.
+   * @param nodes the {@link Node}s in the {@link BayesianNetwork} to be displayed in this {@code
+   *     Sample}.
+   * @see #displayAllNodes()
    */
-  boolean containsAll(Collection<NodeState> states);
+  void setDisplayedNodes(Collection<Node> nodes);
 }

@@ -2,7 +2,7 @@ package io.github.alecredmond;
 
 public class TestConfigs {
   public static final boolean SOLVE_LONG_TESTS = false;
-  public static final boolean PRINT_TABLES = true;
+  public static final boolean PRINT_TABLES = false;
   public static final boolean SAVE_BINARIES = true;
   public static final int STANDARD_DEVIATIONS = 3;
   public static final int NUMBER_OF_SAMPLES = 1_000_000;

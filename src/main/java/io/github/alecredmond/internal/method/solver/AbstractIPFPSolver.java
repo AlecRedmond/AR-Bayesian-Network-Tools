@@ -1,7 +1,7 @@
 package io.github.alecredmond.internal.method.solver;
 
-import io.github.alecredmond.export.inference.direct.Clique;
 import io.github.alecredmond.export.network.BayesianNetwork;
+import io.github.alecredmond.export.probabilitytables.Clique;
 import io.github.alecredmond.export.probabilitytables.NetworkTable;
 import io.github.alecredmond.export.solver.constraint.ProbabilityConstraint;
 import io.github.alecredmond.export.solver.ipfp.IPFPResults;

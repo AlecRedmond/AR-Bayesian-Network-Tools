@@ -26,5 +26,4 @@ public class ConditionalConstraintStrategy implements ConstraintStrategy<Conditi
   public boolean serializedIsInstance(SerializedProbabilityConstraint serialized) {
     return serialized instanceof SerializedConditionalConstraint;
   }
-
 }

@@ -5,12 +5,13 @@ import io.github.alecredmond.export.network.BayesianNetwork;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
 /**
- * A container for the {@link Sample} objects generated during a Monte Carlo {@link
+ * An {@link Iterable} container for {@link Sample} objects generated during a {@link
  * MonteCarloSampler} run. A {@code SampleCollection} holds the complete set of distinct samples
  * produced by the run, along with the observations that were applied, and provides methods for
  * querying sample frequencies and filtering results by {@link NodeState}.
@@ -22,7 +23,7 @@ import java.util.Map;
  * @see Sample
  * @author Alec Redmond
  */
-public interface SampleCollection {
+public interface SampleCollection extends Iterable<Sample> {
   /**
    * Returns a map of each {@link Node} to its {@link NodeObservation} record.
    *
@@ -58,6 +59,19 @@ public interface SampleCollection {
 
   /**
    * Returns the combined frequency of all {@link Sample}s in this {@code SampleCollection} that
+   * contain the given {@link NodeState}s. This is equivalent to {@code P(x|obs) * n}, where {@code
+   * x} is the queried {@link NodeState}, {@code obs} is the set of observations used during the
+   * {@link MonteCarloSampler} run, and {@code n} is the total number of samples generated.
+   *
+   * @param states the {@link NodeState} values to query.
+   * @return the combined frequency of all {@link Sample}s containing the specified states.
+   */
+  default int countSamplesIncludingStates(NodeState... states) {
+    return countSamplesIncludingStates(Arrays.asList(states));
+  }
+
+  /**
+   * Returns the combined frequency of all {@link Sample}s in this {@code SampleCollection} that
    * contain every {@link NodeState} in the given collection. This is equivalent to {@code P(X|obs)
    * * n}, where {@code X} is the set of queried {@link NodeState} values, {@code obs} is the set of
    * observations used during the {@link MonteCarloSampler} run, and {@code n} is the total number
@@ -70,14 +84,18 @@ public interface SampleCollection {
 
   /**
    * Returns the combined frequency of all {@link Sample}s in this {@code SampleCollection} that
-   * contain the given {@link NodeState}. This is equivalent to {@code P(x|obs) * n}, where {@code
-   * x} is the queried {@link NodeState}, {@code obs} is the set of observations used during the
-   * {@link MonteCarloSampler} run, and {@code n} is the total number of samples generated.
+   * contain every {@link NodeState} identified by the given identifiers. This is equivalent to
+   * {@code P(X|obs) * n}, where {@code X} is the set of queried {@link NodeState} values, {@code
+   * obs} is the set of observations used during the {@link MonteCarloSampler} run, and {@code n} is
+   * the total number of samples generated.
    *
-   * @param state the {@link NodeState} value to query.
+   * @param stateIds the identifier of the {@link NodeState} value to query.
    * @return the combined frequency of all {@link Sample}s containing the specified state.
+   * @throws NullPointerException if {@code stateId} is not mapped to any valid {@link NodeState}.
    */
-  int countSamplesIncludingStates(NodeState state);
+  default int countSamplesIncludingStateIds(Serializable... stateIds) {
+    return countSamplesIncludingStateIds(Arrays.asList(stateIds));
+  }
 
   /**
    * Returns the combined frequency of all {@link Sample}s in this {@code SampleCollection} that
@@ -91,20 +109,6 @@ public interface SampleCollection {
    * @return the combined frequency of all {@link Sample}s containing every specified state.
    */
   <T extends Serializable> int countSamplesIncludingStateIds(Collection<T> stateIds);
-
-  /**
-   * Returns the combined frequency of all {@link Sample}s in this {@code SampleCollection} that
-   * contain the {@link NodeState} identified by the given identifier. This is equivalent to {@code
-   * P(x|obs) * n}, where {@code x} is the queried {@link NodeState}, {@code obs} is the set of
-   * observations used during the {@link MonteCarloSampler} run, and {@code n} is the total number
-   * of samples generated.
-   *
-   * @param stateId the identifier of the {@link NodeState} value to query.
-   * @param <T> the type of the {@link NodeState} identifier.
-   * @return the combined frequency of all {@link Sample}s containing the specified state.
-   * @throws NullPointerException if {@code stateId} is not mapped to any valid {@link NodeState}.
-   */
-  <T extends Serializable> int countSamplesIncludingStateIds(T stateId);
 
   /**
    * Returns a list of all distinct {@link Sample}s in this {@code SampleCollection}. A {@link
@@ -124,17 +128,33 @@ public interface SampleCollection {
    * @param states the {@link NodeState} values to query.
    * @return an unmodifiable {@link List} of the matching {@link Sample} objects.
    */
+  default List<Sample> getSamplesIncludingStates(NodeState... states) {
+    return getSamplesIncludingStates(Arrays.asList(states));
+  }
+
+  /**
+   * Returns a list of all distinct {@link Sample}s in this {@code SampleCollection} that contain
+   * every {@link NodeState} in the given collection. Each {@link Sample} contains a unique
+   * combination of {@link NodeState} values and the frequency of its occurrence in the {@link
+   * MonteCarloSampler} run.
+   *
+   * @param states the {@link NodeState} values to query.
+   * @return an unmodifiable {@link List} of the matching {@link Sample} objects.
+   */
   List<Sample> getSamplesIncludingStates(Collection<NodeState> states);
 
   /**
    * Returns a list of all distinct {@link Sample}s in this {@code SampleCollection} that contain
-   * the given {@link NodeState}. Each {@link Sample} contains a unique combination of {@link
-   * NodeState} values and the frequency of its occurrence in the {@link MonteCarloSampler} run.
+   * every {@link NodeState} identified by the given identifiers. Each {@link Sample} contains a
+   * unique combination of {@link NodeState} values and the frequency of its occurrence in the
+   * {@link MonteCarloSampler} run.
    *
-   * @param state the {@link NodeState} value to query.
+   * @param stateIds the identifiers of the {@link NodeState} values to query.
    * @return an unmodifiable {@link List} of the matching {@link Sample} objects.
    */
-  List<Sample> getSamplesIncludingStates(NodeState state);
+  default List<Sample> getSamplesIncludingStatesById(Serializable... stateIds) {
+    return getSamplesIncludingStatesById(Arrays.asList(stateIds));
+  }
 
   /**
    * Returns a list of all distinct {@link Sample}s in this {@code SampleCollection} that contain
@@ -149,25 +169,27 @@ public interface SampleCollection {
   <T extends Serializable> List<Sample> getSamplesIncludingStatesById(Collection<T> stateIds);
 
   /**
-   * Returns a list of all distinct {@link Sample}s in this {@code SampleCollection} that contain
-   * the {@link NodeState} identified by the given identifier. Each {@link Sample} contains a unique
-   * combination of {@link NodeState} values and the frequency of its occurrence in the {@link
-   * MonteCarloSampler} run.
-   *
-   * @param stateId the identifier of the {@link NodeState} value to query.
-   * @param <T> the type of the {@link NodeState} identifier.
-   * @return an unmodifiable {@link List} of the matching {@link Sample} objects.
-   * @throws NullPointerException if {@code stateId} is not mapped to any valid {@link NodeState}.
-   */
-  <T extends Serializable> List<Sample> getSamplesIncludingStatesById(T stateId);
-
-  /**
    * Sets all {@link Node}s as displayed in each {@link Sample}. This resets any display
-   * restrictions applied via {@link #setDisplayedNodes(Collection)} or {@link
-   * #setDisplayedNodes(Node)}, restoring the default state where every {@link Node} in the sampled
-   * {@link BayesianNetwork} is displayed.
+   * restrictions applied via {@link #setDisplayedNodes(Node...)}, restoring the default state where
+   * every {@link Node} in the sampled {@link BayesianNetwork} is displayed.
    */
   void displayAllNodes();
+
+  /**
+   * Restricts the displayed {@link Node}s in each {@link Sample} to the given collection. After
+   * this call, {@link Sample} methods such as {@link Sample#getDisplayedStates()} will only return
+   * the {@link NodeState}s associated with the specified {@link Node}s. This restriction can be
+   * reset by calling {@link #displayAllNodes()} on this {@code SampleCollection}, or on a
+   * per-sample basis by calling {@link Sample#displayAllNodes()}. This only affects the states
+   * exported on a per-sample basis and does not affect count methods such as {@link
+   * #countSamplesIncludingStates(Collection)}.
+   *
+   * @param nodes the {@link Node} objects each {@link Sample} will be restricted to.
+   * @see #displayAllNodes()
+   */
+  default void setDisplayedNodes(Node... nodes) {
+    setDisplayedNodes(Arrays.asList(nodes));
+  }
 
   /**
    * Restricts the displayed {@link Node}s in each {@link Sample} to the given collection. After
@@ -184,18 +206,21 @@ public interface SampleCollection {
   void setDisplayedNodes(Collection<Node> nodes);
 
   /**
-   * Restricts the displayed {@link Node} in each {@link Sample} to a single given instance. After
-   * this call, {@link Sample} methods such as {@link Sample#getDisplayedStates()} will only return
-   * the {@link NodeState} associated with the specified {@link Node}. This restriction can be reset
-   * by calling {@link #displayAllNodes()} on this {@code SampleCollection}, or on a per-sample
-   * basis by calling {@link Sample#displayAllNodes()}. This only affects the states exported on a
-   * per-sample basis and does not affect count methods such as {@link
-   * #countSamplesIncludingStates(Collection)}.
+   * Restricts the displayed {@link Node}s in each {@link Sample} to those identified by the given
+   * identifiers. After this call, {@link Sample} methods such as {@link
+   * Sample#getDisplayedStates()} will only return the {@link NodeState}s associated with the
+   * specified {@link Node}s. This restriction can be reset by calling {@link #displayAllNodes()} on
+   * this {@code SampleCollection}, or on a per-sample basis by calling {@link
+   * Sample#displayAllNodes()}. This only affects the states exported on a per-sample basis and does
+   * not affect count methods such as {@link #countSamplesIncludingStates(Collection)}.
    *
-   * @param node the {@link Node} each {@link Sample} will be restricted to.
+   * @param nodeIds the identifiers of the {@link Node} objects each {@link Sample} will be
+   *     restricted to.
    * @see #displayAllNodes()
    */
-  void setDisplayedNodes(Node node);
+  default void setDisplayedNodesById(Serializable... nodeIds) {
+    setDisplayedNodesById(Arrays.asList(nodeIds));
+  }
 
   /**
    * Restricts the displayed {@link Node}s in each {@link Sample} to those identified by the given
@@ -212,20 +237,4 @@ public interface SampleCollection {
    * @see #displayAllNodes()
    */
   <T extends Serializable> void setDisplayedNodesById(Collection<T> nodeIds);
-
-  /**
-   * Restricts the displayed {@link Node} in each {@link Sample} to the single instance identified
-   * by the given identifier. After this call, {@link Sample} methods such as {@link
-   * Sample#getDisplayedStates()} will only return the {@link NodeState} associated with the
-   * specified {@link Node}. This restriction can be reset by calling {@link #displayAllNodes()} on
-   * this {@code SampleCollection}, or on a per-sample basis by calling {@link
-   * Sample#displayAllNodes()}. This only affects the states exported on a per-sample basis and does
-   * not affect count methods such as {@link #countSamplesIncludingStates(Collection)}.
-   *
-   * @param nodeId the identifier of the {@link Node} each {@link Sample} will be restricted to.
-   * @param <T> the type of the {@link Node} identifier.
-   * @throws NullPointerException if {@code nodeId} is not mapped to any valid {@link Node}.
-   * @see #displayAllNodes()
-   */
-  <T extends Serializable> void setDisplayedNodesById(T nodeId);
 }

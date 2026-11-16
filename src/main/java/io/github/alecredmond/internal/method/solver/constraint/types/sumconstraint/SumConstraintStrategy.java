@@ -26,5 +26,4 @@ public class SumConstraintStrategy implements ConstraintStrategy<SumProbabilityC
   public boolean serializedIsInstance(SerializedProbabilityConstraint serialized) {
     return serialized instanceof SerializedSumConstraint;
   }
-
 }

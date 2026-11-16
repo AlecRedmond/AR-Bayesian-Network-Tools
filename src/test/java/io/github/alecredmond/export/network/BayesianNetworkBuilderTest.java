@@ -277,7 +277,7 @@ class BayesianNetworkBuilderTest {
     }
 
     @Test
-    void addconstraint_sneakyUsingGetter_shouldThrowException() {
+    void addConstraint_sneakyUsingGetter_shouldThrowException() {
       List<ProbabilityConstraint> constraints = buildTestConstraints();
       builder.getConstraints().addAll(constraints);
       assertThrows(ConstraintValidationException.class, () -> builder.build(solver));

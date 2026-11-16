@@ -4,13 +4,13 @@ import static io.github.alecredmond.export.inference.ObservationStatus.*;
 
 import io.github.alecredmond.export.inference.NodeObservation;
 import io.github.alecredmond.export.inference.ObservationStatus;
-import io.github.alecredmond.export.inference.direct.Clique;
-import io.github.alecredmond.export.inference.direct.InferenceTable;
-import io.github.alecredmond.export.inference.direct.Separator;
 import io.github.alecredmond.export.network.BayesianNetwork;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
+import io.github.alecredmond.export.probabilitytables.Clique;
+import io.github.alecredmond.export.probabilitytables.InferenceTable;
 import io.github.alecredmond.export.probabilitytables.ObservedTable;
+import io.github.alecredmond.export.probabilitytables.Separator;
 import io.github.alecredmond.internal.application.cliquegraph.GraphDataInference;
 import io.github.alecredmond.internal.method.cliquegraph.InferenceGraph;
 import io.github.alecredmond.internal.method.cliquegraph.externalwriters.InferenceExternalWriter;

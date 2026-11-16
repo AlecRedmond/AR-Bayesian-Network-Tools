@@ -3,11 +3,11 @@ package io.github.alecredmond.internal.method.cliquegraph.implementation;
 import static io.github.alecredmond.export.inference.ObservationStatus.UNOBSERVED;
 
 import io.github.alecredmond.export.inference.NodeObservation;
-import io.github.alecredmond.export.inference.direct.Clique;
-import io.github.alecredmond.export.inference.direct.Separator;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
+import io.github.alecredmond.export.probabilitytables.Clique;
 import io.github.alecredmond.export.probabilitytables.ProbabilityVector;
+import io.github.alecredmond.export.probabilitytables.Separator;
 import io.github.alecredmond.internal.application.cliquegraph.CliqueData;
 import io.github.alecredmond.internal.method.probabilitytables.tabletransfer.TableTransfer;
 import java.util.*;
@@ -38,29 +38,8 @@ public class CliqueImpl implements Clique {
   }
 
   @Override
-  public void resetPotentials() {
-    data.getTable().resetObservations();
-  }
-
-  @Override
-  public ProbabilityVector getVector() {
-    return data.getTable().getVector();
-  }
-
-  @Override
   public double sumPotentials(Collection<NodeState> states) {
     return data.getTable().sumProbabilities(states);
-  }
-
-  @Override
-  public NodeState[] getStatesFromIndex(int index) {
-    return data.getTable().getStatesFromIndex(index);
-  }
-
-  @Override
-  public <T extends Collection<NodeState>, U extends T> T getStatesFromIndex(
-      int index, Supplier<U> collectionSupplier) {
-    return data.getTable().getStatesFromIndex(index, collectionSupplier);
   }
 
   @Override
@@ -95,6 +74,42 @@ public class CliqueImpl implements Clique {
   @Override
   public int getCliqueIndex() {
     return data.getCliqueIndex();
+  }
+
+  @Override
+  public String getTableName() {
+    return data.getTableName();
+  }
+
+  @Override
+  public Double getProbability(Collection<NodeState> states) {
+    return data.getTable().getProbability(states);
+  }
+
+  @Override
+  public void setSafeMode(boolean safeMode) {
+    data.getTable().setSafeMode(safeMode);
+  }
+
+  @Override
+  public void resetPotentials() {
+    data.getTable().resetObservations();
+  }
+
+  @Override
+  public ProbabilityVector getVector() {
+    return data.getTable().getVector();
+  }
+
+  @Override
+  public NodeState[] getStatesFromIndex(int index) {
+    return data.getTable().getStatesFromIndex(index);
+  }
+
+  @Override
+  public <T extends Collection<NodeState>, U extends T> T getStatesFromIndex(
+      int index, Supplier<U> collectionSupplier) {
+    return data.getTable().getStatesFromIndex(index, collectionSupplier);
   }
 
   @Override

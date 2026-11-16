@@ -26,5 +26,4 @@ public class MarginalConstraintStrategy implements ConstraintStrategy<MarginalCo
   public boolean serializedIsInstance(SerializedProbabilityConstraint serialized) {
     return serialized instanceof SerializedMarginalConstraint;
   }
-
 }

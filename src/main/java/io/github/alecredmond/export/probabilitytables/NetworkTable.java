@@ -29,7 +29,7 @@ import java.util.function.Consumer;
  * @author Alec Redmond
  * @see ProbabilityTable
  */
-public interface NetworkTable extends ProbabilityTable {
+public interface NetworkTable extends CloneableTable<NetworkTable> {
 
   /**
    * Returns the {@link Node} within the {@link BayesianNetwork} that this CPT measures. This

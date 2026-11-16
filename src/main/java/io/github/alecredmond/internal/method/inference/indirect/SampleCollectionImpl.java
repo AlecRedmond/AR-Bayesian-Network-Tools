@@ -1,5 +1,7 @@
 package io.github.alecredmond.internal.method.inference.indirect;
 
+import com.carrotsearch.hppc.IntObjectMap;
+import com.carrotsearch.hppc.cursors.IntObjectCursor;
 import io.github.alecredmond.export.inference.NodeObservation;
 import io.github.alecredmond.export.inference.indirect.Sample;
 import io.github.alecredmond.export.inference.indirect.SampleCollection;
@@ -7,11 +9,9 @@ import io.github.alecredmond.export.network.BayesianNetwork;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
 import io.github.alecredmond.internal.application.inference.indirect.SampleCollectionData;
+import io.github.alecredmond.internal.method.node.NodeUtils;
 import java.io.Serializable;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 
@@ -50,8 +50,9 @@ public class SampleCollectionImpl implements SampleCollection {
     return collectionData.getSamples();
   }
 
-  Map<Node, Integer> getIndexMap() {
-    return collectionData.getNodeIndexMap();
+  @Override
+  public Iterator<Sample> iterator() {
+    return collectionData.getSamples().iterator();
   }
 
   public <T extends Serializable> void setDisplayedNodesById(Collection<T> nodeIds) {
@@ -59,56 +60,50 @@ public class SampleCollectionImpl implements SampleCollection {
     setDisplayedNodes(nodes);
   }
 
-  public <T extends Serializable> void setDisplayedNodesById(T nodeId) {
-    setDisplayedNodesById(List.of(nodeId));
-  }
-
   public void setDisplayedNodes(Collection<Node> nodes) {
-    SampleUtils.applyToSamples(this, s -> s.setDisplayedNodes(nodes));
-  }
-
-  public void setDisplayedNodes(Node node) {
-    setDisplayedNodes(List.of(node));
+    for (Sample sample : this) {
+      sample.setDisplayedNodes(nodes);
+    }
   }
 
   public void displayAllNodes() {
-    SampleUtils.applyToSamples(this, Sample::displayAllNodes);
+    for (Sample sample : this) {
+      sample.displayAllNodes();
+    }
   }
 
   public <T extends Serializable> int countSamplesIncludingStateIds(Collection<T> stateIds) {
     return countSamplesIncludingStates(network.getNodeStatesById(stateIds));
   }
 
-  public <T extends Serializable> int countSamplesIncludingStateIds(T stateId) {
-    return countSamplesIncludingStateIds(List.of(stateId));
-  }
-
   public int countSamplesIncludingStates(Collection<NodeState> states) {
     if (states.isEmpty()) {
       return countSamples();
     }
-    return SampleUtils.countSamplesIncludingStates(this, states);
+    return getSamplesIncludingStates(states).stream().mapToInt(Sample::count).sum();
   }
 
-  public int countSamplesIncludingStates(NodeState state) {
-    return countSamplesIncludingStates(List.of(state));
+  private static boolean checkContains(Sample sample, IntObjectMap<Set<NodeState>> setsPerIndex) {
+    NodeState[] states = sample.getAllStates();
+    for (IntObjectCursor<Set<NodeState>> entry : setsPerIndex) {
+      if (!entry.value.contains(states[entry.key])) return false;
+    }
+    return true;
   }
 
   public <T extends Serializable> List<Sample> getSamplesIncludingStatesById(
       Collection<T> includedStateIds) {
-    return SampleUtils.listSamplesIncludingStates(
-        this, network.getNodeStatesById(includedStateIds));
-  }
-
-  public <T extends Serializable> List<Sample> getSamplesIncludingStatesById(T stateId) {
-    return getSamplesIncludingStatesById(List.of(stateId));
+    return getSamplesIncludingStates(network.getNodeStatesById(includedStateIds));
   }
 
   public List<Sample> getSamplesIncludingStates(Collection<NodeState> includedStates) {
-    return SampleUtils.listSamplesIncludingStates(this, includedStates);
-  }
-
-  public List<Sample> getSamplesIncludingStates(NodeState state) {
-    return getSamplesIncludingStates(List.of(state));
+    if (includedStates.isEmpty()) return new ArrayList<>(collectionData.getSamples());
+    List<Sample> samples = new ArrayList<>();
+    IntObjectMap<Set<NodeState>> idxRequest =
+        NodeUtils.generateIndexMap(includedStates, collectionData.getNodeIndexMap());
+    for (Sample sample : this) {
+      if (checkContains(sample, idxRequest)) samples.add(sample);
+    }
+    return samples;
   }
 }

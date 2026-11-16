@@ -1,10 +1,11 @@
 package io.github.alecredmond.internal.application.cliquegraph;
 
-import io.github.alecredmond.export.inference.direct.Clique;
-import io.github.alecredmond.export.inference.direct.Separator;
 import io.github.alecredmond.export.node.Node;
+import io.github.alecredmond.export.probabilitytables.Clique;
+import io.github.alecredmond.export.probabilitytables.Separator;
 import io.github.alecredmond.internal.method.probabilitytables.JunctionTreeTable;
 import io.github.alecredmond.internal.method.probabilitytables.tabletransfer.TableTransfer;
+import io.github.alecredmond.internal.method.utils.CollectionToString;
 import java.util.*;
 import lombok.EqualsAndHashCode;
 
@@ -16,6 +17,7 @@ public class CliqueData {
   private final Map<Clique, Separator> separatorMap;
   private final List<TableTransfer> writeFromCPTs;
   private final List<TableTransfer> writeToExternal;
+  private final String tableName;
   private int cliqueIndex;
 
   public CliqueData(JunctionTreeTable table) {
@@ -24,6 +26,11 @@ public class CliqueData {
     this.separatorMap = new HashMap<>();
     this.writeFromCPTs = new ArrayList<>();
     this.writeToExternal = new ArrayList<>();
+    this.tableName = "CLIQUE : [%s]".formatted(CollectionToString.apply(nodes, Node::getName));
+  }
+
+  public String getTableName() {
+    return tableName;
   }
 
   public Set<Node> getNodes() {

@@ -22,7 +22,7 @@ import java.util.Map;
  * @see ProbabilityTable
  * @see InferenceEngine
  */
-public interface ObservedTable extends ProbabilityTable {
+public interface ObservedTable extends CloneableTable<ObservedTable> {
 
   /**
    * Returns the single {@link Node} whose prior or posterior probabilities are measured by this

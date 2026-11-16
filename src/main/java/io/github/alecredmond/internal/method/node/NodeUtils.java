@@ -1,5 +1,7 @@
 package io.github.alecredmond.internal.method.node;
 
+import com.carrotsearch.hppc.IntObjectHashMap;
+import com.carrotsearch.hppc.IntObjectMap;
 import io.github.alecredmond.exceptions.NodeStateConflictException;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
@@ -30,6 +32,17 @@ public class NodeUtils {
   public static Map<Node, Set<NodeState>> generateMultiRequest(Collection<NodeState> states) {
     return states.stream()
         .collect(Collectors.groupingBy(NodeState::getNode, HashMap::new, Collectors.toSet()));
+  }
+
+  public static IntObjectMap<Set<NodeState>> generateIndexMap(
+      Collection<NodeState> states, Map<Node, Integer> nodeIndexMap) {
+    IntObjectMap<Set<NodeState>> map = new IntObjectHashMap<>();
+    for (NodeState state : states) {
+      int i = nodeIndexMap.get(state.getNode());
+      map.putIfAbsent(i, new HashSet<>());
+      map.get(i).add(state);
+    }
+    return map;
   }
 
   public static Set<NodeState> combineStates(
@@ -96,10 +109,6 @@ public class NodeUtils {
 
   public static List<NodeState> getAllStates(Collection<Node> nodes) {
     return nodes.stream().map(Node::getStates).flatMap(Collection::stream).toList();
-  }
-
-  public static List<Serializable> getNodeStateIds(Collection<NodeState> nodeStates) {
-    return nodeStates.stream().map(NodeState::getId).toList();
   }
 
   public static Set<Node> getOverlap(Set<Node> nodesA, Set<Node> nodesB) {

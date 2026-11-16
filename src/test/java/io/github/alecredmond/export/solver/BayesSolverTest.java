@@ -1,8 +1,11 @@
 package io.github.alecredmond.export.solver;
 
 import static io.github.alecredmond.TestConfigs.DOUBLE_EQUALITY;
+import static io.github.alecredmond.networkscenario.NetworkScenarioType.values;
 import static org.junit.jupiter.api.Assertions.*;
 
+import io.github.alecredmond.export.inference.direct.InferenceEngine;
+import io.github.alecredmond.export.inference.direct.JunctionTreeAlgorithm;
 import io.github.alecredmond.export.network.BayesianNetwork;
 import io.github.alecredmond.export.network.BayesianNetworkBuilder;
 import io.github.alecredmond.export.node.Node;
@@ -12,17 +15,19 @@ import io.github.alecredmond.export.probabilitytables.RootNodeTable;
 import io.github.alecredmond.export.probabilitytables.cptentry.CptEntry;
 import io.github.alecredmond.export.solver.constraint.ProbabilityConstraint;
 import io.github.alecredmond.export.solver.directinput.DirectCptSolver;
-import io.github.alecredmond.export.solver.ipfp.IPFPJunctionTreeSolver;
-import io.github.alecredmond.export.solver.ipfp.IPFPSingleTableSolver;
+import io.github.alecredmond.export.solver.ipfp.*;
 import io.github.alecredmond.internal.method.solver.cptmapper.constraintsorter.ConditionalTableConstraintSorter;
 import io.github.alecredmond.internal.method.solver.cptmapper.constraintsorter.CptConstraintSorter;
 import io.github.alecredmond.internal.method.solver.cptmapper.constraintsorter.RootConstraintSorter;
+import io.github.alecredmond.internal.method.utils.DoublePrecision;
 import io.github.alecredmond.networkscenario.NetworkScenario;
 import io.github.alecredmond.networkscenario.NetworkScenarioType;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -31,115 +36,197 @@ import org.opentest4j.AssertionFailedError;
 @Slf4j
 class BayesSolverTest {
 
-  public static Stream<Arguments> streamScenarios() {
-    return Arrays.stream(NetworkScenarioType.values())
-        .map(NetworkScenarioType::get)
-        .map(Arguments::of);
+  public static Stream<NetworkScenario> streamScenarios() {
+    return Arrays.stream(NetworkScenarioType.values()).map(NetworkScenarioType::get);
   }
 
-  @ParameterizedTest
-  @MethodSource("streamScenarios")
-  void testSolvesTwiceWithSameResult(NetworkScenario scenario) {
-    BayesianNetworkBuilder builder = scenario.getBuilder();
-    List<Node> orderedNodes = Arrays.stream(scenario.getOrderedNodes()).toList();
-    List<TableAnalyser> jtaCptEntries =
-        getTableAnalysers(orderedNodes, builder, new IPFPJunctionTreeSolver());
-    List<TableAnalyser> staCptEntries =
-        getTableAnalysers(orderedNodes, builder, new IPFPSingleTableSolver());
-    if (scenario.getDefaultSolver() instanceof DirectCptSolver directCptSolver) {
-      List<TableAnalyser> directSolveCptEntries =
-          getTableAnalysers(orderedNodes, builder, directCptSolver);
-      assertListsEqual(directSolveCptEntries, jtaCptEntries);
-      assertListsEqual(directSolveCptEntries, staCptEntries);
+  @Nested
+  class SolversProvideSameResult {
+
+    static Stream<Arguments> streamScenariosAsArgs() {
+      return BayesSolverTest.streamScenarios().map(Arguments::of);
     }
-    assertListsEqual(jtaCptEntries, staCptEntries);
-  }
 
-  private static List<TableAnalyser> getTableAnalysers(
-      List<Node> orderedNodes, BayesianNetworkBuilder builder, BayesSolver solver) {
-    BayesianNetwork network = builder.build(solver).orElseThrow();
-    Set<ProbabilityConstraint> constraints = network.getConstraints();
-    return orderedNodes.stream()
-        .map(network::getNetworkTable)
-        .map(table -> buildTableAnalyser(table, constraints))
-        .toList();
-  }
-
-  private void assertListsEqual(List<TableAnalyser> analysers1, List<TableAnalyser> analysers2) {
-    int bound = analysers1.size();
-    for (int i = 0; i < bound; i++) {
-      checkPerTable(analysers1.get(i), analysers2.get(i));
+    @ParameterizedTest
+    @MethodSource("streamScenariosAsArgs")
+    void testSolvesTwiceWithSameResult(NetworkScenario scenario) {
+      BayesianNetworkBuilder builder = scenario.getBuilder();
+      List<Node> orderedNodes = Arrays.stream(scenario.getOrderedNodes()).toList();
+      List<TableAnalyser> jtaCptEntries =
+          getTableAnalysers(orderedNodes, builder, new IPFPJunctionTreeSolver());
+      List<TableAnalyser> staCptEntries =
+          getTableAnalysers(orderedNodes, builder, new IPFPSingleTableSolver());
+      if (scenario.getDefaultSolver() instanceof DirectCptSolver directCptSolver) {
+        List<TableAnalyser> directSolveCptEntries =
+            getTableAnalysers(orderedNodes, builder, directCptSolver);
+        assertListsEqual(directSolveCptEntries, jtaCptEntries);
+        assertListsEqual(directSolveCptEntries, staCptEntries);
+      }
+      assertListsEqual(jtaCptEntries, staCptEntries);
     }
-  }
 
-  private static TableAnalyser buildTableAnalyser(
-      NetworkTable table, Set<ProbabilityConstraint> constraints) {
-    List<CptEntry> cptEntries = table.getCptEntries();
-    List<ProbabilityConstraint> tableConstraints;
-    switch (table) {
-      case ConditionalTable ct ->
-          tableConstraints =
-              getTableConstraints(ct, constraints, ConditionalTableConstraintSorter::new);
-      case RootNodeTable rnt ->
-          tableConstraints = getTableConstraints(rnt, constraints, RootConstraintSorter::new);
-      default -> throw new IllegalStateException("Unexpected value: " + table);
+    private static List<TableAnalyser> getTableAnalysers(
+        List<Node> orderedNodes, BayesianNetworkBuilder builder, BayesSolver solver) {
+      BayesianNetwork network = builder.build(solver).orElseThrow();
+      Set<ProbabilityConstraint> constraints = network.getConstraints();
+      return orderedNodes.stream()
+          .map(network::getNetworkTable)
+          .map(table -> buildTableAnalyser(table, constraints))
+          .toList();
     }
-    return new TableAnalyser(cptEntries, tableConstraints);
-  }
 
-  private static void checkPerTable(TableAnalyser ta1, TableAnalyser ta2) {
-    boolean allcorrect = true;
-    List<CptEntry> entries1 = ta1.cptEntries;
-    List<CptEntry> entries2 = ta2.cptEntries;
-    Queue<ProbabilityConstraint> it = new ArrayDeque<>(ta1.constraints);
-    final int size = entries1.size();
-    for (int i = 0; i < size; i++) {
-      CptEntry e1 = entries1.get(i);
-      CptEntry e2 = entries2.get(i);
-      assertEquals(e1.eventState(), e2.eventState());
-      assertEquals(e1.conditionStates(), e2.conditionStates());
-      allcorrect &= solverMethodsEqual(e1, e2, constraintMatchingEntry(it, e1));
+    private void assertListsEqual(List<TableAnalyser> analysers1, List<TableAnalyser> analysers2) {
+      int bound = analysers1.size();
+      for (int i = 0; i < bound; i++) {
+        checkPerTable(analysers1.get(i), analysers2.get(i));
+      }
     }
-    assertTrue(allcorrect);
+
+    private static TableAnalyser buildTableAnalyser(
+        NetworkTable table, Set<ProbabilityConstraint> constraints) {
+      List<CptEntry> cptEntries = table.getCptEntries();
+      List<ProbabilityConstraint> tableConstraints;
+      switch (table) {
+        case ConditionalTable ct ->
+            tableConstraints =
+                getTableConstraints(ct, constraints, ConditionalTableConstraintSorter::new);
+        case RootNodeTable rnt ->
+            tableConstraints = getTableConstraints(rnt, constraints, RootConstraintSorter::new);
+        default -> throw new IllegalStateException("Unexpected value: " + table);
+      }
+      return new TableAnalyser(cptEntries, tableConstraints);
+    }
+
+    private static void checkPerTable(TableAnalyser ta1, TableAnalyser ta2) {
+      boolean allcorrect = true;
+      List<CptEntry> entries1 = ta1.cptEntries;
+      List<CptEntry> entries2 = ta2.cptEntries;
+      Queue<ProbabilityConstraint> it = new ArrayDeque<>(ta1.constraints);
+      final int size = entries1.size();
+      for (int i = 0; i < size; i++) {
+        CptEntry e1 = entries1.get(i);
+        CptEntry e2 = entries2.get(i);
+        assertEquals(e1.eventState(), e2.eventState());
+        assertEquals(e1.conditionStates(), e2.conditionStates());
+        allcorrect &= solverMethodsEqual(e1, e2, constraintMatchingEntry(it, e1));
+      }
+      assertTrue(allcorrect);
+    }
+
+    private static <T extends NetworkTable> List<ProbabilityConstraint> getTableConstraints(
+        T table,
+        Set<ProbabilityConstraint> allConstraints,
+        Function<T, CptConstraintSorter<? extends ProbabilityConstraint, T>> sorterConstructor) {
+      return sorterConstructor.apply(table).sortConstraints(allConstraints).stream()
+          .map(ProbabilityConstraint.class::cast)
+          .toList();
+    }
+
+    private static boolean solverMethodsEqual(
+        CptEntry e1, CptEntry e2, ProbabilityConstraint constraint) {
+      boolean allcorrect = true;
+      try {
+        Optional.ofNullable(constraint)
+            .ifPresent(
+                c -> {
+                  assertEquals(e1.probability(), c.getProbability(), DOUBLE_EQUALITY);
+                  assertEquals(e2.probability(), c.getProbability(), DOUBLE_EQUALITY);
+                });
+      } catch (AssertionFailedError e) {
+        allcorrect = false;
+        System.out.printf("DIVERGE FROM CONSTRAINT%n%s%n%s%n", e1, e2);
+      }
+      return allcorrect;
+    }
+
+    private static ProbabilityConstraint constraintMatchingEntry(
+        Queue<ProbabilityConstraint> queue, CptEntry e1) {
+      if (queue.isEmpty()) {
+        return null;
+      }
+      return Optional.of(queue.peek())
+          .filter(c -> c.getEventStates().contains(e1.eventState()))
+          .filter(c -> c.getConditionStates().containsAll(e1.conditionStates()))
+          .map(c -> queue.poll())
+          .orElse(null);
+    }
+
+    record TableAnalyser(List<CptEntry> cptEntries, List<ProbabilityConstraint> constraints) {}
   }
 
-  private static <T extends NetworkTable> List<ProbabilityConstraint> getTableConstraints(
-      T table,
-      Set<ProbabilityConstraint> allConstraints,
-      Function<T, CptConstraintSorter<? extends ProbabilityConstraint, T>> sorterConstructor) {
-    return sorterConstructor.apply(table).sortConstraints(allConstraints).stream()
-        .map(ProbabilityConstraint.class::cast)
-        .toList();
-  }
+  @Nested
+  class IPFPResultsTests {
+    static final double IPFP_DELTA = 1e-3;
+    static final boolean DEBUG_LOG_LOSSES = false;
+    static final List<NetworkScenario> scenarioTypes = provideScenarios();
 
-  private static boolean solverMethodsEqual(
-      CptEntry e1, CptEntry e2, ProbabilityConstraint constraint) {
-    boolean allcorrect = true;
-    try {
-      Optional.ofNullable(constraint)
-          .ifPresent(
-              c -> {
-                assertEquals(e1.probability(), c.getProbability(), DOUBLE_EQUALITY);
-                assertEquals(e2.probability(), c.getProbability(), DOUBLE_EQUALITY);
+    public static Stream<Arguments> allObservations() {
+      return scenarioTypes.stream().flatMap(IPFPResultsTests::getDirectCptEntryAndIPFP);
+    }
+
+    private static Stream<Arguments> getDirectCptEntryAndIPFP(NetworkScenario scenario) {
+      BayesianNetworkBuilder builder = scenario.getBuilder();
+      BayesSolver defaultSolver = scenario.getDefaultSolver();
+      if (defaultSolver instanceof DirectCptSolver directCptSolver) {
+        IPFPSolver ipfpSolver = new IPFPJunctionTreeSolver();
+        return Stream.of(Arguments.of(builder, directCptSolver), Arguments.of(builder, ipfpSolver));
+      } else {
+        return Stream.of(Arguments.of(builder, defaultSolver));
+      }
+    }
+
+    private static List<NetworkScenario> provideScenarios() {
+      return Arrays.stream(values()).map(NetworkScenarioType::get).toList();
+    }
+
+    @ParameterizedTest
+    @MethodSource("allObservations")
+    void measureConstraintsAndIPFPResults(
+        BayesianNetworkBuilder networkBuilder, BayesSolver solver) {
+      BayesianNetwork network = networkBuilder.build(solver).orElseThrow();
+      assertNotNull(network);
+      InferenceEngine engine = new JunctionTreeAlgorithm(network);
+
+      double delta;
+      IPFPResults results;
+      switch (solver) {
+        case IPFPSolver ipfpSolver -> {
+          delta = IPFP_DELTA;
+          results = ipfpSolver.getResults();
+        }
+        case null, default -> {
+          delta = DOUBLE_EQUALITY;
+          results = null;
+        }
+      }
+
+      network
+          .getConstraints()
+          .forEach(
+              constraint -> {
+                engine.setObserved(constraint.getConditionStates());
+                double expected = constraint.getProbability();
+                double actual = engine.getPosteriorProbability(constraint.getEventStates());
+                assertEquals(expected, actual, delta);
+
+                if (results == null) return;
+
+                // TEST ERROR DECREASES OVER TIME
+                IPFPConstraintResult result = results.getResult(constraint);
+                double lastError = result.lastError();
+                assertTrue(lastError < delta);
+                Arrays.stream(result.errors())
+                    .mapToObj(
+                        error ->
+                            error >= lastError || DoublePrecision.fuzzyEquals(error, lastError))
+                    .forEach(Assertions::assertTrue);
+
+                // LOG ERROR & LOSS OVER TIME
+                if (!DEBUG_LOG_LOSSES) return;
+                System.out.println(constraint);
+                System.out.println(Arrays.toString(result.errors()));
+                System.out.println(Arrays.toString(result.losses()));
               });
-    } catch (AssertionFailedError e) {
-      allcorrect = false;
-      System.out.printf("DIVERGE FROM CONSTRAINT%n%s%n%s%n", e1, e2);
     }
-    return allcorrect;
   }
-
-  private static ProbabilityConstraint constraintMatchingEntry(
-      Queue<ProbabilityConstraint> queue, CptEntry e1) {
-    if (queue.isEmpty()) {
-      return null;
-    }
-    return Optional.of(queue.peek())
-        .filter(c -> c.getEventStates().contains(e1.eventState()))
-        .filter(c -> c.getConditionStates().containsAll(e1.conditionStates()))
-        .map(c -> queue.poll())
-        .orElse(null);
-  }
-
-  record TableAnalyser(List<CptEntry> cptEntries, List<ProbabilityConstraint> constraints) {}
 }

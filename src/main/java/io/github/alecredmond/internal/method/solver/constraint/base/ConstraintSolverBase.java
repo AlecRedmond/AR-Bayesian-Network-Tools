@@ -2,9 +2,9 @@ package io.github.alecredmond.internal.method.solver.constraint.base;
 
 import static io.github.alecredmond.internal.method.utils.DoublePrecision.*;
 
-import io.github.alecredmond.export.inference.direct.Clique;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
+import io.github.alecredmond.export.probabilitytables.Clique;
 import io.github.alecredmond.export.solver.constraint.ProbabilityConstraint;
 import io.github.alecredmond.internal.method.node.NodeUtils;
 import io.github.alecredmond.internal.method.probabilitytables.JunctionTreeTable;

@@ -1,4 +1,4 @@
-package io.github.alecredmond.export.inference.direct;
+package io.github.alecredmond.export.probabilitytables;
 
 import io.github.alecredmond.export.inference.NodeObservation;
 import io.github.alecredmond.export.node.Node;

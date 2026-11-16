@@ -1,11 +1,9 @@
-package io.github.alecredmond.internal.method.sampler;
+package io.github.alecredmond.export.inference.indirect;
 
 import static io.github.alecredmond.TestConfigs.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import io.github.alecredmond.export.inference.direct.InferenceEngine;
-import io.github.alecredmond.export.inference.indirect.MonteCarloSampler;
-import io.github.alecredmond.export.inference.indirect.SampleCollection;
 import io.github.alecredmond.export.network.BayesianNetwork;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;

@@ -2,13 +2,13 @@ package io.github.alecredmond.internal.method.inference.direct;
 
 import io.github.alecredmond.export.inference.NodeObservation;
 import io.github.alecredmond.export.inference.ObservationStatus;
-import io.github.alecredmond.export.inference.direct.Clique;
 import io.github.alecredmond.export.inference.direct.InferenceEngine;
-import io.github.alecredmond.export.inference.direct.Separator;
 import io.github.alecredmond.export.network.BayesianNetwork;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
+import io.github.alecredmond.export.probabilitytables.Clique;
 import io.github.alecredmond.export.probabilitytables.ObservedTable;
+import io.github.alecredmond.export.probabilitytables.Separator;
 import io.github.alecredmond.internal.method.cliquegraph.InferenceGraph;
 import io.github.alecredmond.internal.method.cliquegraph.factory.InferenceGraphFactory;
 import io.github.alecredmond.internal.method.inference.AbstractBayesianInference;
@@ -129,10 +129,5 @@ public abstract class AbstractInferenceEngine extends AbstractBayesianInference<
         .forEach(table -> toPrint.put(table.getMeasuredNode(), table));
     new NetworkPrinter(this).printTables(toPrint, "OBSERVED");
     return this;
-  }
-
-  @Override
-  public InferenceEngine printObserved(Node node) {
-    return printObserved(List.of(node));
   }
 }

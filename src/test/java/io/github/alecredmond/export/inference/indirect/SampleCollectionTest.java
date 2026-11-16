@@ -1,4 +1,4 @@
-package io.github.alecredmond.export.sampler;
+package io.github.alecredmond.export.inference.indirect;
 
 import static io.github.alecredmond.TestConfigs.*;
 import static io.github.alecredmond.export.node.BinaryNode.StateOrder.TRUE_FIRST;
@@ -9,9 +9,6 @@ import io.github.alecredmond.export.inference.NodeObservation;
 import io.github.alecredmond.export.inference.ObservationStatus;
 import io.github.alecredmond.export.inference.direct.InferenceEngine;
 import io.github.alecredmond.export.inference.direct.JunctionTreeAlgorithm;
-import io.github.alecredmond.export.inference.indirect.MonteCarloSampler;
-import io.github.alecredmond.export.inference.indirect.Sample;
-import io.github.alecredmond.export.inference.indirect.SampleCollection;
 import io.github.alecredmond.export.network.BayesianNetwork;
 import io.github.alecredmond.export.node.BinaryNode;
 import io.github.alecredmond.export.node.DefaultBinaryNode;

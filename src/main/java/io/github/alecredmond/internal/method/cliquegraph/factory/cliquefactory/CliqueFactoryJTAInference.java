@@ -1,8 +1,8 @@
 package io.github.alecredmond.internal.method.cliquegraph.factory.cliquefactory;
 
-import io.github.alecredmond.export.inference.direct.Clique;
 import io.github.alecredmond.export.network.BayesianNetwork;
 import io.github.alecredmond.export.node.Node;
+import io.github.alecredmond.export.probabilitytables.Clique;
 import io.github.alecredmond.internal.application.cliquegraph.CliqueData;
 import io.github.alecredmond.internal.application.cliquegraph.GraphData;
 import io.github.alecredmond.internal.method.cliquegraph.factory.factoryutils.CliqueJoiner;

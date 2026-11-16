@@ -26,5 +26,4 @@ public class JointConstraintStrategy implements ConstraintStrategy<JointProbabil
   public boolean serializedIsInstance(SerializedProbabilityConstraint serialized) {
     return serialized instanceof SerializedJointProbabilityConstraint;
   }
-
 }

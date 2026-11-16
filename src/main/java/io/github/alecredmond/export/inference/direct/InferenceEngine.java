@@ -6,7 +6,9 @@ import io.github.alecredmond.export.inference.indirect.MonteCarloSampler;
 import io.github.alecredmond.export.network.BayesianNetwork;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
+import io.github.alecredmond.export.probabilitytables.Clique;
 import io.github.alecredmond.export.probabilitytables.ObservedTable;
+import io.github.alecredmond.export.probabilitytables.Separator;
 import io.github.alecredmond.export.solver.BayesSolver;
 import java.io.Serializable;
 import java.util.Arrays;
@@ -173,13 +175,14 @@ public interface InferenceEngine extends BayesianInference<InferenceEngine> {
    * printer can be defined within {@code app.properties} under the {@code app.bayes.printer}
    * section.
    *
-   * @param nodes all {@link Node} values where the associated {@link ObservedTable} should be
-   *     printed.
+   * @param node a {@link Node} where the associated {@link ObservedTable} should be printed.
    * @return this instance for chaining.
    * @throws NetworkPrinterException if the printer is unable to successfully complete the
    *     operation.
    */
-  InferenceEngine printObserved(Collection<Node> nodes);
+  default InferenceEngine printObserved(Node... node) {
+    return printObserved(Arrays.asList(node));
+  }
 
   /**
    * Prints the posterior probability values from the {@link ObservedTable} entries associated with
@@ -187,12 +190,13 @@ public interface InferenceEngine extends BayesianInference<InferenceEngine> {
    * printer can be defined within {@code app.properties} under the {@code app.bayes.printer}
    * section.
    *
-   * @param node a {@link Node} where the associated {@link ObservedTable} should be printed.
+   * @param nodes all {@link Node} values where the associated {@link ObservedTable} should be
+   *     printed.
    * @return this instance for chaining.
    * @throws NetworkPrinterException if the printer is unable to successfully complete the
    *     operation.
    */
-  InferenceEngine printObserved(Node node);
+  InferenceEngine printObserved(Collection<Node> nodes);
 
   Clique getRootClique();
 

@@ -27,7 +27,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 class BayesianInferenceCoherenceTest {
   private static final boolean PERFORM_SAMPLE_CHECK = false;
   private static final double SAMPLE_BAYES_RULE_CUTOFF_PROBABILITY = 1e-3;
-  private static final int TABLE_MAX_ENTRIES_FOR_SAMPLING = 10;
+  private static final int TABLE_MAX_ENTRIES_FOR_SAMPLING = 8;
   private static final double SAMPLE_DELTA = 2e-2;
 
   static Stream<Arguments> supplyCoherenceArguments() {

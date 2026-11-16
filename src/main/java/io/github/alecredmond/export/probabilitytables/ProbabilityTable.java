@@ -89,14 +89,6 @@ public interface ProbabilityTable {
    */
   Double getProbability(Collection<NodeState> states);
 
-  /**
-   * Builds a copy of this {@code ProbabilityTable}. This deep-copies everything except the {@link
-   * Node} and {@link NodeState} values, which maintain the original references.
-   *
-   * @return a copy of the current table.
-   */
-  ProbabilityTable copyTable();
-
   NodeState[] getStatesFromIndex(int index);
 
   <T extends Collection<NodeState>, U extends T> T getStatesFromIndex(

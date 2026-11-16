@@ -1,5 +1,6 @@
 package io.github.alecredmond.internal.method.probabilitytables.probabilityvector.vectoriterators;
 
+import static io.github.alecredmond.TestConfigs.DOUBLE_EQUALITY;
 import static io.github.alecredmond.networkscenario.NetworkScenarioType.*;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -46,16 +47,18 @@ class TableNormalizerTest {
 
     int blockSize = node.getStates().size();
     double average = 1.0 / blockSize;
-    Arrays.stream(probs).forEach(p -> assertEquals(average, p, 1e-6));
+    Arrays.stream(probs).forEach(p -> assertEquals(average, p, DOUBLE_EQUALITY));
 
     IntStream.range(0, blockSize).forEach(i -> probs[i] = 1);
     probs[0] = blockSize - 1;
 
     test.normalize();
 
-    assertEquals(1, Arrays.stream(probs, 0, blockSize).sum(), 1e-6);
-    assertEquals(0.5, probs[0], 1e-6);
-    IntStream.range(1, blockSize).forEach(i -> assertEquals(0.5 / (blockSize - 1), probs[i], 1e-6));
-    IntStream.range(blockSize, probs.length).forEach(i -> assertEquals(average, probs[i], 1e-6));
+    assertEquals(1, Arrays.stream(probs, 0, blockSize).sum(), DOUBLE_EQUALITY);
+    assertEquals(0.5, probs[0], DOUBLE_EQUALITY);
+    IntStream.range(1, blockSize)
+        .forEach(i -> assertEquals(0.5 / (blockSize - 1), probs[i], DOUBLE_EQUALITY));
+    IntStream.range(blockSize, probs.length)
+        .forEach(i -> assertEquals(average, probs[i], DOUBLE_EQUALITY));
   }
 }

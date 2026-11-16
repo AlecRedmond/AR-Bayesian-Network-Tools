@@ -1,9 +1,9 @@
 package io.github.alecredmond.internal.method.cliquegraph.factory.abstractfactory;
 
 import io.github.alecredmond.export.inference.NodeObservation;
-import io.github.alecredmond.export.inference.direct.Clique;
 import io.github.alecredmond.export.network.BayesianNetwork;
 import io.github.alecredmond.export.node.Node;
+import io.github.alecredmond.export.probabilitytables.Clique;
 import io.github.alecredmond.export.probabilitytables.ObservedTable;
 import io.github.alecredmond.export.probabilitytables.ProbabilityTable;
 import io.github.alecredmond.internal.application.cliquegraph.CliqueData;
