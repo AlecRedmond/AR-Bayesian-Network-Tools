@@ -15,7 +15,6 @@ import io.github.alecredmond.internal.serialization.BayesianNetworkSerializer;
 import java.io.File;
 import java.io.Serializable;
 import java.util.Collection;
-import java.util.Map;
 import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -54,35 +53,46 @@ public interface BayesianNetwork {
   /**
    * Loads a saved {@code BayesianNetwork} from a {@code .bayes} file on the disk.
    *
+   * <p>If the saved {@code BayesianNetwork} used {@link Node} types declared outwith this library,
+   * ensure that the relevant {@link NodeSerializer}s are registered using {@link
+   * NodeSerializer#register(NodeSerializer[])}.
+   *
    * @param file a {@code .bayes} file.
    * @return a new {@code BayesianNetwork}, loaded from the file.
    */
-  static BayesianNetwork loadNetworkFromFile(File file, NodeSerializer<?>... serializers) {
-    return loadNetwork(new NetworkFileIO().loadNetwork(file), serializers);
+  static BayesianNetwork loadNetworkFromFile(File file) {
+    return loadNetwork(new NetworkFileIO().loadNetwork(file));
   }
 
   /**
    * De-serializes and loads a new {@code BayesianNetwork} from a {@link SerializedBayesianNetwork}.
-   * {@link SerializedBayesianNetwork}s are constructed by calling {@link
-   * #serializeNetwork(NodeSerializer[])} on an active {@link BayesianNetwork}, which provides a
-   * deep-copy of the network in a format suitable for file I/O operations.
+   * {@link SerializedBayesianNetwork}s are constructed by calling {@link #serializeNetwork()} on an
+   * active {@link BayesianNetwork}, which provides a deep-copy of the network in a format suitable
+   * for file I/O operations.
+   *
+   * <p>If the {@link SerializedBayesianNetwork} was created using {@link Node} types declared
+   * outwith this library, ensure that the relevant {@link NodeSerializer}s are registered using
+   * {@link NodeSerializer#register(NodeSerializer[])}.
    *
    * @param serializedNetwork a {@link SerializedBayesianNetwork} instance.
    * @return a new copy of the serialized {@code BayesianNetwork}.
    */
-  static BayesianNetwork loadNetwork(
-      SerializedBayesianNetwork serializedNetwork, NodeSerializer<?>... serializers) {
-    return new BayesianNetworkSerializer(serializers).deSerializeNetwork(serializedNetwork);
+  static BayesianNetwork loadNetwork(SerializedBayesianNetwork serializedNetwork) {
+    return new BayesianNetworkSerializer().deSerializeNetwork(serializedNetwork);
   }
 
   /**
    * Loads a saved {@code BayesianNetwork} from a {@code .bayes} file on the disk.
    *
+   * <p>If the saved {@code BayesianNetwork} used {@link Node} types declared outwith this library,
+   * ensure that the relevant {@link NodeSerializer}s are registered using {@link
+   * NodeSerializer#register(NodeSerializer[])}.
+   *
    * @param filePath the absolute path to a {@code .bayes} file.
    * @return a new {@code BayesianNetwork}, loaded from the file.
    */
-  static BayesianNetwork loadNetworkFromFile(String filePath, NodeSerializer<?>... serializers) {
-    return loadNetwork(new NetworkFileIO().loadNetwork(filePath), serializers);
+  static BayesianNetwork loadNetworkFromFile(String filePath) {
+    return loadNetwork(new NetworkFileIO().loadNetwork(filePath));
   }
 
   // ----------------------------------------------------------------------------------------------
@@ -92,20 +102,28 @@ public interface BayesianNetwork {
   /**
    * Serializes and saves this {@code BayesianNetwork} to the disk.
    *
+   * <p>If this {@code BayesianNetwork} uses {@link Node} types declared outwith this library,
+   * ensure that the relevant {@link NodeSerializer}s are registered using {@link
+   * NodeSerializer#register(NodeSerializer[])}.
+   *
    * @param file the file to write.
    * @return {@code true} if the save operation was successful.
    */
-  boolean saveNetworkToFile(File file, NodeSerializer<?>... additionalSerializers);
+  boolean saveNetworkToFile(File file);
 
   /**
    * Serializes and saves this {@code BayesianNetwork} to the disk.
    *
+   * <p>If this {@code BayesianNetwork} uses {@link Node} types declared outwith this library,
+   * ensure that the relevant {@link NodeSerializer}s are registered using {@link
+   * NodeSerializer#register(NodeSerializer[])}.
+   *
    * @param filePath path to the new file.
    * @return {@code true} if the save operation was successful.
    */
-  boolean saveNetworkToFile(String filePath, NodeSerializer<?>... additionalSerializers);
+  boolean saveNetworkToFile(String filePath);
 
-  SerializedBayesianNetwork serializeNetwork(NodeSerializer<?>... additionalSerializers);
+  SerializedBayesianNetwork serializeNetwork();
 
   // ----------------------------------------------------------------------------------------------
   // ----------------------------------DATA GETTERS -----------------------------------------------
@@ -204,14 +222,6 @@ public interface BayesianNetwork {
 
   <T extends Collection<NetworkTable>, U extends T> T getNetworkTables(
       Supplier<U> collectionSupplier);
-
-  /**
-   * Returns a new map connecting each {@link Node} in this {@code BayesianNetwork} to its
-   * associated Conditional Probability Table (CPT).
-   *
-   * @return a new map containing each {@link Node} and its associated {@link NetworkTable} CPT.
-   */
-  Map<Node, NetworkTable> getNetworkTablesMap();
 
   /**
    * Builds a new {@link InferenceEngine} from the current {@code BayesianNetwork}. An {@link

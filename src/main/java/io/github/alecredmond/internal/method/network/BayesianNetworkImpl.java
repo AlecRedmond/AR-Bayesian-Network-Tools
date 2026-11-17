@@ -8,7 +8,6 @@ import io.github.alecredmond.export.network.BayesianNetwork;
 import io.github.alecredmond.export.network.serialized.SerializedBayesianNetwork;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
-import io.github.alecredmond.export.node.serialization.NodeSerializer;
 import io.github.alecredmond.export.probabilitytables.NetworkTable;
 import io.github.alecredmond.export.solver.constraint.ProbabilityConstraint;
 import io.github.alecredmond.internal.application.network.BayesianNetworkData;
@@ -46,18 +45,18 @@ public class BayesianNetworkImpl implements BayesianNetwork {
   // ----------------------------------------------------------------------------------------------
 
   @Override
-  public boolean saveNetworkToFile(File file, NodeSerializer<?>... additionalSerializers) {
-    return new NetworkFileIO().saveNetwork(serializeNetwork(additionalSerializers), file);
+  public boolean saveNetworkToFile(File file) {
+    return new NetworkFileIO().saveNetwork(serializeNetwork(), file);
   }
 
   @Override
-  public boolean saveNetworkToFile(String filePath, NodeSerializer<?>... additionalSerializers) {
-    return new NetworkFileIO().saveNetwork(serializeNetwork(additionalSerializers), filePath);
+  public boolean saveNetworkToFile(String filePath) {
+    return new NetworkFileIO().saveNetwork(serializeNetwork(), filePath);
   }
 
   @Override
-  public SerializedBayesianNetwork serializeNetwork(NodeSerializer<?>... additionalSerializers) {
-    return new BayesianNetworkSerializer(additionalSerializers).serializeNetwork(this);
+  public SerializedBayesianNetwork serializeNetwork() {
+    return new BayesianNetworkSerializer().serializeNetwork(this);
   }
 
   // ----------------------------------------------------------------------------------------------
@@ -174,14 +173,6 @@ public class BayesianNetworkImpl implements BayesianNetwork {
       Supplier<U> collectionSupplier) {
     return Arrays.stream(networkData.getNetworkTables())
         .collect(Collectors.toCollection(collectionSupplier));
-  }
-
-  public Map<Node, NetworkTable> getNetworkTablesMap() {
-    return Arrays.stream(networkData.getNetworkTables())
-        .map(table -> Map.entry(table.getNetworkNode(), table))
-        .collect(
-            Collectors.toMap(
-                Map.Entry::getKey, Map.Entry::getValue, (x, y) -> y, LinkedHashMap::new));
   }
 
   public InferenceEngine buildInferenceEngine() {

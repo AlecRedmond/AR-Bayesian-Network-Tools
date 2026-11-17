@@ -15,6 +15,7 @@ import io.github.alecredmond.internal.method.solver.constraint.types.marginalcon
 import io.github.alecredmond.internal.method.solver.cptmapper.iterator.ConditionalCPTMapperIterator;
 import io.github.alecredmond.internal.method.solver.cptmapper.iterator.CptMapperIterator;
 import io.github.alecredmond.internal.method.solver.cptmapper.iterator.RootCPTMapperIterator;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -71,7 +72,8 @@ public class DirectCptSolver implements BayesSolver {
   }
 
   private List<CptMappingReport> performDirectImpute() {
-    return network.getNetworkTablesMap().values().parallelStream()
+    return Arrays.stream(network.getNetworkTables())
+        .parallel()
         .map(this::buildMapperIterator)
         .map(CptMapperIterator::directMapCPTs)
         .toList();

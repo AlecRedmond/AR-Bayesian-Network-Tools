@@ -123,10 +123,10 @@ public abstract class AbstractInferenceEngine extends AbstractBayesianInference<
   @Override
   public InferenceEngine printObserved(Collection<Node> nodes) {
     ObservedTable[] observedTables = inferenceGraph.getObservedTables();
-    Map<Node, ObservedTable> toPrint = new LinkedHashMap<>();
-    nodes.stream()
-        .map(n -> converter.accessByNode(n, observedTables))
-        .forEach(table -> toPrint.put(table.getMeasuredNode(), table));
+    ObservedTable[] toPrint =
+        nodes.stream()
+            .map(n -> converter.accessByNode(n, observedTables))
+            .toArray(ObservedTable[]::new);
     new NetworkPrinter(this).printTables(toPrint, "OBSERVED");
     return this;
   }

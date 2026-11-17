@@ -5,14 +5,21 @@ import io.github.alecredmond.export.node.NodeState;
 import io.github.alecredmond.export.probabilitytables.Clique;
 import io.github.alecredmond.export.probabilitytables.ProbabilityVector;
 import io.github.alecredmond.export.probabilitytables.Separator;
+import io.github.alecredmond.export.probabilitytables.tableentry.TableEntry;
 import io.github.alecredmond.internal.application.cliquegraph.SeparatorData;
+import io.github.alecredmond.internal.application.printer.PrinterPropertyConfigs;
+import io.github.alecredmond.internal.application.printer.TableCellMatrix;
+import io.github.alecredmond.internal.method.printer.LineGenerator;
+import io.github.alecredmond.internal.method.printer.PrintableTable;
+import io.github.alecredmond.internal.method.printer.TableMatrixFactory;
 import io.github.alecredmond.internal.method.probabilitytables.JunctionTreeTable;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 import java.util.function.Supplier;
 
-public class SeparatorImpl implements Separator {
+public class SeparatorImpl implements Separator, PrintableTable {
   private final SeparatorData data;
 
   public SeparatorImpl(SeparatorData separatorData) {
@@ -45,6 +52,11 @@ public class SeparatorImpl implements Separator {
   }
 
   @Override
+  public TableEntry[] getEntries() {
+    return data.getTable().getEntries();
+  }
+
+  @Override
   public void resetPotentials() {
     JunctionTreeTable table = data.getTable();
     double marginalised = 1.0 / table.getProbabilities().length;
@@ -68,12 +80,22 @@ public class SeparatorImpl implements Separator {
   }
 
   @Override
+  public double sumPotentials(Collection<NodeState> states) {
+    return data.getTable().sumProbabilities(states);
+  }
+
+  @Override
   public Set<Node> getNodes() {
     return data.getNodes();
   }
 
   @Override
-  public double sumPotentials(Collection<NodeState> states) {
-    return data.getTable().sumProbabilities(states);
+  public List<String> generateLines(PrinterPropertyConfigs configs) {
+    return new LineGenerator<>(this, configs).generateLines(buildCellMatrix(configs));
+  }
+
+  @Override
+  public TableCellMatrix buildCellMatrix(PrinterPropertyConfigs configs) {
+    return new TableMatrixFactory(this, configs).buildMatrix();
   }
 }

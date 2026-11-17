@@ -12,7 +12,7 @@ import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.probabilitytables.ConditionalTable;
 import io.github.alecredmond.export.probabilitytables.NetworkTable;
 import io.github.alecredmond.export.probabilitytables.RootNodeTable;
-import io.github.alecredmond.export.probabilitytables.cptentry.CptEntry;
+import io.github.alecredmond.export.probabilitytables.tableentry.CptEntry;
 import io.github.alecredmond.export.solver.constraint.ProbabilityConstraint;
 import io.github.alecredmond.export.solver.directinput.DirectCptSolver;
 import io.github.alecredmond.export.solver.ipfp.*;
@@ -84,7 +84,7 @@ class BayesSolverTest {
 
     private static TableAnalyser buildTableAnalyser(
         NetworkTable table, Set<ProbabilityConstraint> constraints) {
-      List<CptEntry> cptEntries = table.getCptEntries();
+      List<CptEntry> cptEntries = Arrays.asList(table.getEntries());
       List<ProbabilityConstraint> tableConstraints;
       switch (table) {
         case ConditionalTable ct ->

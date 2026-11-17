@@ -3,6 +3,7 @@ package io.github.alecredmond.export.node;
 import java.io.Serializable;
 import java.util.Objects;
 
+/** A default implementation of {@link NodeState}. */
 public final class DefaultNodeState implements NodeState {
   private final Node node;
   private final int position;
@@ -10,6 +11,14 @@ public final class DefaultNodeState implements NodeState {
   private final Serializable id;
   private final int hashCode;
 
+  /**
+   * Constructs a new {@link DefaultNodeState}.
+   *
+   * @param node the parent {@link Node} of this state.
+   * @param position the index of this state in the parent {@link Node}'s state list.
+   * @param name the name of this {@link NodeState}
+   * @param id the unique identifier of this {@link NodeState}
+   */
   public DefaultNodeState(Node node, int position, String name, Serializable id) {
     this.node = node;
     this.position = position;

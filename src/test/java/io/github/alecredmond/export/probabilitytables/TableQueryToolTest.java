@@ -6,7 +6,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import io.github.alecredmond.export.network.BayesianNetwork;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
-import io.github.alecredmond.export.probabilitytables.cptentry.CptEntry;
+import io.github.alecredmond.export.probabilitytables.tableentry.CptEntry;
+import io.github.alecredmond.export.probabilitytables.tableentry.CptRow;
 import io.github.alecredmond.export.solver.constraint.ProbabilityConstraint;
 import io.github.alecredmond.internal.method.node.NodeUtils;
 import io.github.alecredmond.internal.method.probabilitytables.probabilityvector.ProbabilityVectorFactory;
@@ -194,9 +195,9 @@ class TableQueryToolTest {
   @MethodSource("provideNetworkTables")
   void testListCptEntries(NetworkTable networkTable) {
     double[] probabilities = networkTable.getProbabilities();
-    List<CptEntry> entries = networkTable.getCptEntries();
+    CptEntry[] entries = networkTable.getEntries();
     for (int i = 0; i < probabilities.length; i++) {
-      CptEntry entry = entries.get(i);
+      CptEntry entry = entries[i];
       Set<NodeState> allStates = new HashSet<>(entry.conditionStates());
       allStates.add(entry.eventState());
       assertEquals(entry.probability(), probabilities[i], DOUBLE_EQUALITY);
@@ -207,19 +208,18 @@ class TableQueryToolTest {
   @ParameterizedTest
   @MethodSource("provideNetworkTables")
   void testIterateOverConditions(NetworkTable networkTable) {
-    networkTable.iterateOverConditions(
-        cptRow -> {
-          Set<NodeState> conditions = cptRow.conditionStates();
-          Map<NodeState, Double> conditionalProbMap = networkTable.getConditionalProb(conditions);
-          cptRow
-              .rowEntries()
-              .forEach(
-                  cptEntry -> {
-                    NodeState eventState = cptEntry.eventState();
-                    double probability = cptEntry.probability();
-                    assertEquals(conditionalProbMap.get(eventState), probability, DOUBLE_EQUALITY);
-                  });
-        });
+    for (CptRow cptRow : networkTable.getRows()) {
+      Set<NodeState> conditions = cptRow.conditionStates();
+      Map<NodeState, Double> conditionalProbMap = networkTable.getConditionalProb(conditions);
+      cptRow
+          .rowEntries()
+          .forEach(
+              cptEntry -> {
+                NodeState eventState = cptEntry.eventState();
+                double probability = cptEntry.probability();
+                assertEquals(conditionalProbMap.get(eventState), probability, DOUBLE_EQUALITY);
+              });
+    }
   }
 
   @ParameterizedTest

@@ -11,11 +11,10 @@ import io.github.alecredmond.export.inference.indirect.SampleCollection;
 import io.github.alecredmond.export.network.BayesianNetwork;
 import io.github.alecredmond.export.node.NodeState;
 import io.github.alecredmond.export.probabilitytables.NetworkTable;
-import io.github.alecredmond.export.probabilitytables.cptentry.CptEntry;
+import io.github.alecredmond.export.probabilitytables.tableentry.CptEntry;
 import io.github.alecredmond.networkscenario.NetworkScenario;
 import io.github.alecredmond.networkscenario.NetworkScenarioType;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
@@ -50,9 +49,9 @@ class BayesianInferenceCoherenceTest {
     final int bound = tables.length;
     for (int i = 0; i < bound; i++) {
       NetworkTable table = tables[i];
-      List<CptEntry> cptEntries = table.getCptEntries();
-      boolean processSampler = cptEntries.size() <= TABLE_MAX_ENTRIES_FOR_SAMPLING;
-      log.info("TABLE {}/{}, {} entries to process", i + 1, bound, cptEntries.size());
+      CptEntry[] cptEntries = table.getEntries();
+      boolean processSampler = cptEntries.length <= TABLE_MAX_ENTRIES_FOR_SAMPLING;
+      log.info("TABLE {}/{}, {} entries to process", i + 1, bound, cptEntries.length);
       for (CptEntry cptEntry : cptEntries) {
         assertBayesRuleInferenceEngine(engine, cptEntry);
         if (PERFORM_SAMPLE_CHECK && processSampler) {

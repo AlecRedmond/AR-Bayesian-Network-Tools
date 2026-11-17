@@ -2,6 +2,7 @@ package io.github.alecredmond.export.probabilitytables;
 
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
+import io.github.alecredmond.export.probabilitytables.tableentry.TableEntry;
 import java.util.Collection;
 import java.util.Set;
 import java.util.function.Supplier;
@@ -115,4 +116,14 @@ public interface ProbabilityTable {
    * @param safeMode {@code true} to validate {@link NodeState} inputs, otherwise {@code false}.
    */
   void setSafeMode(boolean safeMode);
+
+  /**
+   * Returns every {@link TableEntry} within this {@code ProbabilityTable}. A {@link TableEntry}
+   * contains details of all measured {@link NodeState}s, a reference to its index in the
+   * probability {@code double[]} in this {@code ProbabilityTable}, and the probability itself.
+   *
+   * @return A new {@link TableEntry} array, ordered identically to this {@code ProbabilityTable}'s
+   *     probability array.
+   */
+  TableEntry[] getEntries();
 }

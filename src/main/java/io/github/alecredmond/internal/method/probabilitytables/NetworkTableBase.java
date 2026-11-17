@@ -1,12 +1,12 @@
 package io.github.alecredmond.internal.method.probabilitytables;
 
 import io.github.alecredmond.export.node.Node;
-import io.github.alecredmond.export.probabilitytables.cptentry.CptEntry;
-import io.github.alecredmond.export.probabilitytables.cptentry.CptRow;
+import io.github.alecredmond.export.probabilitytables.NetworkTable;
+import io.github.alecredmond.export.probabilitytables.tableentry.CptEntry;
+import io.github.alecredmond.export.probabilitytables.tableentry.CptRow;
 import io.github.alecredmond.internal.application.probabilitytables.base.SingleEventTableData;
-import io.github.alecredmond.internal.method.vectoriterator.misciterators.CptConditionIterator;
+import io.github.alecredmond.internal.method.vectoriterator.misciterators.CptRowGenerator;
 import java.util.*;
-import java.util.function.Consumer;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -15,27 +15,26 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @EqualsAndHashCode(callSuper = true, onlyExplicitlyIncluded = true)
 public abstract class NetworkTableBase<D extends SingleEventTableData>
-    extends ProbabilityTableBase<D> {
-  private final CptConditionIterator conditionIterator;
+    extends ProbabilityTableBase<D> implements NetworkTable {
 
   protected NetworkTableBase(D tableData) {
     super(tableData);
-    this.conditionIterator = supplyConditionIterator();
   }
-
-  protected abstract CptConditionIterator supplyConditionIterator();
 
   public Node getNetworkNode() {
     return tableData.getEventNode();
   }
 
-  public List<CptEntry> getCptEntries() {
-    List<CptEntry> entries = new ArrayList<>();
-    iterateOverConditions(cptRow -> entries.addAll(cptRow.rowEntries()));
-    return entries;
+  @Override
+  public CptEntry[] getEntries() {
+    return Arrays.stream(getRows())
+        .map(CptRow::rowEntries)
+        .flatMap(Collection::stream)
+        .toArray(CptEntry[]::new);
   }
 
-  public void iterateOverConditions(Consumer<CptRow> conditionalRowConsumer) {
-    conditionIterator.iterateConditions(conditionalRowConsumer, List.of());
+  @Override
+  public CptRow[] getRows() {
+    return new CptRowGenerator(this).buildRows();
   }
 }

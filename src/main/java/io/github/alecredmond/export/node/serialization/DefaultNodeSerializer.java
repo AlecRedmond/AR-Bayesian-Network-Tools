@@ -8,23 +8,18 @@ import java.util.*;
 public class DefaultNodeSerializer extends AbstractNodeSerializer<DefaultNode> {
 
   @Override
-  public boolean canSerialize(Node node) {
-    return node instanceof DefaultNode;
+  public DefaultNode safeCastNode(Node node) {
+    return node instanceof DefaultNode defaultNode ? defaultNode : null;
   }
 
   @Override
-  public boolean canDeSerialize(SerializedNode serializedNode) {
-    return serializedNode.serializerId().equals(serializerId());
+  public Class<DefaultNode> nodeClass() {
+    return DefaultNode.class;
   }
 
   @Override
   public Serializable serializerId() {
     return this.getClass().getName();
-  }
-
-  @Override
-  public DefaultNode safeCastNode(Node node) {
-    return node instanceof DefaultNode defaultNode ? defaultNode : null;
   }
 
   @Override

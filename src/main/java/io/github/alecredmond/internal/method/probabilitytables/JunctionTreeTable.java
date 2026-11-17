@@ -4,6 +4,7 @@ import io.github.alecredmond.export.inference.NodeObservation;
 import io.github.alecredmond.export.node.NodeState;
 import io.github.alecredmond.export.probabilitytables.ProbabilityTable;
 import io.github.alecredmond.export.probabilitytables.ProbabilityVector;
+import io.github.alecredmond.export.probabilitytables.tableentry.TableEntry;
 import java.util.Collection;
 import java.util.List;
 
@@ -17,4 +18,6 @@ public interface JunctionTreeTable extends ProbabilityTable {
   void resetObservations();
 
   ProbabilityVector getVector();
+
+  TableEntry[] getEntries();
 }

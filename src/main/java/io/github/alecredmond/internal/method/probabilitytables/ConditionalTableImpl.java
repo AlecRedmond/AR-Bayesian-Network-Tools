@@ -3,14 +3,13 @@ package io.github.alecredmond.internal.method.probabilitytables;
 import io.github.alecredmond.exceptions.ProbabilityTableRequestException;
 import io.github.alecredmond.export.node.NodeState;
 import io.github.alecredmond.export.probabilitytables.ConditionalTable;
+import io.github.alecredmond.internal.application.printer.PrinterPropertyConfigs;
 import io.github.alecredmond.internal.application.probabilitytables.ConditionalTableData;
 import io.github.alecredmond.internal.method.cartesianvector.indexfinder.FastIndexFinder;
 import io.github.alecredmond.internal.method.cartesianvector.indexfinder.SafeConditionFinder;
 import io.github.alecredmond.internal.method.cartesianvector.indexfinder.VectorIndexFinder;
-import io.github.alecredmond.internal.method.probabilitytables.printerformat.ConditionalMatrixGenerator;
-import io.github.alecredmond.internal.method.probabilitytables.printerformat.PrinterMatrixGeneratorBase;
+import io.github.alecredmond.internal.method.printer.ConditionalLineGenerator;
 import io.github.alecredmond.internal.method.probabilitytables.tablefactory.ConditionalTableFactory;
-import io.github.alecredmond.internal.method.vectoriterator.misciterators.CptConditionIterator;
 import io.github.alecredmond.internal.method.vectoriterator.misciterators.TableNormalizer;
 import java.util.*;
 import lombok.EqualsAndHashCode;
@@ -39,18 +38,6 @@ public class ConditionalTableImpl extends NetworkTableBase<ConditionalTableData>
   }
 
   @Override
-  public void setSafeMode(boolean safeMode) {
-    super.setSafeMode(safeMode);
-    this.conditionIndexFinder =
-        safeMode ? SafeConditionFinder.create(tableData) : FastIndexFinder.create(tableData);
-  }
-
-  @Override
-  protected PrinterMatrixGeneratorBase buildMatrixGenerator() {
-    return new ConditionalMatrixGenerator(this);
-  }
-
-  @Override
   public Map<NodeState, Double> getConditionalProb(Collection<NodeState> conditionStates) {
     try {
       Map<NodeState, Double> map = new LinkedHashMap<>();
@@ -67,7 +54,14 @@ public class ConditionalTableImpl extends NetworkTableBase<ConditionalTableData>
   }
 
   @Override
-  protected CptConditionIterator supplyConditionIterator() {
-    return new CptConditionIterator(this);
+  public void setSafeMode(boolean safeMode) {
+    super.setSafeMode(safeMode);
+    this.conditionIndexFinder =
+        safeMode ? SafeConditionFinder.create(tableData) : FastIndexFinder.create(tableData);
+  }
+
+  @Override
+  public List<String> generateLines(PrinterPropertyConfigs configs) {
+    return new ConditionalLineGenerator(this, configs).generateLines(buildCellMatrix(configs));
   }
 }
