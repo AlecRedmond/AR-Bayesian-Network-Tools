@@ -1,8 +1,13 @@
 package io.github.alecredmond.export.network.cptdefinition;
 
 import io.github.alecredmond.export.node.BinaryNode;
+import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.internal.method.vectoriterator.misciterators.BinaryCptDefinitionPadder;
 
+/**
+ * A CPT Definition for a {@link BinaryNode}, defined only from each measured {@link Node}'s true
+ * values.
+ */
 public class HalfCptDefinition extends OrderedCptDefinition {
 
   public HalfCptDefinition(

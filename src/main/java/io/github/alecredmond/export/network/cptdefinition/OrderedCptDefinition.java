@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import lombok.NonNull;
 
+/** A full CPT Definition. */
 public class OrderedCptDefinition implements CptDefinition {
   protected final Node measuredNode;
   protected final ProbabilityVector vector;

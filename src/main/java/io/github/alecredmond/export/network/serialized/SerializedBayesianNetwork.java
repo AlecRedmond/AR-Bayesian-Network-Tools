@@ -4,7 +4,6 @@ import io.github.alecredmond.export.network.BayesianNetwork;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
 import io.github.alecredmond.export.node.serialization.SerializedNode;
-import io.github.alecredmond.export.probabilitytables.serialized.SerializedNetworkTable;
 import io.github.alecredmond.export.solver.constraint.ProbabilityConstraint;
 import io.github.alecredmond.export.solver.constraint.serialized.SerializedProbabilityConstraint;
 import java.io.Serializable;
@@ -20,7 +19,6 @@ import java.io.Serializable;
  * @param serializedConstraints a list of serialized {@link ProbabilityConstraint}s within the
  *     network.
  * @see SerializedNode
- * @see SerializedNetworkTable
  * @see SerializedProbabilityConstraint
  * @author Alec Redmond
  */

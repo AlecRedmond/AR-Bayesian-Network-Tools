@@ -4,7 +4,6 @@ import io.github.alecredmond.export.inference.BayesianInference;
 import io.github.alecredmond.export.inference.NodeObservation;
 import io.github.alecredmond.export.inference.direct.InferenceEngine;
 import io.github.alecredmond.export.network.BayesianNetwork;
-import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
 import java.util.Random;
 
@@ -13,13 +12,6 @@ import java.util.Random;
  * network's conditional probability tables (CPTs). A {@code MonteCarloSampler} run returns a {@link
  * SampleCollection} of {@link Sample} objects. Each {@link Sample} contains a unique combination of
  * {@link NodeState} values and the frequency of its occurrence.
- *
- * <p>The only sampling algorithm currently available is <i>Likelihood Weighting Sampling (LWS)</i>.
- * LWS performs a random walk down each CPT in the {@link BayesianNetwork}, selecting each new
- * {@link NodeState} according to its weighted probability. When the algorithm reaches a {@link
- * Node} constrained to a specific {@link NodeState}, the weight of the sample is multiplied by the
- * conditional probability of that state given the sample's current configuration. At the end of the
- * run, the weighted samples are normalized and proportionally correct frequencies are assigned.
  *
  * <p>Monte Carlo sampling is a form of indirect inference. It relies on Java's built-in {@link
  * Random} functionality and does not produce exact or deterministic results. The margin of error is

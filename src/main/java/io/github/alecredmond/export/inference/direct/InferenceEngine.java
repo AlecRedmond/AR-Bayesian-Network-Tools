@@ -17,7 +17,7 @@ import java.util.Collection;
 /**
  * {@code InferenceEngine} provides utilities for running direct inference on a solved {@link
  * BayesianNetwork}. The values stored in the network's Conditional Probability Tables (CPTs) are
- * mapped to a secondary inference network which can be queried for joint, marginal, or conditional
+ * mapped to a secondary inference network which can be queried for prior or posterior
  * probabilities.
  *
  * <p>Specific {@link NodeState} values can be set as observed (always true) using {@link
@@ -25,8 +25,8 @@ import java.util.Collection;
  * instance until new observations are given, or until the observations are cleared using {@link
  * #resetObservations()}.
  *
- * <p>Unlike Monte Carlo sampling (as used in {@link MonteCarloSampler}), which will give an
- * approximate solution, the results of direct inference are both exact and deterministic.
+ * <p>Unlike {@link MonteCarloSampler}, which will give an approximate solution, the results of
+ * direct inference are both exact and deterministic.
  *
  * <p>Instances of this interface are not thread-safe. External synchronization is required for
  * concurrent access.
@@ -51,6 +51,16 @@ public interface InferenceEngine extends BayesianInference<InferenceEngine> {
    */
   <T extends Serializable> ObservedTable getObservedTableById(T nodeId);
 
+  /**
+   * Returns an {@link ObservedTable} associated with a {@link Node}. This is a table containing
+   * only the node's {@link NodeState} values, which are mapped to their current posterior
+   * probability if this {@code InferenceEngine} has observations applied, or their prior (marginal)
+   * probability otherwise. The values on this table are not deep-copied and will change if the
+   * observations on this instance change.
+   *
+   * @param nodeName the name of the {@link Node} associated with the {@link ObservedTable}.
+   * @return a {@link ObservedTable} mapping a single node's states to their current probability.
+   */
   ObservedTable getObservedTableByNodeName(String nodeName);
 
   /**
@@ -93,8 +103,25 @@ public interface InferenceEngine extends BayesianInference<InferenceEngine> {
    */
   ObservedTable copyObservedTable(Node node);
 
+  /**
+   * Returns all {@link ObservedTable}s associated with the {@link Node} values of the network.
+   * {@link ObservedTable}s are tables containing only the node's {@link NodeState} values, which
+   * are mapped to their current posterior probability if this {@code InferenceEngine} has
+   * observations applied, or their prior (marginal) probability otherwise. The values on each table
+   * are not deep-copied and will change if the observations on this instance change.
+   *
+   * @return an array of all {@link ObservedTable}s in this {@code InferenceEngine}.
+   */
   ObservedTable[] getObservedTables();
 
+  /**
+   * Returns the posterior probability of the given {@link NodeState} values, or their prior
+   * probability if this {@code InferenceEngine} is unobserved. This measures {@code P(S|O)} where S
+   * is the intersection of all queried states and O is the current observations.
+   *
+   * @param measuredStates the states to be queried.
+   * @return the posterior probability of all measured {@link NodeState} values.
+   */
   default double getPosteriorProbability(NodeState... measuredStates) {
     return getPosteriorProbability(Arrays.asList(measuredStates));
   }
@@ -109,6 +136,15 @@ public interface InferenceEngine extends BayesianInference<InferenceEngine> {
    */
   double getPosteriorProbability(Collection<NodeState> measuredStates);
 
+  /**
+   * Returns the posterior probability of the given {@link NodeState} values, or their prior
+   * probability if this {@code InferenceEngine} is unobserved. This measures {@code P(S|O)} where S
+   * is the intersection of all queried states and O is the current observations.
+   *
+   * @param measuredStateIds the identifiers of all {@link NodeState} values to be queried.
+   * @return the posterior probability of all measured {@link NodeState} values.
+   * @throws NullPointerException if any id was not associated with a {@link NodeState}.
+   */
   default double getPosteriorProbabilityById(Serializable... measuredStateIds) {
     return getPosteriorProbabilityById(Arrays.asList(measuredStateIds));
   }
@@ -198,9 +234,26 @@ public interface InferenceEngine extends BayesianInference<InferenceEngine> {
    */
   InferenceEngine printObserved(Collection<Node> nodes);
 
-  Clique getRootClique();
+  /**
+   * Returns the smallest leaf {@link Clique} in this {@code InferenceEngine}. This clique is
+   * guaranteed to have only one connected separator and can be used as a starting point for a
+   * complete ordering of the inference graph.
+   *
+   * @return the leaf {@link Clique} with the shortest probability array.
+   */
+  Clique getSmallestLeafClique();
 
+  /**
+   * Returns all {@link Clique} tables in this {@code InferenceEngine}.
+   *
+   * @return an array of every {@link Clique} in this {@code InferenceEngine}.
+   */
   Clique[] getCliques();
 
+  /**
+   * Returns all {@link Separator} tables in this {@code InferenceEngine}.
+   *
+   * @return an array of every {@link Separator} in this {@code InferenceEngine}.
+   */
   Separator[] getSeparators();
 }

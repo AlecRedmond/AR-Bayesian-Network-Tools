@@ -9,11 +9,20 @@ import io.github.alecredmond.internal.method.inference.direct.AbstractInferenceE
  * junction tree of smaller cliques, each with its own joint sub-table, connected by separators
  * formed from their shared nodes. Observations are applied per-clique and propagated via
  * message-passing through the separators. JTA scales on the treewidth of the network, and will
- * typically yield an exponential time and memory complexity improvement over the joint table method
- * at the cost of a small overhead. It is also the only option for networks whose full joint
- * Cartesian product would exceed 2<sup>31</sup>&minus;1 entries.
+ * typically yield an exponential time and memory complexity improvement over {@link
+ * SingleTableAlgorithm} at the cost of a small overhead. It is also the only option for networks
+ * whose full joint Cartesian product would exceed 2<sup>31</sup>&minus;1 entries.
+ *
+ * @see InferenceEngine
+ * @author Alec Redmond
  */
 public final class JunctionTreeAlgorithm extends AbstractInferenceEngine {
+
+  /**
+   * Constructs a new {@code JunctionTreeAlgorithm} inference engine.
+   *
+   * @param bayesianNetwork the {@link BayesianNetwork} for inference.
+   */
   public JunctionTreeAlgorithm(BayesianNetwork bayesianNetwork) {
     super(bayesianNetwork, new InferenceGraphFactoryJTA());
   }

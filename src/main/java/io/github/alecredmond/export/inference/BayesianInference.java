@@ -11,13 +11,13 @@ import java.util.Collection;
 import java.util.Map;
 
 /**
- * The root interface for a Bayesian inference type where the observed state can be modified. An
- * {@code Observable} type allows {@link NodeState} values to either be set as observed (resetting
- * the previous observations) or added to a pool of eliminated states (maintaining the other
- * previous observations). All probability functions will be conditional on only the non-eliminated
- * {@link NodeState} values currently active.
+ * The root interface for a Bayesian inference type where the observed state can be modified. A
+ * {@code BayesianInference} type allows {@link NodeState} values to either be set as observed
+ * (resetting the previous observations) or added to a pool of eliminated states (maintaining the
+ * other previous observations). All probability functions will be conditional on only the
+ * non-eliminated {@link NodeState} values currently active.
  *
- * @param <T> the type of the observable, for instance chaining.
+ * @param <T> the type of this inference, for instance chaining.
  * @see InferenceEngine
  * @see MonteCarloSampler
  * @see NodeObservation
@@ -26,9 +26,9 @@ import java.util.Map;
 public interface BayesianInference<T extends BayesianInference<T>> {
 
   /**
-   * Returns the {@link BayesianNetwork} measured by this {@code Observable}.
+   * Returns the {@link BayesianNetwork} measured by this {@code BayesianInference}.
    *
-   * @return the {@link BayesianNetwork} associated with this {@code Observable}.
+   * @return the {@link BayesianNetwork} associated with this {@code BayesianInference}.
    */
   BayesianNetwork getNetwork();
 
@@ -53,8 +53,8 @@ public interface BayesianInference<T extends BayesianInference<T>> {
   /**
    * Sets the observed state to match the given input. This method will only apply key-value pairs
    * where the given {@link Node} is present within the {@link BayesianNetwork} which backs this
-   * {@code Observable}. Other pairs will be discarded and undeclared {@link Node}s will be set as
-   * {@link ObservationStatus#UNOBSERVED}.
+   * {@code BayesianInference}. Other pairs will be discarded and undeclared {@link Node}s will be
+   * set as {@link ObservationStatus#UNOBSERVED}.
    *
    * @param observations the observation map to set.
    * @return this instance for chaining.

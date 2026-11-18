@@ -11,6 +11,7 @@ public enum NetworkScenarioType {
   CAR_TRIMS(CarTrimNetwork::new),
   DIAMOND_NET(DiamondNetwork::new),
   LOPSIDED(LopsidedNetwork::new),
+  PENG_DING_DIAMOND(PengAndDingDiamond::new),
   RAIN_NETWORK(RainNetwork::new),
   SIMPLE_LINEAR(SimpleLinearNetwork::new),
   WEATHER_NETWORK(WeatherNetwork::new);

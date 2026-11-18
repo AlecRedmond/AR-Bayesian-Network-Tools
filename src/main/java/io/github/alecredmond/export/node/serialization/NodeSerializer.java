@@ -21,6 +21,11 @@ public interface NodeSerializer<T extends Node> {
 
   Class<T> nodeClass();
 
+  /**
+   * Returns the unique identifier for this {@code NodeSerializer}.
+   *
+   * @return the identifier for this {@code NodeSerializer}.
+   */
   Serializable serializerId();
 
   T deSerialize(SerializedNode serializedNode, List<Node> parents);

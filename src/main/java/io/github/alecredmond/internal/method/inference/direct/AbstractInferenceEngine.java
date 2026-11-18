@@ -47,7 +47,7 @@ public abstract class AbstractInferenceEngine extends AbstractBayesianInference<
   }
 
   @Override
-  public Clique getRootClique() {
+  public Clique getSmallestLeafClique() {
     return inferenceGraph.getRootClique();
   }
 
