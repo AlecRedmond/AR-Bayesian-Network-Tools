@@ -26,6 +26,9 @@ import org.apache.commons.lang3.SerializationUtils;
  */
 public abstract class AbstractNodeSerializer<T extends Node> implements NodeSerializer<T> {
 
+  /** Constructs a new {@code AbstractNodeSerializer} */
+  protected AbstractNodeSerializer() {}
+
   /**
    * {@inheritDoc}
    *

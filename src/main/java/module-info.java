@@ -15,9 +15,9 @@ module BayesSolver {
   requires com.carrotsearch.hppc;
 
   exports io.github.alecredmond.exceptions;
-  exports io.github.alecredmond.export.solver.constraint;
-  exports io.github.alecredmond.export.solver.constraint.serialized;
   exports io.github.alecredmond.export.inference;
+  exports io.github.alecredmond.export.inference.direct;
+  exports io.github.alecredmond.export.inference.indirect;
   exports io.github.alecredmond.export.network;
   exports io.github.alecredmond.export.network.cptdefinition;
   exports io.github.alecredmond.export.network.serialized;
@@ -26,8 +26,6 @@ module BayesSolver {
   exports io.github.alecredmond.export.probabilitytables;
   exports io.github.alecredmond.export.probabilitytables.tableentry;
   exports io.github.alecredmond.export.solver;
-  exports io.github.alecredmond.export.solver.ipfp;
-  exports io.github.alecredmond.export.inference.direct;
-  exports io.github.alecredmond.export.inference.indirect;
-  exports io.github.alecredmond.export.solver.directinput;
+  exports io.github.alecredmond.export.solver.constraint;
+  exports io.github.alecredmond.export.solver.constraint.serialized;
 }

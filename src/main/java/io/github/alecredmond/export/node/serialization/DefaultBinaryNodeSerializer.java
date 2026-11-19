@@ -19,6 +19,11 @@ import org.apache.commons.lang3.SerializationUtils;
  */
 public class DefaultBinaryNodeSerializer extends AbstractNodeSerializer<DefaultBinaryNode> {
 
+  /** Constructs a new {@code DefaultBinaryNodeSerializer} */
+  public DefaultBinaryNodeSerializer() {
+    /* Default constructor */
+  }
+
   @Override
   public DefaultBinaryNode safeCastNode(Node node) {
     return node instanceof DefaultBinaryNode binaryNode ? binaryNode : null;

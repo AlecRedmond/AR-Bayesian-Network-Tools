@@ -4,7 +4,11 @@ import io.github.alecredmond.exceptions.ConstraintValidationException;
 import io.github.alecredmond.export.network.cptdefinition.CptDefinition;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
-import io.github.alecredmond.export.solver.BayesSolver;
+import io.github.alecredmond.export.solver.ConstraintFitter;
+import io.github.alecredmond.export.solver.DirectCptWriter;
+import io.github.alecredmond.export.solver.IPFPJunctionTreeSolver;
+import io.github.alecredmond.export.solver.IPFPSolver;
+import io.github.alecredmond.export.solver.MultiStageSolver;
 import io.github.alecredmond.export.solver.constraint.MarginalConstraint;
 import io.github.alecredmond.export.solver.constraint.ProbabilityConstraint;
 import java.util.Collection;
@@ -17,14 +21,14 @@ import java.util.Set;
  * <p>A builder is created with {@link BayesianNetwork#builder()}. The network is described by
  * setting its name and nodes, by defining the conditional probability tables (CPTs) of its nodes,
  * and by adding {@link ProbabilityConstraint}s. The network is then created with {@link #build()}
- * or {@link #build(BayesSolver)}.
+ * or {@link #build(ConstraintFitter)}.
  *
  * <p>Each method that configures the builder returns the builder itself, so calls can be chained.
  *
  * @author Alec Redmond
  * @see BayesianNetwork
  * @see CptDefinition
- * @see BayesSolver
+ * @see ConstraintFitter
  */
 public interface BayesianNetworkBuilder {
 
@@ -37,24 +41,34 @@ public interface BayesianNetworkBuilder {
   BayesianNetworkBuilder setNetworkName(String networkName);
 
   /**
-   * Builds the network using a solver created by {@link BayesSolver#create()}.
+   * Builds the network using the default {@link ConstraintFitter}. This is equivalent to calling
+   * {@link #build(ConstraintFitter)} with a {@link MultiStageSolver} as the argument. The
+   * multi-stage procedure first attempts direct CPT imputation (entering all {@link
+   * ProbabilityConstraint}s as CPT entries), with a backup Iterative Proportional Fitting Procedure
+   * (IPFP) if CPT imputation fails. This is useful in situations where CPT imputation would be
+   * preferred but its viability cannot be guaranteed. In circumstances where CPT imputation is
+   * known to be inviable, it is preferable to directly use an {@link IPFPSolver} (such as {@link
+   * IPFPJunctionTreeSolver}).
    *
    * @return an {@link Optional} containing the new {@link BayesianNetwork}, or an empty {@code
    *     Optional} if the network could not be built
-   * @see #build(BayesSolver)
+   * @see #build(ConstraintFitter)
    */
   default Optional<BayesianNetwork> build() {
-    return build(BayesSolver.create());
+    return build(new MultiStageSolver());
   }
 
   /**
-   * Builds the network using the specified solver.
+   * Builds the network using the specified {@link ConstraintFitter}.
    *
-   * @param solver the solver used to fit the network to its constraints
+   * @param constraintFitter the constraint fitter to be used
    * @return an {@link Optional} containing the new {@link BayesianNetwork}, or an empty {@code
    *     Optional} if the network could not be built
+   * @see DirectCptWriter
+   * @see IPFPJunctionTreeSolver
+   * @see MultiStageSolver
    */
-  Optional<BayesianNetwork> build(BayesSolver solver);
+  Optional<BayesianNetwork> build(ConstraintFitter constraintFitter);
 
   /**
    * Sets the nodes of the network to be built.

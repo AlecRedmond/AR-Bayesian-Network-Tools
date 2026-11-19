@@ -6,10 +6,10 @@ import io.github.alecredmond.export.network.serialized.SerializedBayesianNetwork
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.serialization.SerializedNode;
 import io.github.alecredmond.export.probabilitytables.NetworkTable;
-import io.github.alecredmond.export.solver.BayesSolver;
+import io.github.alecredmond.export.solver.ConstraintFitter;
 import java.util.Optional;
 
-public class DeserializerSolver implements BayesSolver {
+public class DeserializerSolver implements ConstraintFitter {
   private final SerializedBayesianNetwork sbn;
 
   public DeserializerSolver(SerializedBayesianNetwork sbn) {

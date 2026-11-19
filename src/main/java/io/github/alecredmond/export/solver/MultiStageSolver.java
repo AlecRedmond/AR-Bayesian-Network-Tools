@@ -1,23 +1,18 @@
 package io.github.alecredmond.export.solver;
 
 import io.github.alecredmond.export.network.BayesianNetwork;
-import io.github.alecredmond.export.solver.directinput.DirectCptSolver;
-import io.github.alecredmond.export.solver.ipfp.IPFPJunctionTreeSolver;
-import io.github.alecredmond.export.solver.ipfp.IPFPResults;
-import io.github.alecredmond.export.solver.ipfp.IPFPSolver;
 import java.util.Optional;
 
 public class MultiStageSolver implements IPFPSolver {
-  private final DirectCptSolver directCptSolver;
+  private final DirectCptWriter directCptWriter;
   private final IPFPSolver ipfpSolver;
 
   public MultiStageSolver() {
-    this.directCptSolver = new DirectCptSolver();
-    this.ipfpSolver = new IPFPJunctionTreeSolver();
+    this(new IPFPJunctionTreeSolver());
   }
 
   public MultiStageSolver(IPFPSolver ipfpSolver) {
-    this.directCptSolver = new DirectCptSolver();
+    this.directCptWriter = new DirectCptWriter();
     this.ipfpSolver = ipfpSolver;
   }
 
@@ -28,12 +23,12 @@ public class MultiStageSolver implements IPFPSolver {
 
   @Override
   public Optional<BayesianNetwork> solveFromCurrentValues(BayesianNetwork bayesianNetwork) {
-    return solveNetwork(bayesianNetwork);
+    return ipfpSolver.solveFromCurrentValues(bayesianNetwork);
   }
 
   @Override
   public Optional<BayesianNetwork> solveNetwork(BayesianNetwork bayesianNetwork) {
-    return directCptSolver
+    return directCptWriter
         .solveNetwork(bayesianNetwork)
         .or(() -> ipfpSolver.solveFromCurrentValues(bayesianNetwork));
   }

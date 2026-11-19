@@ -1,4 +1,4 @@
-package io.github.alecredmond.export.solver.ipfp;
+package io.github.alecredmond.export.solver;
 
 import io.github.alecredmond.internal.method.cliquegraph.factory.SolverGraphFactorySTA;
 import io.github.alecredmond.internal.method.solver.AbstractIPFPSolver;

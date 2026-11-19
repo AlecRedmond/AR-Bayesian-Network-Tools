@@ -4,8 +4,8 @@ import io.github.alecredmond.export.network.BayesianNetworkBuilder;
 import io.github.alecredmond.export.network.cptdefinition.*;
 import io.github.alecredmond.export.node.BinaryNode;
 import io.github.alecredmond.export.node.Node;
-import io.github.alecredmond.export.solver.BayesSolver;
-import io.github.alecredmond.export.solver.directinput.DirectCptSolver;
+import io.github.alecredmond.export.solver.ConstraintFitter;
+import io.github.alecredmond.export.solver.DirectCptWriter;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
@@ -15,8 +15,8 @@ public abstract class CptDefinedScenario extends AbstractNetworkScenario {
   protected final Map<Node, CptDefinition> cptDefinitionMap = new HashMap<>();
 
   @Override
-  public BayesSolver getDefaultSolver() {
-    return new DirectCptSolver();
+  public ConstraintFitter getDefaultSolver() {
+    return new DirectCptWriter();
   }
 
   @Override

@@ -11,7 +11,7 @@ import java.util.Map;
 
 /**
  * A conditional probability table (CPT) for a {@link Node} within a {@link BayesianNetwork}. A CPT
- * maps the probability over all {@link NodeState} values of a single {@link Node}, conditional on
+ * maps the probability over all {@link NodeState} values of a single {@code Node}, conditional on
  * the states of its parents: {@code P(X|Pa(X))}.
  *
  * <p>There are two variants of {@code NetworkTable}:
@@ -33,7 +33,7 @@ public interface NetworkTable extends CloneableTable<NetworkTable> {
    * Returns the {@link Node} within the {@link BayesianNetwork} that this CPT measures. This
    * represents the {@code X} variable within the expression {@code P(X|Pa(X))}.
    *
-   * @return the {@link Node} measured by this CPT.
+   * @return the {@code Node} measured by this CPT
    */
   Node getNetworkNode();
 
@@ -41,36 +41,42 @@ public interface NetworkTable extends CloneableTable<NetworkTable> {
    * Builds a copy of this {@code NetworkTable}. This deep-copies everything except the {@link Node}
    * and {@link NodeState} values, which maintain the original references.
    *
-   * @return a copy of the current table.
+   * @return a copy of the current table
    */
   @Override
   NetworkTable copyTable();
 
   /**
-   * Returns a cross-section of probabilities for every {@link NodeState} in the Network {@link
-   * Node}, under the given conditions.
+   * Returns a cross-section of probabilities for every {@link NodeState} of the network node, under
+   * the given conditions.
    *
    * <p><b>This method is affected by Safe Mode.</b> When Safe Mode is enabled, the input must
-   * contain a {@link NodeState} for every {@link Node} value in {@link
-   * NetworkTable#getConditions()}, otherwise the method will return an empty {@link HashMap}.
+   * contain a {@code NodeState} for every {@code Node} in {@link NetworkTable#getConditions()},
+   * otherwise the method returns an empty {@link HashMap}.
    *
-   * @param condition a collection of {@link NodeState} values which define a condition within the
+   * @param condition a collection of {@code NodeState} values that define a condition within the
    *     table
-   * @return a new map of each Network node's {@link NodeState} and its probability under the given
-   *     conditions, or an empty {@link HashMap} if Safe Mode validation failed.
+   * @return a new map of each state of the network node and its probability under the given
+   *     conditions, or an empty {@code HashMap} if Safe Mode validation failed
    */
   Map<NodeState, Double> getConditionalProb(Collection<NodeState> condition);
 
   /**
-   * Returns every {@link CptEntry} within this {@code NetworkTable}. A {@link CptEntry} contains
-   * details of the measured {@link NodeState} within the table's Network {@link Node}, any
-   * conditioning states acting upon it, its conditional probability, and a reference to its index
-   * in the probability {@code double[]} in this {@code NetworkTable}.
+   * Returns every {@link CptEntry} within this {@code NetworkTable}. A {@code CptEntry} contains
+   * details of the measured {@link NodeState} of the network node, any conditioning states acting
+   * upon it, its conditional probability, and a reference to its index in the probability {@code
+   * double[]} of this {@code NetworkTable}.
    *
-   * @return A new {@link CptEntry} array, ordered identically to this {@code NetworkTable}'s
-   *     probability array.
+   * @return a new {@code CptEntry} array, ordered identically to the probability array of this
+   *     {@code NetworkTable}
    */
   CptEntry[] getEntries();
 
+  /**
+   * Returns every {@link CptRow} within this {@code NetworkTable}. Each {@code CptRow} groups the
+   * entries that share a single combination of condition states.
+   *
+   * @return an array of the rows of this table
+   */
   CptRow[] getRows();
 }

@@ -4,7 +4,7 @@ import io.github.alecredmond.export.network.BayesianNetwork;
 import io.github.alecredmond.export.network.BayesianNetworkBuilder;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
-import io.github.alecredmond.export.solver.BayesSolver;
+import io.github.alecredmond.export.solver.ConstraintFitter;
 import java.util.List;
 import java.util.Set;
 
@@ -13,7 +13,7 @@ public interface NetworkScenario {
 
   BayesianNetwork buildNetwork();
 
-  BayesSolver getDefaultSolver();
+  ConstraintFitter getDefaultSolver();
 
   Node getNodeByName(String name);
 

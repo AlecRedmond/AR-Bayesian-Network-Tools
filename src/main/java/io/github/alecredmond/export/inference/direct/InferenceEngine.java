@@ -9,7 +9,7 @@ import io.github.alecredmond.export.node.NodeState;
 import io.github.alecredmond.export.probabilitytables.Clique;
 import io.github.alecredmond.export.probabilitytables.ObservedTable;
 import io.github.alecredmond.export.probabilitytables.Separator;
-import io.github.alecredmond.export.solver.BayesSolver;
+import io.github.alecredmond.export.solver.ConstraintFitter;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collection;
@@ -31,7 +31,7 @@ import java.util.Collection;
  * <p>Instances of this interface are not thread-safe. External synchronization is required for
  * concurrent access.
  *
- * @see BayesSolver
+ * @see ConstraintFitter
  * @author Alec Redmond
  */
 @SuppressWarnings("UnusedReturnValue")

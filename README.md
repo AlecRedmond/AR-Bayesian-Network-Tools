@@ -130,7 +130,7 @@ control:
 wetGrassNetwork.solveNetwork(); 
 
 // Version 2.
-// Manually create a BayesSolver
+// Manually create a ConstraintFitter
 BayesSolver solver = BayesSolver.create(wetGrassNetwork);
 
 // 2.a

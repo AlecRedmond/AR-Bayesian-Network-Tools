@@ -1,5 +1,5 @@
 /**
- * Provides the classes for defining conditional probability tables (CPTs) by hand.
+ * Provides the classes for manually defining conditional probability tables (CPTs).
  *
  * <p>A {@link io.github.alecredmond.export.network.cptdefinition.CptDefinition} describes the CPT
  * of a single node from a flat array of probabilities. The enums {@link

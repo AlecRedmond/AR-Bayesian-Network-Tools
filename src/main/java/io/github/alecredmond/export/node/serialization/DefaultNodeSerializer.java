@@ -15,6 +15,11 @@ import org.apache.commons.lang3.SerializationUtils;
  */
 public class DefaultNodeSerializer extends AbstractNodeSerializer<DefaultNode> {
 
+  /** Constructs a new {@code DefaultNodeSerializer} */
+  public DefaultNodeSerializer() {
+    /* Default constructor */
+  }
+
   @Override
   public DefaultNode safeCastNode(Node node) {
     return node instanceof DefaultNode defaultNode ? defaultNode : null;

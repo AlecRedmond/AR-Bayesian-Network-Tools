@@ -8,7 +8,7 @@ import io.github.alecredmond.export.network.cptdefinition.CptDefinition;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
 import io.github.alecredmond.export.probabilitytables.NetworkTable;
-import io.github.alecredmond.export.solver.BayesSolver;
+import io.github.alecredmond.export.solver.ConstraintFitter;
 import io.github.alecredmond.export.solver.constraint.ProbabilityConstraint;
 import io.github.alecredmond.internal.application.network.BayesianNetworkData;
 import io.github.alecredmond.internal.method.network.validator.ValidatorType;
@@ -36,13 +36,13 @@ public class BayesianNetworkBuilderImpl implements BayesianNetworkBuilder {
   }
 
   @Override
-  public Optional<BayesianNetwork> build(BayesSolver solver) {
+  public Optional<BayesianNetwork> build(ConstraintFitter constraintFitter) {
     resetNodeChildren();
     BayesianNetworkData networkData = new BayesianNetworkData(networkName, nodes, constraints);
     validateData(networkData);
     NodeComparator comparator = orderNodes(networkData);
     buildArraysAndMaps(networkData, comparator);
-    return solver.solveNetwork(new BayesianNetworkImpl(networkData));
+    return constraintFitter.solveNetwork(new BayesianNetworkImpl(networkData));
   }
 
   private void resetNodeChildren() {

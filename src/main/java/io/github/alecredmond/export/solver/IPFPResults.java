@@ -1,6 +1,5 @@
-package io.github.alecredmond.export.solver.ipfp;
+package io.github.alecredmond.export.solver;
 
-import io.github.alecredmond.export.solver.BayesSolver;
 import io.github.alecredmond.export.solver.constraint.ProbabilityConstraint;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -9,14 +8,15 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Contains the results of a {@link BayesSolver} Iterative Proportional Fitting Procedure (IPFP).
+ * Contains the results of a {@link ConstraintFitter} Iterative Proportional Fitting Procedure
+ * (IPFP).
  *
  * <p>This includes the total number of cycles completed, the aggregate R-squared error calculated
  * on the final cycle, and a per-constraint breakdown linking each active {@link
  * ProbabilityConstraint} to its respective {@link IPFPConstraintResult}.
  *
  * @see IPFPConstraintResult
- * @see BayesSolver
+ * @see ConstraintFitter
  * @author Alec Redmond
  * @param cycles The total number of cycles completed by the solver.
  * @param constraintResults A map that connects each constraint to its specific result, including

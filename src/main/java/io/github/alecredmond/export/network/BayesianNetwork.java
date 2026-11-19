@@ -9,7 +9,7 @@ import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
 import io.github.alecredmond.export.node.serialization.NodeSerializer;
 import io.github.alecredmond.export.probabilitytables.NetworkTable;
-import io.github.alecredmond.export.solver.BayesSolver;
+import io.github.alecredmond.export.solver.ConstraintFitter;
 import io.github.alecredmond.export.solver.constraint.ProbabilityConstraint;
 import io.github.alecredmond.internal.fileio.NetworkFileIO;
 import io.github.alecredmond.internal.method.network.BayesianNetworkBuilderImpl;
@@ -41,7 +41,7 @@ import java.util.stream.Stream;
  * @author Alec Redmond
  * @version 1.0.0 RELEASE
  * @see BayesianNetworkBuilder
- * @see BayesSolver
+ * @see ConstraintFitter
  * @see InferenceEngine
  * @see MonteCarloSampler
  * @see NetworkTable

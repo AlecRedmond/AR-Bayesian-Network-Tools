@@ -2,10 +2,10 @@ package io.github.alecredmond.exceptions;
 
 import io.github.alecredmond.export.inference.direct.InferenceEngine;
 import io.github.alecredmond.export.probabilitytables.ProbabilityTable;
-import io.github.alecredmond.export.solver.BayesSolver;
+import io.github.alecredmond.export.solver.ConstraintFitter;
 
 /**
- * Thrown if a {@link ProbabilityTable} in {@link BayesSolver} or {@link InferenceEngine} would
+ * Thrown if a {@link ProbabilityTable} in {@link ConstraintFitter} or {@link InferenceEngine} would
  * exceed 2<sup>31</sup>&minus;1 entries.
  */
 public class TreewidthException extends IllegalStateException {

@@ -1,10 +1,9 @@
-package io.github.alecredmond.export.solver.directinput;
+package io.github.alecredmond.export.solver;
 
 import io.github.alecredmond.export.network.BayesianNetwork;
 import io.github.alecredmond.export.probabilitytables.ConditionalTable;
 import io.github.alecredmond.export.probabilitytables.NetworkTable;
 import io.github.alecredmond.export.probabilitytables.RootNodeTable;
-import io.github.alecredmond.export.solver.BayesSolver;
 import io.github.alecredmond.export.solver.constraint.ConditionalConstraint;
 import io.github.alecredmond.export.solver.constraint.MarginalConstraint;
 import io.github.alecredmond.export.solver.constraint.ProbabilityConstraint;
@@ -22,12 +21,12 @@ import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class DirectCptSolver implements BayesSolver {
+public class DirectCptWriter implements ConstraintFitter {
   private final ConditionalConstraintValidator conditionalValidator;
   private final MarginalConstraintValidator marginalValidator;
   private BayesianNetwork network;
 
-  public DirectCptSolver() {
+  public DirectCptWriter() {
     this.conditionalValidator = new ConditionalConstraintValidator();
     this.marginalValidator = new MarginalConstraintValidator();
   }

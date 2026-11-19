@@ -1,13 +1,12 @@
-package io.github.alecredmond.export.solver.ipfp;
+package io.github.alecredmond.export.solver;
 
-import io.github.alecredmond.export.solver.BayesSolver;
 import io.github.alecredmond.export.solver.constraint.ProbabilityConstraint;
 import java.util.Arrays;
 import java.util.Objects;
 
 /**
  * Holds the per-cycle error and loss data for a single {@link ProbabilityConstraint} from a {@link
- * BayesSolver} run.
+ * ConstraintFitter} run.
  *
  * @see IPFPResults
  * @author Alec Redmond

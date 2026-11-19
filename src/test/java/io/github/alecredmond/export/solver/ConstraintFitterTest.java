@@ -14,8 +14,6 @@ import io.github.alecredmond.export.probabilitytables.NetworkTable;
 import io.github.alecredmond.export.probabilitytables.RootNodeTable;
 import io.github.alecredmond.export.probabilitytables.tableentry.CptEntry;
 import io.github.alecredmond.export.solver.constraint.ProbabilityConstraint;
-import io.github.alecredmond.export.solver.directinput.DirectCptSolver;
-import io.github.alecredmond.export.solver.ipfp.*;
 import io.github.alecredmond.internal.method.solver.cptmapper.constraintsorter.ConditionalTableConstraintSorter;
 import io.github.alecredmond.internal.method.solver.cptmapper.constraintsorter.CptConstraintSorter;
 import io.github.alecredmond.internal.method.solver.cptmapper.constraintsorter.RootConstraintSorter;
@@ -34,7 +32,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.opentest4j.AssertionFailedError;
 
 @Slf4j
-class BayesSolverTest {
+class ConstraintFitterTest {
 
   public static Stream<NetworkScenario> streamScenarios() {
     return Arrays.stream(NetworkScenarioType.values()).map(NetworkScenarioType::get);
@@ -44,7 +42,7 @@ class BayesSolverTest {
   class SolversProvideSameResult {
 
     static Stream<Arguments> streamScenariosAsArgs() {
-      return BayesSolverTest.streamScenarios().map(Arguments::of);
+      return ConstraintFitterTest.streamScenarios().map(Arguments::of);
     }
 
     @ParameterizedTest
@@ -56,9 +54,9 @@ class BayesSolverTest {
           getTableAnalysers(orderedNodes, builder, new IPFPJunctionTreeSolver());
       List<TableAnalyser> staCptEntries =
           getTableAnalysers(orderedNodes, builder, new IPFPSingleTableSolver());
-      if (scenario.getDefaultSolver() instanceof DirectCptSolver directCptSolver) {
+      if (scenario.getDefaultSolver() instanceof DirectCptWriter directCptWriter) {
         List<TableAnalyser> directSolveCptEntries =
-            getTableAnalysers(orderedNodes, builder, directCptSolver);
+            getTableAnalysers(orderedNodes, builder, directCptWriter);
         assertListsEqual(directSolveCptEntries, jtaCptEntries);
         assertListsEqual(directSolveCptEntries, staCptEntries);
       }
@@ -66,7 +64,7 @@ class BayesSolverTest {
     }
 
     private static List<TableAnalyser> getTableAnalysers(
-        List<Node> orderedNodes, BayesianNetworkBuilder builder, BayesSolver solver) {
+        List<Node> orderedNodes, BayesianNetworkBuilder builder, ConstraintFitter solver) {
       BayesianNetwork network = builder.build(solver).orElseThrow();
       Set<ProbabilityConstraint> constraints = network.getConstraints();
       return orderedNodes.stream()
@@ -166,10 +164,10 @@ class BayesSolverTest {
 
     private static Stream<Arguments> getDirectCptEntryAndIPFP(NetworkScenario scenario) {
       BayesianNetworkBuilder builder = scenario.getBuilder();
-      BayesSolver defaultSolver = scenario.getDefaultSolver();
-      if (defaultSolver instanceof DirectCptSolver directCptSolver) {
+      ConstraintFitter defaultSolver = scenario.getDefaultSolver();
+      if (defaultSolver instanceof DirectCptWriter directCptWriter) {
         IPFPSolver ipfpSolver = new IPFPJunctionTreeSolver();
-        return Stream.of(Arguments.of(builder, directCptSolver), Arguments.of(builder, ipfpSolver));
+        return Stream.of(Arguments.of(builder, directCptWriter), Arguments.of(builder, ipfpSolver));
       } else {
         return Stream.of(Arguments.of(builder, defaultSolver));
       }
@@ -182,7 +180,7 @@ class BayesSolverTest {
     @ParameterizedTest
     @MethodSource("allObservations")
     void measureConstraintsAndIPFPResults(
-        BayesianNetworkBuilder networkBuilder, BayesSolver solver) {
+        BayesianNetworkBuilder networkBuilder, ConstraintFitter solver) {
       BayesianNetwork network = networkBuilder.build(solver).orElseThrow();
       assertNotNull(network);
       InferenceEngine engine = new JunctionTreeAlgorithm(network);

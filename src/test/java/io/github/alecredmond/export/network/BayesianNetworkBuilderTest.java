@@ -14,12 +14,12 @@ import io.github.alecredmond.export.node.DefaultNodeState;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
 import io.github.alecredmond.export.probabilitytables.NetworkTable;
-import io.github.alecredmond.export.solver.BayesSolver;
+import io.github.alecredmond.export.solver.ConstraintFitter;
+import io.github.alecredmond.export.solver.IPFPJunctionTreeSolver;
 import io.github.alecredmond.export.solver.constraint.ConditionalConstraint;
 import io.github.alecredmond.export.solver.constraint.JointProbabilityConstraint;
 import io.github.alecredmond.export.solver.constraint.MarginalConstraint;
 import io.github.alecredmond.export.solver.constraint.ProbabilityConstraint;
-import io.github.alecredmond.export.solver.ipfp.IPFPJunctionTreeSolver;
 import io.github.alecredmond.internal.method.solver.constraint.types.marginalconstraint.ValidatedMarginalConstraint;
 import java.util.*;
 import java.util.stream.IntStream;
@@ -42,7 +42,7 @@ class BayesianNetworkBuilderTest {
     DefaultBinaryNode b;
     DefaultBinaryNode c;
     DefaultBinaryNode d;
-    BayesSolver solver = new IPFPJunctionTreeSolver();
+    ConstraintFitter solver = new IPFPJunctionTreeSolver();
 
     @BeforeEach
     void setUpBinaryNodes() {
@@ -161,7 +161,7 @@ class BayesianNetworkBuilderTest {
     DefaultBinaryNode b;
     DefaultBinaryNode c;
     DefaultBinaryNode d;
-    BayesSolver solver = new IPFPJunctionTreeSolver();
+    ConstraintFitter solver = new IPFPJunctionTreeSolver();
 
     @BeforeEach
     void setUpBinaryNodes() {
