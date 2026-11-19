@@ -34,6 +34,12 @@ public final class LikelihoodWeightingSampler extends AbstractMonteCarloSampler 
     this.sampleStore = SampleStore.create(bayesianNetwork);
   }
 
+  /**
+   * Internal method for sampling {@link NodeState} permutations.
+   *
+   * @param numberOfSamples the requested number of samples
+   * @return a map of each sampled permutation and the number of times it was sampled
+   */
   @Override
   protected Map<NodeState[], Integer> generateSampledStates(int numberOfSamples) {
     sampleStore.clear();

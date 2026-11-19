@@ -1,5 +1,6 @@
 package io.github.alecredmond.export.probabilitytables;
 
+import io.github.alecredmond.export.inference.direct.InferenceEngine;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
 import java.util.Arrays;
@@ -7,6 +8,7 @@ import java.util.Collection;
 import java.util.Set;
 import java.util.function.Supplier;
 
+/** A table from an {@link InferenceEngine}, e.g. the Junction Tree Algorithm. */
 public interface InferenceTable extends ProbabilityTable {
   void resetPotentials();
 

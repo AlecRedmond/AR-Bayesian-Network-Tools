@@ -1,5 +1,6 @@
 package io.github.alecredmond.export.network;
 
+import static io.github.alecredmond.TestConfigs.DOUBLE_EQUALITY;
 import static io.github.alecredmond.export.node.BinaryNode.StateOrder.TRUE_FIRST;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -12,6 +13,7 @@ import io.github.alecredmond.export.node.DefaultNode;
 import io.github.alecredmond.export.node.DefaultNodeState;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
+import io.github.alecredmond.export.probabilitytables.NetworkTable;
 import io.github.alecredmond.export.solver.BayesSolver;
 import io.github.alecredmond.export.solver.constraint.ConditionalConstraint;
 import io.github.alecredmond.export.solver.constraint.JointProbabilityConstraint;
@@ -303,6 +305,20 @@ class BayesianNetworkBuilderTest {
         assertEquals(expected.getProbability(), actual.getProbability());
         assertEquals(expected.getEventStates(), actual.getEventStates());
         assertEquals(expected.getConditionStates(), actual.getConditionStates());
+      }
+    }
+
+    @Test
+    void addThenClearConstraints_shouldStillSolve() {
+      assertDoesNotThrow(() -> builder.addConstraint(a.trueState(), 0.2));
+      assertDoesNotThrow(() -> builder.clearConstraints());
+      BayesianNetwork network = builder.build(solver).orElseThrow();
+      for (NetworkTable table : network.getNetworkTables()) {
+        double[] probabilities = table.getProbabilities();
+        double expected = 1.0 / table.getNetworkNode().getStates().size();
+        for (double probability : probabilities) {
+          assertEquals(expected, probability, DOUBLE_EQUALITY);
+        }
       }
     }
   }

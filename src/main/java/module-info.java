@@ -30,5 +30,4 @@ module BayesSolver {
   exports io.github.alecredmond.export.inference.direct;
   exports io.github.alecredmond.export.inference.indirect;
   exports io.github.alecredmond.export.solver.directinput;
-  exports io.github.alecredmond.internal.application.printer;
 }

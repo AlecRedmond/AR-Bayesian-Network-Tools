@@ -12,8 +12,8 @@ import io.github.alecredmond.internal.method.inference.direct.AbstractInferenceE
  * queries. In all other circumstances, use {@link JunctionTreeAlgorithm}. The absolute upper limit
  * for STA is a table length of 2<sup>31</sup>&minus;1 entries, the maximum length of a Java array.
  *
- * @see InferenceEngine
  * @author Alec Redmond
+ * @see InferenceEngine
  */
 public final class SingleTableAlgorithm extends AbstractInferenceEngine {
 

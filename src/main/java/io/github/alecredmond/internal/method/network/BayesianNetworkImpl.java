@@ -1,9 +1,5 @@
 package io.github.alecredmond.internal.method.network;
 
-import io.github.alecredmond.export.inference.direct.InferenceEngine;
-import io.github.alecredmond.export.inference.direct.JunctionTreeAlgorithm;
-import io.github.alecredmond.export.inference.indirect.LikelihoodWeightingSampler;
-import io.github.alecredmond.export.inference.indirect.MonteCarloSampler;
 import io.github.alecredmond.export.network.BayesianNetwork;
 import io.github.alecredmond.export.network.serialized.SerializedBayesianNetwork;
 import io.github.alecredmond.export.node.Node;
@@ -110,7 +106,7 @@ public class BayesianNetworkImpl implements BayesianNetwork {
   }
 
   @Override
-  public <T extends Collection<Node>, U extends T> U getNodes(Supplier<U> collectionSupplier) {
+  public <T extends Collection<Node>> T getNodes(Supplier<T> collectionSupplier) {
     return streamNodes().collect(Collectors.toCollection(collectionSupplier));
   }
 
@@ -169,17 +165,8 @@ public class BayesianNetworkImpl implements BayesianNetwork {
   }
 
   @Override
-  public <T extends Collection<NetworkTable>, U extends T> T getNetworkTables(
-      Supplier<U> collectionSupplier) {
+  public <T extends Collection<NetworkTable>> T getNetworkTables(Supplier<T> collectionSupplier) {
     return Arrays.stream(networkData.getNetworkTables())
         .collect(Collectors.toCollection(collectionSupplier));
-  }
-
-  public InferenceEngine buildInferenceEngine() {
-    return new JunctionTreeAlgorithm(this);
-  }
-
-  public MonteCarloSampler buildSampler() {
-    return new LikelihoodWeightingSampler(this);
   }
 }

@@ -9,18 +9,21 @@ import io.github.alecredmond.export.solver.constraint.serialized.SerializedProba
 import java.io.Serializable;
 
 /**
- * A {@link Serializable} snapshot of a {@link BayesianNetwork}. The serialization process creates a
- * deep copy of the network, replacing all {@link Node} and {@link NodeState} instances with their
- * serializable identifiers. Intended for use in File I/O operations and to save/load the state of
- * the network.
+ * A {@link Serializable} snapshot of a {@link BayesianNetwork}.
  *
- * @param networkName the name of the {@link BayesianNetwork}.
- * @param serializedNodes a list of serialized {@link Node}s from the network.
- * @param serializedConstraints a list of serialized {@link ProbabilityConstraint}s within the
- *     network.
+ * <p>The serialization process creates a deep copy of the network, replacing all {@link Node} and
+ * {@link NodeState} instances with their serializable identifiers. A snapshot is intended for file
+ * I/O, to save and load the state of a network.
+ *
+ * @author Alec Redmond
+ * @param networkName the name of the network
+ * @param serializedNodes the serialized form of each {@code Node} in the network
+ * @param serializedConstraints the serialized form of each {@link ProbabilityConstraint} in the
+ *     network
+ * @see BayesianNetwork#serializeNetwork()
+ * @see BayesianNetwork#loadNetwork(SerializedBayesianNetwork)
  * @see SerializedNode
  * @see SerializedProbabilityConstraint
- * @author Alec Redmond
  */
 public record SerializedBayesianNetwork(
     String networkName,

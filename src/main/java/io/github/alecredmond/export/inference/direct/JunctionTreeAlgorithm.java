@@ -13,8 +13,8 @@ import io.github.alecredmond.internal.method.inference.direct.AbstractInferenceE
  * SingleTableAlgorithm} at the cost of a small overhead. It is also the only option for networks
  * whose full joint Cartesian product would exceed 2<sup>31</sup>&minus;1 entries.
  *
- * @see InferenceEngine
  * @author Alec Redmond
+ * @see InferenceEngine
  */
 public final class JunctionTreeAlgorithm extends AbstractInferenceEngine {
 
