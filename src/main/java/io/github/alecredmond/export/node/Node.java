@@ -1,7 +1,8 @@
 package io.github.alecredmond.export.node;
 
+import io.github.alecredmond.export.inference.BayesianInference;
 import io.github.alecredmond.export.network.BayesianNetwork;
-import io.github.alecredmond.export.solver.constraint.ProbabilityConstraint;
+import io.github.alecredmond.export.network.BayesianNetworkBuilder;
 import io.github.alecredmond.internal.application.cartesianvector.CartesianVariable;
 import java.io.Serializable;
 import java.util.List;
@@ -14,55 +15,78 @@ import java.util.List;
  * {@code "NODE:FALSE"}. A {@code Node} is conditionally dependent on its parents, while its
  * children are conditionally dependent on it.
  *
- * <p><b>Note:</b> All nodes in a network MUST be registered in the {@link BayesianNetwork} instance
- * before attempting to connect them to their parents or children through the methods defined here.
+ * <p><b>Changing any data in a {@code Node} after building a {@link BayesianNetwork} will result in
+ * undefined behavior on that network</b>, as well as any {@link BayesianInference} utilising that
+ * network. {@code Node} instances should be treated as effectively final once {@link
+ * BayesianNetworkBuilder#build()} is called.
  *
- * @see NodeState
- * @see BayesianNetwork
- * @see ProbabilityConstraint
+ * <p><b>Note:</b> Only the <i>parents</i> of a {@code Node} are processed when building a network
+ * through {@link BayesianNetworkBuilder}. The children of the node will be automatically set during
+ * the build process.
+ *
  * @author Alec Redmond
+ * @see DefaultNode
+ * @see BinaryNode
+ * @see NodeState
  */
 public interface Node extends CartesianVariable {
 
   /**
-   * Returns the unique identifier for this {@code Node}.
+   * Returns the unique identifier for this node.
    *
    * @return the {@link Serializable} identifier of this node.
    */
   Serializable getId();
 
+  /**
+   * Returns the name of this node.
+   *
+   * @return the name of this node
+   */
   String getName();
 
   /**
-   * Returns the ordered list of {@link NodeState} values that this {@code Node} can exhibit.
+   * Returns the states that this node can exhibit, in order.
    *
-   * @return an unmodifiable {@link List} of the node's states.
+   * @return a {@link List} of the states of this node
    */
   @Override
   List<NodeState> getStates();
 
   /**
-   * Returns the parent nodes of this {@code Node} in the network structure.
+   * Returns the parent nodes of this node in the network structure.
    *
-   * @return an unmodifiable {@link List} of parent nodes.
+   * @return a {@link List} of the parent nodes of this node
    */
   List<Node> getParents();
 
   /**
-   * Returns the child nodes of this {@code Node} in the network structure.
+   * Returns the children of this node in the network structure.
    *
-   * @return an unmodifiable {@link List} of child nodes.
+   * @return a {@link List} of the child nodes of this node
    */
   List<Node> getChildren();
 
   /**
-   * Sets a list of {@link Node}s as the new children for this {@code Node}.
+   * Replaces the children of this node with the specified nodes.
    *
-   * @param children the new list of children connected to this {@code Node}.
+   * @param children the new children of this node
    */
   void setChildren(List<Node> children);
 
+  /**
+   * Returns the state of this node that has the specified name.
+   *
+   * @param stateName the name of the requested state
+   * @return the state with the specified name, or {@code null} if this node has no such state
+   */
   NodeState getStateByName(String stateName);
 
+  /**
+   * Returns the state of this node that has the specified identifier.
+   *
+   * @param stateId the identifier of the requested state
+   * @return the state with the specified identifier, or {@code null} if this node has no such state
+   */
   NodeState getStateById(Serializable stateId);
 }

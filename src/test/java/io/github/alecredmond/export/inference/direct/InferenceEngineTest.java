@@ -81,7 +81,8 @@ class InferenceEngineTest {
       ObservedTable rainTable = test.getObservedTable(rain);
       double pRainPrior = rainTable.getProbability(rain.trueState());
       assertEquals(0.2, pRainPrior, DOUBLE_EQUALITY);
-      assertNotNull(test.eliminateStates(wetGrass.falseState()));
+      NodeState wetGrassFalse = wetGrass.getStateById(wetGrass.falseState().getId());
+      assertNotNull(test.eliminateStates(wetGrassFalse));
       double pRainGivenWet = rainTable.getProbability(rain.trueState());
       assertEquals(0.384852, pRainGivenWet, DOUBLE_EQUALITY);
 

@@ -5,7 +5,18 @@ import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
 import java.io.Serializable;
 import java.util.List;
+import org.apache.commons.lang3.SerializationUtils;
 
+/**
+ * A {@link NodeSerializer} for {@link DefaultBinaryNode} instances.
+ *
+ * <p>When a node is deserialized, its recorded states must be exactly one state named {@code
+ * "TRUE"} and one state named {@code "FALSE"}.
+ *
+ * @author Alec Redmond
+ * @see DefaultNodeSerializer
+ * @see AbstractNodeSerializer
+ */
 public class DefaultBinaryNodeSerializer extends AbstractNodeSerializer<DefaultBinaryNode> {
 
   @Override
@@ -18,15 +29,27 @@ public class DefaultBinaryNodeSerializer extends AbstractNodeSerializer<DefaultB
     return DefaultBinaryNode.class;
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * <p>This implementation returns the fully qualified name of the runtime class of this
+   * serializer.
+   */
   @Override
   public Serializable serializerId() {
     return this.getClass().getName();
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * @throws IllegalStateException if the recorded states are not exactly one {@code "TRUE"} state
+   *     and one {@code "FALSE"} state
+   */
   @Override
   public DefaultBinaryNode deSerialize(SerializedNode serializedNode, List<Node> parents) {
     DefaultBinaryNode node = new DefaultBinaryNode();
-    node.setId(serializedNode.id());
+    node.setId(SerializationUtils.clone(serializedNode.id()));
     node.setName(serializedNode.name());
     node.setStates(deserializeStates(serializedNode, node));
     node.setParents(parents);

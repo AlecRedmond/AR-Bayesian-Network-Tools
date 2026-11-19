@@ -109,20 +109,4 @@ public final class DefaultNodeState implements NodeState {
   public String getName() {
     return name;
   }
-
-  public Node node() {
-    return node;
-  }
-
-  public int position() {
-    return position;
-  }
-
-  public String name() {
-    return name;
-  }
-
-  public Serializable id() {
-    return id;
-  }
 }
