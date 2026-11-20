@@ -1,11 +1,11 @@
 package io.github.alecredmond.internal.method.solver.cptmapper.iterator;
 
-import io.github.alecredmond.export.constraints.ConditionalConstraint;
-import io.github.alecredmond.export.constraints.ProbabilityConstraint;
 import io.github.alecredmond.export.node.NodeState;
 import io.github.alecredmond.export.probabilitytables.ConditionalTable;
-import io.github.alecredmond.internal.method.constraints.strategy.ValidatedConstraint;
-import io.github.alecredmond.internal.method.constraints.types.conditionalconstraint.ConditionalConstraintValidator;
+import io.github.alecredmond.export.solver.constraint.ConditionalConstraint;
+import io.github.alecredmond.export.solver.constraint.ProbabilityConstraint;
+import io.github.alecredmond.internal.method.solver.constraint.strategy.ValidatedConstraint;
+import io.github.alecredmond.internal.method.solver.constraint.types.conditionalconstraint.ConditionalConstraintValidator;
 import io.github.alecredmond.internal.method.solver.cptmapper.constraintsorter.ConditionalTableConstraintSorter;
 import io.github.alecredmond.internal.method.utils.CollectionToString;
 import java.util.*;

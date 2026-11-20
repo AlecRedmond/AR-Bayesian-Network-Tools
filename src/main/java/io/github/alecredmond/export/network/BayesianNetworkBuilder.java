@@ -1,222 +1,272 @@
 package io.github.alecredmond.export.network;
 
-import io.github.alecredmond.exceptions.BayesNetIDException;
 import io.github.alecredmond.exceptions.ConstraintValidationException;
-import io.github.alecredmond.exceptions.NetworkStructureException;
+import io.github.alecredmond.export.network.cptdefinition.CptDefinition;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
-import io.github.alecredmond.internal.method.network.NetworkInputBuilder;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
+import io.github.alecredmond.export.solver.ConstraintFitter;
+import io.github.alecredmond.export.solver.DirectCptWriter;
+import io.github.alecredmond.export.solver.IPFPJunctionTreeSolver;
+import io.github.alecredmond.export.solver.IPFPSolver;
+import io.github.alecredmond.export.solver.MultiStageSolver;
+import io.github.alecredmond.export.solver.constraint.MarginalConstraint;
+import io.github.alecredmond.export.solver.constraint.ProbabilityConstraint;
+import java.util.Collection;
+import java.util.Optional;
+import java.util.Set;
 
 /**
- * Streamlines the construction of a {@link BayesianNetwork}.
+ * Defines and builds a {@link BayesianNetwork}.
  *
- * <p>This builder allows network configuration to be defined on a per-{@link Node} basis. This
- * approach bypasses the strict input ordering required when manually constructing a {@link
- * BayesianNetwork} via the standard interface. A node configuration relies on:
+ * <p>A builder is created with {@link BayesianNetwork#builder()}. The network is described by
+ * setting its name and nodes, by defining the conditional probability tables (CPTs) of its nodes,
+ * and by adding {@link ProbabilityConstraint}s. The network is then created with {@link #build()}
+ * or {@link #build(ConstraintFitter)}.
  *
- * <ul>
- *   <li>The {@link Serializable} identifier for the {@link Node}.
- *   <li>The {@link Serializable} identifiers for the node's {@link NodeState}s.
- *   <li>The identifiers of the node's parent nodes (for conditional nodes).
- *   <li>The Conditional Probability Table (CPT) values, structured as a {@code double[]} array
- *       (optional).
- * </ul>
+ * <p>Each method that configures the builder returns the builder itself, so calls can be chained.
  *
- * @see BayesianNetwork
  * @author Alec Redmond
+ * @see BayesianNetwork
+ * @see CptDefinition
+ * @see ConstraintFitter
  */
-@SuppressWarnings({"LombokGetterMayBeUsed", "LombokSetterMayBeUsed", "unused"})
-public class BayesianNetworkBuilder {
-  /**
-   * A list of {@link BayesianNetworkBuilderNode} objects, each containing the information for a
-   * {@link Node} to be built in the new {@link BayesianNetwork}.
-   */
-  private final List<BayesianNetworkBuilderNode<?>> nodeInputs = new ArrayList<>();
-
-  /** The name of the new {@link BayesianNetwork} to be built. */
-  private String networkName;
+public interface BayesianNetworkBuilder {
 
   /**
-   * Constructs an empty {@code BayesianNetworkBuilder} with the default network name {@code
-   * "UNNAMED NETWORK"}.
+   * Sets the name of the network to be built.
+   *
+   * @param networkName the name of the network
+   * @return this builder for method chaining
    */
-  public BayesianNetworkBuilder() {
-    this.networkName = "UNNAMED NETWORK";
+  BayesianNetworkBuilder setNetworkName(String networkName);
+
+  /**
+   * Builds the network using the default {@link ConstraintFitter}. This is equivalent to calling
+   * {@link #build(ConstraintFitter)} with a {@link MultiStageSolver} as the argument. The
+   * multi-stage procedure first attempts direct CPT imputation (entering all {@link
+   * ProbabilityConstraint}s as CPT entries), with a backup Iterative Proportional Fitting Procedure
+   * (IPFP) if CPT imputation fails. This is useful in situations where CPT imputation would be
+   * preferred but its viability cannot be guaranteed. In circumstances where CPT imputation is
+   * known to be inviable, it is preferable to directly use an {@link IPFPSolver} (such as {@link
+   * IPFPJunctionTreeSolver}).
+   *
+   * @return an {@link Optional} containing the new {@link BayesianNetwork}, or an empty {@code
+   *     Optional} if the network could not be built
+   * @see #build(ConstraintFitter)
+   */
+  default Optional<BayesianNetwork> build() {
+    return build(new MultiStageSolver());
   }
 
   /**
-   * Constructs an empty {@code BayesianNetworkBuilder} with the specified network name.
+   * Builds the network using the specified {@link ConstraintFitter}.
    *
-   * @param networkName the name to assign to the resulting {@link BayesianNetwork}.
+   * @param constraintFitter the constraint fitter to be used
+   * @return an {@link Optional} containing the new {@link BayesianNetwork}, or an empty {@code
+   *     Optional} if the network could not be built
+   * @see DirectCptWriter
+   * @see IPFPJunctionTreeSolver
+   * @see MultiStageSolver
    */
-  public BayesianNetworkBuilder(String networkName) {
-    this.networkName = networkName;
-  }
+  Optional<BayesianNetwork> build(ConstraintFitter constraintFitter);
 
   /**
-   * Constructs and returns the {@link BayesianNetwork} using the current node inputs.
+   * Sets the nodes of the network to be built.
    *
-   * @return a fully constructed {@link BayesianNetwork}.
-   * @throws BayesNetIDException if any identifier is incorrectly mapped or duplicated.
-   * @throws NetworkStructureException if the network contains disconnected sections, or if the
-   *     parent/child relationships form a cyclic graph.
-   * @throws ConstraintValidationException if a provided CPT array is of incorrect length, or if the
-   *     CPT probabilities represent an illegal configuration.
+   * @param nodes the nodes of the network
+   * @return this builder for method chaining
    */
-  public BayesianNetwork build() {
-    return new NetworkInputBuilder().buildNetwork(networkName, nodeInputs);
-  }
+  BayesianNetworkBuilder setNodes(Node... nodes);
 
   /**
-   * Adds a root (unparented) {@link Node} configuration to this builder.
+   * Sets the nodes of the network to be built.
    *
-   * @param nodeId the identifier for the root {@link Node}.
-   * @param stateIds the identifiers for the {@link NodeState} values associated with the {@link
-   *     Node}.
-   * @param <T> the {@link Serializable} type of the identifiers.
-   * @return this builder instance for method chaining.
-   * @throws NullPointerException if any input parameter is {@code null}.
-   * @throws IllegalArgumentException if {@code stateIds} is null or empty.
+   * @param nodes the nodes of the network
+   * @return this builder for method chaining
    */
-  public <T extends Serializable> BayesianNetworkBuilder addNode(T nodeId, List<T> stateIds) {
-    nodeInputs.add(new BayesianNetworkBuilderNode<>(nodeId, stateIds));
-    return this;
-  }
+  BayesianNetworkBuilder setNodes(Collection<Node> nodes);
 
   /**
-   * Adds a root (unparented) {@link Node} configuration, including its CPT values, to this builder.
+   * Defines the conditional probability table (CPT) of a node from a user-supplied {@link
+   * CptDefinition}. The node whose table is defined is the measured node of the definition.
    *
-   * <p>For root nodes, the length of the {@code cptValues} array must exactly match the size of the
-   * {@code stateIds} list. The probabilities must be provided in the same order as the declared
-   * states. For example:
-   *
-   * <pre>{@code
-   * String nodeId = "RAIN";
-   * List<String> stateIds = List.of("RAIN:T", "RAIN:F");
-   * double[] rainCPT = {0.2, 0.8}; // 20% chance of RAIN:T, 80% chance of RAIN:F
-   * bayesianNetworkBuilder.addRootNode(nodeId, stateIds, rainCPT);
-   * }</pre>
-   *
-   * @param nodeId the identifier for the root {@link Node}.
-   * @param stateIds the identifiers for the {@link NodeState} values associated with the {@link
-   *     Node}.
-   * @param cptValues the marginal probabilities for this root {@link Node}.
-   * @param <T> the {@link Serializable} type of the identifiers.
-   * @return this builder instance for method chaining.
-   * @throws NullPointerException if any input parameter is {@code null}.
-   * @throws IllegalArgumentException if {@code stateIds} is null or empty.
+   * @param cptDefinition the user-defined CPT
+   * @return this builder for method chaining
+   * @see CptDefinition#measuredNode()
    */
-  public <T extends Serializable> BayesianNetworkBuilder addNode(
-      T nodeId, List<T> stateIds, double[] cptValues) {
-    nodeInputs.add(new BayesianNetworkBuilderNode<>(nodeId, stateIds, cptValues));
-    return this;
-  }
+  BayesianNetworkBuilder defineCPT(CptDefinition cptDefinition);
+
+  // ----------------------------------------------------------------------------------------------
+  // ----------------------------------CONSTRAINT ADDERS-------------------------------------------
+  // ----------------------------------------------------------------------------------------------
 
   /**
-   * Adds a conditional (parented) {@link Node} configuration to this builder.
+   * Adds a new {@link MarginalConstraint} to the network to be built. During the solving process,
+   * the solver will attempt to find a solution that minimizes the divergence from the constraints
+   * assigned to it.
    *
-   * @param nodeId the identifier for this {@link Node}.
-   * @param stateIds the identifiers for the {@link NodeState} values associated with this {@link
-   *     Node}.
-   * @param parentIds the identifiers of the parent {@link Node}s. These must correspond to nodes
-   *     added to this builder before calling {@link #build()}.
-   * @param <T> the {@link Serializable} type of the identifiers.
-   * @return this builder instance for method chaining.
-   * @throws NullPointerException if any input parameter is {@code null}.
-   * @throws IllegalArgumentException if {@code stateIds} is null or empty.
+   * <p>A {@code MarginalConstraint} is an unconditional constraint of the form {@code P(e) = p},
+   * where:
+   *
+   * <ul>
+   *   <li>{@code e} is the event {@link NodeState}.
+   *   <li>{@code p} is the probability of the event.
+   * </ul>
+   *
+   * <p>Constraints do not need to follow the network's graph ordering, {@code P(X|Pa(X))}. However,
+   * constraints that span conditionally independent nodes cannot be losslessly projected back to
+   * individual CPT entries, and may produce different inference results after fitting. Such
+   * constraints may also add another virtual edge to the graph's structure during solving, which
+   * can increase the treewidth.
+   *
+   * @param eventState the event node state in the constraint
+   * @param probability the probability of the event
+   * @return this builder for method chaining
+   * @throws ConstraintValidationException if the constraint is in an illegal configuration
    */
-  public <T extends Serializable> BayesianNetworkBuilder addNode(
-      T nodeId, List<T> stateIds, List<T> parentIds) {
-    nodeInputs.add(new BayesianNetworkBuilderNode<>(nodeId, stateIds, parentIds));
-    return this;
-  }
+  BayesianNetworkBuilder addConstraint(NodeState eventState, double probability);
 
   /**
-   * Adds a conditional (parented) {@link Node} configuration, including its CPT values, to this
-   * builder.
+   * Adds a new {@link ProbabilityConstraint} to the network to be built. During the solving
+   * process, the solver will attempt to find a solution that minimizes the divergence from the
+   * constraints assigned to it.
    *
-   * <p>For conditional nodes, the length of the {@code cptValues} array must equal the product of
-   * the number of states for this node and all of its parents.
+   * <p>Constraints are given in the form {@code P(E|C) = p}, where:
    *
-   * <p>The correct ordering of the {@code cptValues} array is determined by the {@code
-   * cptNodeOrder} parameter, which must contain the identifiers of this node and all its parents.
-   * The builder iterates through the Cartesian product of the states for these nodes. The iteration
-   * cycles fastest through the right-most (last) node in the {@code cptNodeOrder} list,
-   * incrementing the node to its left whenever it overflows.
+   * <ul>
+   *   <li>{@code E} are the event {@link NodeState}s.
+   *   <li>{@code C} are the condition {@link NodeState}s.
+   *   <li>{@code p} is the conditional probability.
+   * </ul>
    *
-   * <p>Consider three nodes representing {@code P(WET_GRASS | RAIN, SPRINKLER)}, each with {@code
-   * :T} and {@code :F} states:
+   * <p>Constraints do not need to follow the network's graph ordering, {@code P(X|Pa(X))}. However,
+   * constraints that span conditionally independent nodes cannot be losslessly projected back to
+   * individual CPT entries, and may produce different inference results after fitting. Such
+   * constraints may also add another virtual edge to the graph's structure during solving, which
+   * can increase the treewidth.
    *
-   * <pre>{@code
-   * String nodeId = "WET_GRASS";
-   * List<String> stateIds = List.of("WET_GRASS:T", "WET_GRASS:F");
-   * // If the longest stride is "RAIN", and the shortest is "WET_GRASS":
-   * List<String> cptNodeOrder = List.of("RAIN", "SPRINKLER", "WET_GRASS");
-   * // "WET_GRASS" will iterate states at each index
-   * // "SPRINKLER" will iterate states when "WET GRASS" cycles all its states (every 2 indices)
-   * // "RAIN" will iterate states when "SPRINKLER" cycles all its states (every 4 indices)
-   * double[] wetGrassCpt = new double[]{
-   * 0.99, // RAIN:T, SPRINKLER:T, WET_GRASS:T
-   * 0.01, // RAIN:T, SPRINKLER:T, WET_GRASS:F
-   * 0.80, // RAIN:T, SPRINKLER:F, WET_GRASS:T
-   * 0.20, // RAIN:T, SPRINKLER:F, WET_GRASS:F
-   * 0.90, // RAIN:F, SPRINKLER:T, WET_GRASS:T
-   * 0.10, // RAIN:F, SPRINKLER:T, WET_GRASS:F
-   * 0.00, // RAIN:F, SPRINKLER:F, WET_GRASS:T
-   * 1.00  // RAIN:F, SPRINKLER:F, WET_GRASS:F
-   * };
-   * bayesianNetworkBuilder.addNode(nodeId, stateIds, cptNodeOrder, wetGrassCpt);
-   * }</pre>
-   *
-   * @param nodeId the identifier for this {@link Node}.
-   * @param stateIds the identifiers for the {@link NodeState} values associated with this {@link
-   *     Node}.
-   * @param cptNodeOrder the identifiers of the node and its parents, ordered by the iteration
-   *     hierarchy used for the {@code cptValues} array. The parent identifiers must correspond to
-   *     nodes added to this builder before calling {@link #build()}.
-   * @param cptValues the conditional probabilities mapping to the Cartesian product of the node
-   *     states.
-   * @param <T> the {@link Serializable} type of the identifiers.
-   * @return this builder instance for method chaining.
-   * @throws NullPointerException if any input parameter is {@code null}.
-   * @throws IllegalArgumentException if {@code stateIds} or empty, or if {@code cptStrideOrderDesc}
-   *     does not contain the {@code nodeId}.
+   * @param eventState the event node state in the constraint
+   * @param conditionState the condition node state in the constraint
+   * @param probability the probability of the event given the condition
+   * @return this builder for method chaining
+   * @throws ConstraintValidationException if the constraint is in an illegal configuration
    */
-  public <T extends Serializable> BayesianNetworkBuilder addNode(
-      T nodeId, List<T> stateIds, List<T> cptNodeOrder, double[] cptValues) {
-    nodeInputs.add(new BayesianNetworkBuilderNode<>(nodeId, stateIds, cptNodeOrder, cptValues));
-    return this;
-  }
+  BayesianNetworkBuilder addConstraint(
+      NodeState eventState, NodeState conditionState, double probability);
 
   /**
-   * Retrieves the name of the {@link BayesianNetwork} this builder will construct.
+   * Adds a new {@link ProbabilityConstraint} to the network to be built. During the solving
+   * process, the solver will attempt to find a solution that minimizes the divergence from the
+   * constraints assigned to it.
    *
-   * @return the name of the new network.
+   * <p>Constraints are given in the form {@code P(E|C) = p}, where:
+   *
+   * <ul>
+   *   <li>{@code E} are the event {@link NodeState}s.
+   *   <li>{@code C} are the condition {@link NodeState}s.
+   *   <li>{@code p} is the conditional probability.
+   * </ul>
+   *
+   * <p>Constraints do not need to follow the network's graph ordering, {@code P(X|Pa(X))}. However,
+   * constraints that span conditionally independent nodes cannot be losslessly projected back to
+   * individual CPT entries, and may produce different inference results after fitting. Such
+   * constraints may also add another virtual edge to the graph's structure during solving, which
+   * can increase the treewidth.
+   *
+   * @param eventState the event node state in the constraint
+   * @param conditionStates the condition node states in the constraint
+   * @param probability the probability of the event given the conditions
+   * @return this builder for method chaining
+   * @throws ConstraintValidationException if the constraint is in an illegal configuration
    */
-  public String getNetworkName() {
-    return this.networkName;
-  }
+  BayesianNetworkBuilder addConstraint(
+      NodeState eventState, Collection<NodeState> conditionStates, double probability);
 
   /**
-   * Sets the name of the {@link BayesianNetwork} this builder will construct.
+   * Adds a new {@link ProbabilityConstraint} to the network to be built. During the solving
+   * process, the solver will attempt to find a solution that minimizes the divergence from the
+   * constraints assigned to it.
    *
-   * @param networkName the name of the new network.
+   * <p>Constraints are given in the form {@code P(E|C) = p}, where:
+   *
+   * <ul>
+   *   <li>{@code E} are the event {@link NodeState}s.
+   *   <li>{@code C} are the condition {@link NodeState}s.
+   *   <li>{@code p} is the conditional probability.
+   * </ul>
+   *
+   * <p>Constraints do not need to follow the network's graph ordering, {@code P(X|Pa(X))}. However,
+   * constraints that span conditionally independent nodes cannot be losslessly projected back to
+   * individual CPT entries, and may produce different inference results after fitting. Such
+   * constraints may also add another virtual edge to the graph's structure during solving, which
+   * can increase the treewidth.
+   *
+   * @param eventStates the event node states in the constraint
+   * @param conditionStates the condition node states in the constraint
+   * @param probability the probability of the events given the conditions
+   * @return this builder for method chaining
+   * @throws ConstraintValidationException if the constraint is in an illegal configuration
    */
-  public void setNetworkName(String networkName) {
-    this.networkName = networkName;
-  }
+  BayesianNetworkBuilder addConstraint(
+      Collection<NodeState> eventStates, Collection<NodeState> conditionStates, double probability);
 
   /**
-   * Returns the list of node builder objects in this {@code BayesianNetworkBuilder}. Each {@link
-   * BayesianNetworkBuilderNode} contains all the information required to construct a single {@link
-   * Node} within the new {@link BayesianNetwork}.
+   * Adds a {@link ProbabilityConstraint} to the network to be built. During the solving process,
+   * the solver will attempt to find a solution that minimizes the divergence from the constraints
+   * assigned to it.
    *
-   * @return the current list of {@link BayesianNetworkBuilderNode}s.
+   * <p>Constraints are given in the form {@code P(E|C) = p}, where:
+   *
+   * <ul>
+   *   <li>{@code E} are the event {@link NodeState}s.
+   *   <li>{@code C} are the condition {@link NodeState}s.
+   *   <li>{@code p} is the conditional probability.
+   * </ul>
+   *
+   * <p>Constraints do not need to follow the network's graph ordering, {@code P(X|Pa(X))}. However,
+   * constraints that span conditionally independent nodes cannot be losslessly projected back to
+   * individual CPT entries, and may produce different inference results after fitting. Such
+   * constraints may also add another virtual edge to the graph's structure during solving, which
+   * can increase the treewidth.
+   *
+   * @param probabilityConstraint a constraint containing node states from the network to be built
+   * @return this builder for method chaining
+   * @throws ConstraintValidationException if the constraint is in an illegal configuration
    */
-  public List<BayesianNetworkBuilderNode<?>> getNodeInputs() {
-    return this.nodeInputs;
-  }
+  BayesianNetworkBuilder addConstraint(ProbabilityConstraint probabilityConstraint);
+
+  /**
+   * Adds a collection of {@link ProbabilityConstraint}s to the network to be built. During the
+   * solving process, the solver will attempt to find a solution that minimizes the divergence from
+   * the constraints assigned to it.
+   *
+   * <p>Constraints are given in the form {@code P(E|C) = p}, where:
+   *
+   * <ul>
+   *   <li>{@code E} are the event {@link NodeState}s.
+   *   <li>{@code C} are the condition {@link NodeState}s.
+   *   <li>{@code p} is the conditional probability.
+   * </ul>
+   *
+   * <p>Constraints do not need to follow the network's graph ordering, {@code P(X|Pa(X))}. However,
+   * constraints that span conditionally independent nodes cannot be losslessly projected back to
+   * individual CPT entries, and may produce different inference results after fitting. Such
+   * constraints may also add another virtual edge to the graph's structure during solving, which
+   * can increase the treewidth.
+   *
+   * @param probabilityConstraints the constraints to add
+   * @return this builder for method chaining
+   * @throws ConstraintValidationException if any constraint is in an illegal configuration
+   */
+  BayesianNetworkBuilder addConstraints(Collection<ProbabilityConstraint> probabilityConstraints);
+
+  /**
+   * Returns the {@link ProbabilityConstraint}s that have been added to this builder.
+   *
+   * @return the set of constraints added so far
+   */
+  Set<ProbabilityConstraint> getConstraints();
+
+  /** Removes all {@link ProbabilityConstraint}s that have been added to this builder. */
+  void clearConstraints();
 }

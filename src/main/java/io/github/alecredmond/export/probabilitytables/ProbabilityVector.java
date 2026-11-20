@@ -19,11 +19,12 @@ import lombok.ToString;
  * P(S) = probabilities[index]
  * }</pre>
  *
- * <p>Node ordering is defined by {@link #orderedNodes}. The same index positions map consistently
- * across {@link #stateArrays}, {@link #numberOfStates}, and {@link #strideLengths}.
+ * <p>The order of the nodes is given by {@link #getOrderedNodes()}. The same index positions map
+ * consistently across {@link #getStateArrays()}, {@link #getNumberOfStates()}, and {@link
+ * #getStrideLengths()}.
  *
- * @see ProbabilityTable
  * @author Alec Redmond
+ * @see ProbabilityTable
  */
 @SuppressWarnings("LombokGetterMayBeUsed")
 @EqualsAndHashCode(callSuper = true)
@@ -37,19 +38,19 @@ public class ProbabilityVector extends CartesianVector<Node, NodeState> {
    */
   private final double[] probabilities;
 
-  /** Maps each {@link Node} in this vector to its index position in {@link #orderedNodes}. */
+  /** Maps each {@link Node} in this vector to its index position in {@link #getOrderedNodes()}. */
   private final Map<Node, Integer> nodeIndexMap;
 
   /**
    * Constructs a new {@code ProbabilityVector}. This constructor is used internally.
    *
-   * @param orderedNodes the ordered array of nodes in this vector.
-   * @param stateArrays the multidimensional array of states parallel to the node array.
-   * @param numberOfStates the number of states available for each node.
-   * @param strideLengths the stride values used to compute the probability index.
-   * @param probabilities the flat double array containing probability entries.
-   * @param nodeIndexMap a look-up map pointing from nodes to their structural array indexes.
-   * @param rank the length of the probabilities array.
+   * @param orderedNodes the ordered array of nodes in this vector
+   * @param stateArrays the multidimensional array of states, parallel to the node array
+   * @param numberOfStates the number of states available for each node
+   * @param strideLengths the stride values used to compute the probability index
+   * @param probabilities the flat {@code double} array that contains the probability entries
+   * @param nodeIndexMap a lookup map from each node to its index in the structural arrays
+   * @param rank the length of the probabilities array
    */
   public ProbabilityVector(
       Node[] orderedNodes,
@@ -65,16 +66,16 @@ public class ProbabilityVector extends CartesianVector<Node, NodeState> {
   }
 
   /**
-   * Returns ordered array of {@link Node}s managed by this probability vector. The index of each
-   * {@link Node} is used to access its relevant data in:
+   * Returns the ordered array of {@link Node}s managed by this probability vector. The index of
+   * each {@code Node} is used to access its relevant data in:
    *
    * <ul>
-   *   <li>{@link #stateArrays}
-   *   <li>{@link #numberOfStates}
-   *   <li>{@link #strideLengths}
+   *   <li>{@link #getStateArrays()}
+   *   <li>{@link #getNumberOfStates()}
+   *   <li>{@link #getStrideLengths()}
    * </ul>
    *
-   * @return the parallel node array.
+   * @return the parallel node array
    */
   @Override
   public Node[] getOrderedNodes() {
@@ -83,9 +84,10 @@ public class ProbabilityVector extends CartesianVector<Node, NodeState> {
 
   /**
    * Returns the number of {@link NodeState} values for each node, parallel to {@link
-   * #orderedNodes}. Equivalent to {@code stateArrays[i].length} for each index {@code i}.
+   * #getOrderedNodes()}. This is equivalent to {@code stateArrays[i].length} for each index {@code
+   * i}.
    *
-   * @return the parallel array of state counts.
+   * @return the parallel array of state counts
    */
   @Override
   public int[] getNumberOfStates() {
@@ -93,13 +95,13 @@ public class ProbabilityVector extends CartesianVector<Node, NodeState> {
   }
 
   /**
-   * Returns the stride values used to compute an index into {@link #probabilities}. The multiplier
-   * decreases along the length of the array such that:<br>
-   * {@code strideLengths[i+1] = strideLengths[i] / numberOfStates[i]} <br>
-   * The final element will always equal 1.<br>
-   * See the class-level documentation for the full indexing formula.
+   * Returns the stride values used to compute an index into the probability array. The multiplier
+   * decreases along the length of the array such that {@code strideLengths[i+1] = strideLengths[i]
+   * / numberOfStates[i]}, and the final element always equals 1.
    *
-   * @return the parallel array of stride lengths.
+   * <p>See the class-level documentation for the full indexing formula.
+   *
+   * @return the parallel array of stride lengths
    */
   @Override
   public int[] getStrideLengths() {
@@ -107,12 +109,12 @@ public class ProbabilityVector extends CartesianVector<Node, NodeState> {
   }
 
   /**
-   * Returns the states available for each node, parallel to {@link #orderedNodes}. {@code
-   * stateArrays[i]} contains all {@link NodeState} values for {@code nodeArray[i]}. <br>
-   * Accessing {@code stateArrays[i][j]} is equivalent to {@code
-   * nodeArray[i].getNodeStates().get(j)}.
+   * Returns the states available for each node, parallel to {@link #getOrderedNodes()}. The array
+   * {@code stateArrays[i]} contains all {@link NodeState} values of {@code orderedNodes[i]}, so
+   * accessing {@code stateArrays[i][j]} is equivalent to {@code
+   * orderedNodes[i].getStates().get(j)}.
    *
-   * @return the parallel matrix of node states.
+   * @return the parallel matrix of node states
    */
   @Override
   public NodeState[][] getStateArrays() {
@@ -120,10 +122,10 @@ public class ProbabilityVector extends CartesianVector<Node, NodeState> {
   }
 
   /**
-   * Returns the length of the probability array in this {@code ProbabilityVector}. Equal to the
-   * size of the Cartesian Product of all {@link Node}s declared in {@link #orderedNodes}.
+   * Returns the length of the probability array in this {@code ProbabilityVector}. This is equal to
+   * the size of the Cartesian product of all {@link Node}s in {@link #getOrderedNodes()}.
    *
-   * @return the rank of this {@code ProbabilityVector}.
+   * @return the rank of this {@code ProbabilityVector}
    */
   @Override
   public int getRank() {
@@ -131,21 +133,21 @@ public class ProbabilityVector extends CartesianVector<Node, NodeState> {
   }
 
   /**
-   * The probability value for each {@link NodeState} combination in the Cartesian product. The
-   * maximum length of this array, and therefore the absolute entry limit for a {@code
+   * Returns the probability value for each {@link NodeState} combination in the Cartesian product.
+   * The maximum length of this array, and therefore the absolute entry limit for a {@code
    * ProbabilityVector}, is 2<sup>31</sup>&minus;1.
    *
-   * @return the complete backing double array.
+   * @return the complete backing {@code double} array
    */
   public double[] getProbabilities() {
     return this.probabilities;
   }
 
   /**
-   * Returns an index lookup map, linking each {@link Node} in this vector to its index position in
-   * {@link #orderedNodes}.
+   * Returns an index lookup map that links each {@link Node} in this vector to its index position
+   * in {@link #getOrderedNodes()}.
    *
-   * @return a map linking nodes to their absolute array index positions.
+   * @return a map linking nodes to their absolute array index positions
    */
   public Map<Node, Integer> getNodeIndexMap() {
     return this.nodeIndexMap;

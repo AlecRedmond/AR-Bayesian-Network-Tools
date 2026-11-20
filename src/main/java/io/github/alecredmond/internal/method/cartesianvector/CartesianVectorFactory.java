@@ -4,7 +4,7 @@ import io.github.alecredmond.exceptions.ProbabilityVectorFactoryException;
 import io.github.alecredmond.internal.application.cartesianvector.CartesianState;
 import io.github.alecredmond.internal.application.cartesianvector.CartesianVariable;
 import io.github.alecredmond.internal.application.cartesianvector.CartesianVector;
-import io.github.alecredmond.internal.method.junctiontree.treebuilding.TreewidthValidator;
+import io.github.alecredmond.internal.method.cliquegraph.factory.factoryutils.TreewidthValidator;
 import io.github.alecredmond.internal.method.utils.CollectionToString;
 import java.util.List;
 import java.util.function.IntFunction;
@@ -38,7 +38,7 @@ public abstract class CartesianVectorFactory<
           "Attempted to create a vector using nodes [%s], which have no NodeStates!"
               .formatted(CollectionToString.apply(emptyStates)));
     }
-    if (!TreewidthValidator.validateVectorLength(nodes)) {
+    if (!TreewidthValidator.validateIndexableByInt(nodes)) {
       throw new ProbabilityVectorFactoryException(
           "Attempted to create a Probability Vector that would exceed 2^31 - 1 entries with nodes: [%s]"
               .formatted(CollectionToString.apply(nodes)));

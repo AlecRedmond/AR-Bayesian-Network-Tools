@@ -7,10 +7,7 @@ import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
 import io.github.alecredmond.export.probabilitytables.ObservedTable;
 import io.github.alecredmond.internal.application.probabilitytables.ObservedTableData;
-import io.github.alecredmond.internal.method.probabilitytables.printerformat.PrinterMatrixGeneratorBase;
-import io.github.alecredmond.internal.method.probabilitytables.printerformat.UnconditionalMatrixGenerator;
 import io.github.alecredmond.internal.method.probabilitytables.tablefactory.ObservedTableFactory;
-import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 import lombok.EqualsAndHashCode;
@@ -25,11 +22,6 @@ public class ObservedTableImpl extends ProbabilityTableBase<ObservedTableData>
   @Override
   public void normalizeTable() {
     TableUtils.marginalizeJointTable(this);
-  }
-
-  @Override
-  protected PrinterMatrixGeneratorBase buildMatrixGenerator() {
-    return new UnconditionalMatrixGenerator(tableData);
   }
 
   @Override
@@ -50,11 +42,6 @@ public class ObservedTableImpl extends ProbabilityTableBase<ObservedTableData>
   @Override
   public Double getProbability(NodeState state) {
     return super.getProbability(List.of(state));
-  }
-
-  @Override
-  public Double getProbabilityById(Serializable stateId) {
-    return super.getProbabilityFromIDs(List.of(stateId));
   }
 
   @Override

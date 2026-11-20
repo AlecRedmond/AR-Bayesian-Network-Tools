@@ -1,0 +1,259 @@
+package io.github.alecredmond.export.inference.direct;
+
+import io.github.alecredmond.exceptions.NetworkPrinterException;
+import io.github.alecredmond.export.inference.BayesianInference;
+import io.github.alecredmond.export.inference.indirect.MonteCarloSampler;
+import io.github.alecredmond.export.network.BayesianNetwork;
+import io.github.alecredmond.export.node.Node;
+import io.github.alecredmond.export.node.NodeState;
+import io.github.alecredmond.export.probabilitytables.Clique;
+import io.github.alecredmond.export.probabilitytables.ObservedTable;
+import io.github.alecredmond.export.probabilitytables.Separator;
+import io.github.alecredmond.export.solver.ConstraintFitter;
+import java.io.Serializable;
+import java.util.Arrays;
+import java.util.Collection;
+
+/**
+ * {@code InferenceEngine} provides utilities for running direct inference on a solved {@link
+ * BayesianNetwork}. The values stored in the network's Conditional Probability Tables (CPTs) are
+ * mapped to a secondary inference network which can be queried for prior or posterior
+ * probabilities.
+ *
+ * <p>Specific {@link NodeState} values can be set as observed (always true) using {@link
+ * #setObserved(Collection)} or {@link #setObservedById(Collection)}. These will be persisted in the
+ * instance until new observations are given, or until the observations are cleared using {@link
+ * #resetObservations()}.
+ *
+ * <p>Unlike {@link MonteCarloSampler}, which will give an approximate solution, the results of
+ * direct inference are both exact and deterministic.
+ *
+ * <p>Instances of this interface are not thread-safe. External synchronization is required for
+ * concurrent access.
+ *
+ * @see ConstraintFitter
+ * @author Alec Redmond
+ */
+@SuppressWarnings("UnusedReturnValue")
+public interface InferenceEngine extends BayesianInference<InferenceEngine> {
+
+  /**
+   * Returns an {@link ObservedTable} associated with a {@link Node}. This is a table containing
+   * only the node's {@link NodeState} values, which are mapped to their current posterior
+   * probability if this {@code InferenceEngine} has observations applied, or their prior (marginal)
+   * probability otherwise. The values on this table are not deep-copied and will change if the
+   * observations on this instance change.
+   *
+   * @param nodeId the identifier of the {@link Node} associated with the {@link ObservedTable}.
+   * @param <T> the type of the node identifier.
+   * @return a {@link ObservedTable} mapping a single node's states to their current probability.
+   * @throws NullPointerException if the identifier was not associated with any {@link Node}.
+   */
+  <T extends Serializable> ObservedTable getObservedTableById(T nodeId);
+
+  /**
+   * Returns an {@link ObservedTable} associated with a {@link Node}. This is a table containing
+   * only the node's {@link NodeState} values, which are mapped to their current posterior
+   * probability if this {@code InferenceEngine} has observations applied, or their prior (marginal)
+   * probability otherwise. The values on this table are not deep-copied and will change if the
+   * observations on this instance change.
+   *
+   * @param nodeName the name of the {@link Node} associated with the {@link ObservedTable}.
+   * @return a {@link ObservedTable} mapping a single node's states to their current probability.
+   */
+  ObservedTable getObservedTableByNodeName(String nodeName);
+
+  /**
+   * Returns an {@link ObservedTable} associated with a {@link Node}. This is a table containing
+   * only the node's {@link NodeState} values, which are mapped to their current posterior
+   * probability if this {@code InferenceEngine} has observations applied, or their prior (marginal)
+   * probability otherwise. The values on this table are not deep-copied and will change if the
+   * observations on this instance change.
+   *
+   * @param node the {@link Node} associated with the {@link ObservedTable}.
+   * @return a {@link ObservedTable} mapping a single node's states to their current probability.
+   */
+  ObservedTable getObservedTable(Node node);
+
+  /**
+   * Returns an {@link ObservedTable} associated with a {@link Node}. This is a table containing
+   * only the node's {@link NodeState} values, which are mapped to their current posterior
+   * probability if this {@code InferenceEngine} has observations applied, or their prior (marginal)
+   * probability otherwise. This will provide a deep copy of the table, and the probability values
+   * will not change if the observations on the instance change.
+   *
+   * @param nodeId the identifier of the {@link Node} associated with the {@link ObservedTable}.
+   * @param <T> the type of the node identifier.
+   * @return a {@link ObservedTable} mapping a single node's states to their probability given the
+   *     conditions when constructed.
+   * @throws NullPointerException if the id was not associated with any {@link Node}.
+   */
+  <T extends Serializable> ObservedTable copyObservedTableById(T nodeId);
+
+  /**
+   * Returns an {@link ObservedTable} associated with a {@link Node}. This is a table containing
+   * only the node's {@link NodeState} values, which are mapped to their current posterior
+   * probability if this {@code InferenceEngine} has observations applied, or their prior (marginal)
+   * probability otherwise. This will provide a deep copy of the table, and the probability values
+   * will not change if the observations on the instance change.
+   *
+   * @param node the {@link Node} associated with the {@link ObservedTable}.
+   * @return a {@link ObservedTable} mapping a single node's states to their probability given the
+   *     conditions when constructed.
+   */
+  ObservedTable copyObservedTable(Node node);
+
+  /**
+   * Returns all {@link ObservedTable}s associated with the {@link Node} values of the network.
+   * {@link ObservedTable}s are tables containing only the node's {@link NodeState} values, which
+   * are mapped to their current posterior probability if this {@code InferenceEngine} has
+   * observations applied, or their prior (marginal) probability otherwise. The values on each table
+   * are not deep-copied and will change if the observations on this instance change.
+   *
+   * @return an array of all {@link ObservedTable}s in this {@code InferenceEngine}.
+   */
+  ObservedTable[] getObservedTables();
+
+  /**
+   * Returns the posterior probability of the given {@link NodeState} values, or their prior
+   * probability if this {@code InferenceEngine} is unobserved. This measures {@code P(S|O)} where S
+   * is the intersection of all queried states and O is the current observations.
+   *
+   * @param measuredStates the states to be queried.
+   * @return the posterior probability of all measured {@link NodeState} values.
+   */
+  default double getPosteriorProbability(NodeState... measuredStates) {
+    return getPosteriorProbability(Arrays.asList(measuredStates));
+  }
+
+  /**
+   * Returns the posterior probability of the given {@link NodeState} values, or their prior
+   * probability if this {@code InferenceEngine} is unobserved. This measures {@code P(S|O)} where S
+   * is the intersection of all queried states and O is the current observations.
+   *
+   * @param measuredStates the states to be queried.
+   * @return the posterior probability of all measured {@link NodeState} values.
+   */
+  double getPosteriorProbability(Collection<NodeState> measuredStates);
+
+  /**
+   * Returns the posterior probability of the given {@link NodeState} values, or their prior
+   * probability if this {@code InferenceEngine} is unobserved. This measures {@code P(S|O)} where S
+   * is the intersection of all queried states and O is the current observations.
+   *
+   * @param measuredStateIds the identifiers of all {@link NodeState} values to be queried.
+   * @return the posterior probability of all measured {@link NodeState} values.
+   * @throws NullPointerException if any id was not associated with a {@link NodeState}.
+   */
+  default double getPosteriorProbabilityById(Serializable... measuredStateIds) {
+    return getPosteriorProbabilityById(Arrays.asList(measuredStateIds));
+  }
+
+  /**
+   * Returns the posterior probability of the given {@link NodeState} values, or their prior
+   * probability if this {@code InferenceEngine} is unobserved. This measures {@code P(S|O)} where S
+   * is the intersection of all queried states and O is the current observations.
+   *
+   * @param measuredStateIds the identifiers of all {@link NodeState} values to be queried.
+   * @param <T> the type of the measured {@link NodeState} identifiers.
+   * @return the posterior probability of all measured {@link NodeState} values.
+   * @throws NullPointerException if any id was not associated with a {@link NodeState}.
+   */
+  <T extends Serializable> double getPosteriorProbabilityById(Collection<T> measuredStateIds);
+
+  /**
+   * Prints the posterior probability values from all {@link ObservedTable} entries, either to a
+   * {@code .txt} file or to the console. Parameters for the printer can be defined within {@code
+   * app.properties} under the {@code app.bayes.printer} section.
+   *
+   * @return this instance for chaining.
+   * @throws NetworkPrinterException if the printer is unable to successfully complete the
+   *     operation.
+   */
+  InferenceEngine printObserved();
+
+  /**
+   * Prints the posterior probability values from the {@link ObservedTable} entries associated with
+   * the given {@link Node}s, either to a {@code .txt} file or to the console. Parameters for the
+   * printer can be defined within {@code app.properties} under the {@code app.bayes.printer}
+   * section.
+   *
+   * @param nodeIds the identifiers of all {@link Node} values where the associated {@link
+   *     ObservedTable} should be printed.
+   * @return this instance for chaining.
+   * @throws NetworkPrinterException if the printer is unable to successfully complete the
+   *     operation.
+   * @throws NullPointerException if any identifiers were not associated with a {@link Node}.
+   */
+  default InferenceEngine printObservedById(Serializable... nodeIds) {
+    return printObservedById(Arrays.asList(nodeIds));
+  }
+
+  /**
+   * Prints the posterior probability values from the {@link ObservedTable} entries associated with
+   * the given {@link Node}s, either to a {@code .txt} file or to the console. Parameters for the
+   * printer can be defined within {@code app.properties} under the {@code app.bayes.printer}
+   * section.
+   *
+   * @param nodeIds the identifiers of all {@link Node} values where the associated {@link
+   *     ObservedTable} should be printed.
+   * @param <T> the type of the {@link Node} identifiers.
+   * @return this instance for chaining.
+   * @throws NetworkPrinterException if the printer is unable to successfully complete the
+   *     operation.
+   * @throws NullPointerException if any identifiers were not associated with a {@link Node}.
+   */
+  <T extends Serializable> InferenceEngine printObservedById(Collection<T> nodeIds);
+
+  /**
+   * Prints the posterior probability values from the {@link ObservedTable} entries associated with
+   * the given {@link Node}, either to a {@code .txt} file or to the console. Parameters for the
+   * printer can be defined within {@code app.properties} under the {@code app.bayes.printer}
+   * section.
+   *
+   * @param node a {@link Node} where the associated {@link ObservedTable} should be printed.
+   * @return this instance for chaining.
+   * @throws NetworkPrinterException if the printer is unable to successfully complete the
+   *     operation.
+   */
+  default InferenceEngine printObserved(Node... node) {
+    return printObserved(Arrays.asList(node));
+  }
+
+  /**
+   * Prints the posterior probability values from the {@link ObservedTable} entries associated with
+   * the given {@link Node}, either to a {@code .txt} file or to the console. Parameters for the
+   * printer can be defined within {@code app.properties} under the {@code app.bayes.printer}
+   * section.
+   *
+   * @param nodes all {@link Node} values where the associated {@link ObservedTable} should be
+   *     printed.
+   * @return this instance for chaining.
+   * @throws NetworkPrinterException if the printer is unable to successfully complete the
+   *     operation.
+   */
+  InferenceEngine printObserved(Collection<Node> nodes);
+
+  /**
+   * Returns the smallest leaf {@link Clique} in this {@code InferenceEngine}. This clique is
+   * guaranteed to have only one connected separator and can be used as a starting point for a
+   * complete ordering of the inference graph.
+   *
+   * @return the leaf {@link Clique} with the shortest probability array.
+   */
+  Clique getSmallestLeafClique();
+
+  /**
+   * Returns all {@link Clique} tables in this {@code InferenceEngine}.
+   *
+   * @return an array of every {@link Clique} in this {@code InferenceEngine}.
+   */
+  Clique[] getCliques();
+
+  /**
+   * Returns all {@link Separator} tables in this {@code InferenceEngine}.
+   *
+   * @return an array of every {@link Separator} in this {@code InferenceEngine}.
+   */
+  Separator[] getSeparators();
+}

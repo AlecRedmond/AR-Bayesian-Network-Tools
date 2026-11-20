@@ -27,6 +27,9 @@ public class JunctionTableSummer implements ProbabilityIteratorTemplate {
   }
 
   public double sum(Collection<NodeState> states) {
+    if (states.isEmpty()) {
+      return Arrays.stream(table.getProbabilities()).sum();
+    }
     this.requestStates.clear();
     this.requestNodes.clear();
     this.requestStates.addAll(states);

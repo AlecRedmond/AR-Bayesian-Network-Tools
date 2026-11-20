@@ -1,7 +1,7 @@
 package io.github.alecredmond.internal.method.probabilitytables.tablefactory;
 
 import io.github.alecredmond.exceptions.TableBuilderException;
-import io.github.alecredmond.export.network.BayesianNetworkData;
+import io.github.alecredmond.export.network.BayesianNetwork;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.probabilitytables.ProbabilityVector;
 import io.github.alecredmond.internal.application.probabilitytables.JunctionTreeTableData;
@@ -11,8 +11,8 @@ import java.util.*;
 
 public class JunctionTreeTableFactory extends BaseTableFactory<JunctionTreeTable> {
 
-  public JunctionTreeTable buildTable(Set<Node> events, BayesianNetworkData bnd) {
-    List<Node> orderedNodes = bnd.getNodes().stream().filter(events::contains).toList();
+  public JunctionTreeTable buildTable(Set<Node> events, BayesianNetwork network) {
+    List<Node> orderedNodes = network.streamNodes().filter(events::contains).toList();
     return buildTable(orderedNodes, new ArrayList<>());
   }
 

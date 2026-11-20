@@ -3,19 +3,19 @@ package io.github.alecredmond.export.probabilitytables;
 import static io.github.alecredmond.TestConfigs.DOUBLE_EQUALITY;
 import static org.junit.jupiter.api.Assertions.*;
 
-import io.github.alecredmond.export.constraints.ProbabilityConstraint;
 import io.github.alecredmond.export.network.BayesianNetwork;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
-import io.github.alecredmond.export.probabilitytables.cptentry.CptEntry;
+import io.github.alecredmond.export.probabilitytables.tableentry.CptEntry;
+import io.github.alecredmond.export.probabilitytables.tableentry.CptRow;
+import io.github.alecredmond.export.solver.constraint.ProbabilityConstraint;
 import io.github.alecredmond.internal.method.node.NodeUtils;
 import io.github.alecredmond.internal.method.probabilitytables.probabilityvector.ProbabilityVectorFactory;
 import io.github.alecredmond.internal.method.vectoriterator.misciterators.StateCombinationGenerator;
-import io.github.alecredmond.scenarios.NetworkScenario;
-import java.io.Serializable;
+import io.github.alecredmond.networkscenario.NetworkScenario;
+import io.github.alecredmond.networkscenario.NetworkScenarioType;
 import java.util.*;
 import java.util.function.BiFunction;
-import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -28,32 +28,30 @@ import org.junit.jupiter.params.provider.MethodSource;
 class TableQueryToolTest {
 
   public static Stream<Arguments> provideNormalizeTableArgs() {
-    return provideArgs(
-        (t, n) -> Stream.of(Arguments.of(t)), s -> s.get().buildNetworkData(), t -> true);
+    return provideArgs((t, n) -> Stream.of(Arguments.of(t)), t -> true);
   }
 
   static Stream<Arguments> provideArgs(
       BiFunction<NetworkTable, BayesianNetwork, Stream<Arguments>> function,
-      Function<NetworkScenario, BayesianNetwork> networkInit,
       Predicate<? super NetworkTable> tableFilter) {
-    return getBayesianNetworkStream(networkInit)
+    return getBayesianNetworkStream()
         .flatMap(
             network ->
-                network.getNetworkData().getNetworkTablesMap().values().stream()
+                Arrays.stream(network.getNetworkTables())
                     .filter(tableFilter)
                     .map(t -> Optional.ofNullable(function.apply(t, network)))
                     .filter(Optional::isPresent)
                     .flatMap(Optional::get));
   }
 
-  private static Stream<BayesianNetwork> getBayesianNetworkStream(
-      Function<NetworkScenario, BayesianNetwork> networkInit) {
-    return Arrays.stream(NetworkScenario.values())
-        .map(networkInit);
+  private static Stream<BayesianNetwork> getBayesianNetworkStream() {
+    return Arrays.stream(NetworkScenarioType.values())
+        .map(NetworkScenarioType::get)
+        .map(NetworkScenario::buildNetwork);
   }
 
   public static Stream<Arguments> provideOverloadedCptQueryNetworks() {
-    return getBayesianNetworkStream(s -> s.get().solveNetwork()).map(Arguments::of);
+    return getBayesianNetworkStream().map(Arguments::of);
   }
 
   public static Stream<Arguments> provideNetworkTables() {
@@ -61,13 +59,7 @@ class TableQueryToolTest {
   }
 
   static Stream<Arguments> provideTableOnly(Predicate<? super NetworkTable> tableFilter) {
-    return provideSolvedArgs((table, network) -> Stream.of(Arguments.of(table)), tableFilter);
-  }
-
-  static Stream<Arguments> provideSolvedArgs(
-      BiFunction<NetworkTable, BayesianNetwork, Stream<Arguments>> function,
-      Predicate<? super NetworkTable> tableFilter) {
-    return provideArgs(function, scenario -> scenario.get().solveNetwork(), tableFilter);
+    return provideArgs((table, network) -> Stream.of(Arguments.of(table)), tableFilter);
   }
 
   public static Stream<Arguments> provideSafeModeArgs() {
@@ -79,12 +71,13 @@ class TableQueryToolTest {
   }
 
   public static Stream<Arguments> provideGetConditionProbArgs() {
-    return provideSolvedArgs(TableQueryToolTest::allConditionsForTable, t -> true);
+    return provideArgs(
+        TableQueryToolTest::allConditionsForTable, (Predicate<? super NetworkTable>) t -> true);
   }
 
   private static Stream<Arguments> allConditionsForTable(NetworkTable t, BayesianNetwork n) {
     List<ProbabilityConstraint> eventStateConstraints =
-        n.getNetworkData().getConstraints().stream()
+        n.getConstraints().stream()
             .filter(c -> c.getEventNodes().equals(t.getEvents()))
             .filter(c -> c.getEventStates().size() == 1)
             .filter(c -> c.getConditionNodes().equals(t.getConditions()))
@@ -123,13 +116,14 @@ class TableQueryToolTest {
   }
 
   static Stream<Arguments> provideGetProbArgs() {
-    return provideSolvedArgs(TableQueryToolTest::buildGetProbArgs, t -> true);
+    return provideArgs(
+        TableQueryToolTest::buildGetProbArgs, (Predicate<? super NetworkTable>) t -> true);
   }
 
   static Stream<Arguments> buildGetProbArgs(NetworkTable table, BayesianNetwork network) {
     Set<Node> eventNodes = table.getEvents();
     Set<Node> conditionNodes = table.getConditions();
-    return network.getNetworkData().getConstraints().stream()
+    return network.getConstraints().stream()
         .filter(c -> c.getEventNodes().equals(eventNodes))
         .filter(c -> c.getEventStates().size() == 1)
         .filter(c -> c.getConditionNodes().equals(conditionNodes))
@@ -141,14 +135,6 @@ class TableQueryToolTest {
   void getProbability_shouldSucceed(NetworkTable table, ProbabilityConstraint constraint) {
     Set<NodeState> allStates = constraint.getAllStates();
     assertEquals(constraint.getProbability(), table.getProbability(allStates), DOUBLE_EQUALITY);
-  }
-
-  @ParameterizedTest
-  @MethodSource("provideGetProbArgs")
-  void getProbabilityFromIDs_shouldSucceed(NetworkTable table, ProbabilityConstraint constraint) {
-    List<Serializable> stateIds = NodeUtils.getNodeStateIds(constraint.getAllStates());
-    assertEquals(
-        constraint.getProbability(), table.getProbabilityFromIDs(stateIds), DOUBLE_EQUALITY);
   }
 
   @ParameterizedTest
@@ -186,19 +172,6 @@ class TableQueryToolTest {
   }
 
   @ParameterizedTest
-  @MethodSource("provideGetConditionProbArgs")
-  void getConditionalProbByIds(
-      NetworkTable networkTable,
-      Map<NodeState, ProbabilityConstraint> constraintMap,
-      Collection<NodeState> conditionStates) {
-    Map<NodeState, Double> probs =
-        networkTable.getConditionalProbByIds(NodeUtils.getNodeStateIds(conditionStates));
-    constraintMap.forEach(
-        (event, constraint) ->
-            assertEquals(constraint.getProbability(), probs.get(event), DOUBLE_EQUALITY));
-  }
-
-  @ParameterizedTest
   @MethodSource("provideSafeModeArgs")
   void setSafeMode(NetworkTable networkTable) {
     Node networkNode = networkTable.getNetworkNode();
@@ -222,9 +195,9 @@ class TableQueryToolTest {
   @MethodSource("provideNetworkTables")
   void testListCptEntries(NetworkTable networkTable) {
     double[] probabilities = networkTable.getProbabilities();
-    List<CptEntry> entries = networkTable.getCptEntries();
+    CptEntry[] entries = networkTable.getEntries();
     for (int i = 0; i < probabilities.length; i++) {
-      CptEntry entry = entries.get(i);
+      CptEntry entry = entries[i];
       Set<NodeState> allStates = new HashSet<>(entry.conditionStates());
       allStates.add(entry.eventState());
       assertEquals(entry.probability(), probabilities[i], DOUBLE_EQUALITY);
@@ -235,31 +208,30 @@ class TableQueryToolTest {
   @ParameterizedTest
   @MethodSource("provideNetworkTables")
   void testIterateOverConditions(NetworkTable networkTable) {
-    networkTable.iterateOverConditions(
-        cptRow -> {
-          Set<NodeState> conditions = cptRow.conditionStates();
-          Map<NodeState, Double> conditionalProbMap = networkTable.getConditionalProb(conditions);
-          cptRow
-              .rowEntries()
-              .forEach(
-                  cptEntry -> {
-                    NodeState eventState = cptEntry.eventState();
-                    double probability = cptEntry.probability();
-                    assertEquals(conditionalProbMap.get(eventState), probability, DOUBLE_EQUALITY);
-                  });
-        });
+    for (CptRow cptRow : networkTable.getRows()) {
+      Set<NodeState> conditions = cptRow.conditionStates();
+      Map<NodeState, Double> conditionalProbMap = networkTable.getConditionalProb(conditions);
+      cptRow
+          .rowEntries()
+          .forEach(
+              cptEntry -> {
+                NodeState eventState = cptEntry.eventState();
+                double probability = cptEntry.probability();
+                assertEquals(conditionalProbMap.get(eventState), probability, DOUBLE_EQUALITY);
+              });
+    }
   }
 
   @ParameterizedTest
   @MethodSource("provideOverloadedCptQueryNetworks")
   void testOverloadedCptQueries(BayesianNetwork network) {
-    List<Node> nodes = network.getNetworkData().getNodes();
+    List<Node> nodes = network.getNodes(ArrayList::new);
     ProbabilityVector vector = new ProbabilityVectorFactory().build(nodes);
     StateCombinationGenerator generator = new StateCombinationGenerator(vector);
 
     List<Set<NodeState>> allStates =
         generator.generateCombos(new LinkedHashSet<>(nodes), LinkedHashSet::new);
-    List<NetworkTable> networkTables = network.getNetworkTables().values().stream().toList();
+    List<NetworkTable> networkTables = network.getNetworkTables(ArrayList::new);
 
     for (Set<NodeState> stateSet : allStates) {
       Map<Node, NodeState> request = NodeUtils.generateRequest(stateSet);

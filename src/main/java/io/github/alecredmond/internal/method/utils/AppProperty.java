@@ -9,11 +9,7 @@ public enum AppProperty {
   DIRECTORY_PRINTER("app.bayes.directory.printerDirectory"),
   DIRECTORY_SAVE("app.bayes.directory.saveDirectory"),
 
-  // Inference Properties
-  INFERENCE_ALGORITHM("app.bayes.inference.defaultInferenceAlgorithm"),
-
   // Solver Properties
-  SOLVER_ALGORITHM("app.bayes.solver.defaultSolverAlgorithm"),
   SOLVER_CYCLES_LIMIT("app.bayes.solver.cyclesLimit"),
   SOLVER_TIME_LIMIT_SECONDS("app.bayes.solver.timeLimitSeconds"),
   SOLVER_LOG_PROGRESS("app.bayes.solver.logSolverProgress"),

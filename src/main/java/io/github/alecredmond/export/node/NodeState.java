@@ -2,101 +2,95 @@ package io.github.alecredmond.export.node;
 
 import io.github.alecredmond.internal.application.cartesianvector.CartesianState;
 import java.io.Serializable;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NonNull;
+import java.util.*;
 
 /**
  * Represents a single state that a {@link Node} variable can exhibit.
  *
- * <p>Nodes within a Bayesian Network will typically have multiple states (for example "TRUE" or
- * "FALSE"), and these should comprehensively cover all possible outcomes a Node can achieve.
+ * <p>A node in a Bayesian network usually has several states, for example {@code "TRUE"} and {@code
+ * "FALSE"}. Together, the states of a node should cover every outcome that the node can have.
  *
- * <p>While a {@code NodeState}'s identifier can be anything both unique and serializable, when
- * defining an identifier using a descriptive string, it is highly advisable to prepend the state
- * name with the name of its parent {@code Node}:
- *
- * <ul>
- *   <li><b>Recommended:</b> {@code NodeState rainTrue = new NodeState("RAIN:TRUE", rain)}
- *   <li><b>Avoid:</b> {@code NodeState rainTrue = new NodeState("TRUE", rain)}
- * </ul>
- *
- * <p>This avoids any ID conflicts with other nodes that share the same state names ("TRUE" and
- * "FALSE" being the most obvious) while also making the origin of the state immediately clear.
+ * <p>Each {@code NodeState} must declare its index in the node's state list {@link
+ * Node#getStates()}, as well as its unique identifier and name. If a randomly assigned identifier
+ * is acceptable, the static method {@link NodeState#createStates(Node, String...)} may be used to
+ * build a list of states from the node and the state names.
  *
  * @author Alec Redmond
  * @see Node
+ * @see DefaultNodeState
  */
-@SuppressWarnings({"LombokGetterMayBeUsed"})
-@Data
-@EqualsAndHashCode(onlyExplicitlyIncluded = true)
-public class NodeState implements CartesianState {
-
-  /** The unique identifier for this state. */
-  @EqualsAndHashCode.Include private final Serializable id;
-
-  /** The parent {@link Node} that exhibits this state. */
-  private final Node node;
-
-  private int position;
+public interface NodeState extends CartesianState {
 
   /**
-   * Constructs a new {@code NodeState} with a unique identifier and its associated {@link Node}.
-   *
-   * @param id the {@link Serializable} unique identifier for this state
-   * @param node the {@link Node} that this state belongs to
-   * @param <T> the type of the state identifier
-   * @throws NullPointerException if either the id or the node is {@code null}
-   */
-  public <T extends Serializable> NodeState(@NonNull T id, @NonNull Node node) {
-    this.id = id;
-    this.node = node;
-  }
-
-  /**
-   * Returns a string representation of this state, which corresponds to its identifier.
-   *
-   * @return the string representation of the state identifier
-   */
-  @Override
-  public String toString() {
-    return id.toString();
-  }
-
-  /**
-   * Returns the unique identifier for this {@code NodeState}.
+   * Returns the unique identifier of this state.
    *
    * @return the {@link Serializable} identifier of this state
    */
-  public Serializable getId() {
-    return this.id;
+  Serializable getId();
+
+  /**
+   * Returns the node to which this state belongs.
+   *
+   * @return the {@link Node} that can exhibit this state
+   */
+  Node getNode();
+
+  /**
+   * Returns the index of this state in the list of states of its parent {@link Node}.
+   *
+   * @return the position of this state
+   */
+  int getPosition();
+
+  /**
+   * Returns the name of this state.
+   *
+   * @return the name of this state
+   */
+  String getName();
+
+  /**
+   * Creates a state for each of the specified names, for the specified node.
+   *
+   * <p>The state at index {@code i} of the returned list is a {@link DefaultNodeState} with
+   * position {@code i}, the name at index {@code i} of {@code stateNames}, and a randomly generated
+   * {@link UUID} as its identifier.
+   *
+   * <p>The hash code of each state is computed immediately from the identifier and name of {@code
+   * node}, so both should be set on {@code node} before this method is called. The created states
+   * are not added to {@code node}; the caller must assign them.
+   *
+   * @param node the node to which the created states belong
+   * @param stateNames the names of the states, in the order of their positions
+   * @return an unmodifiable list of the new states, in the order of {@code stateNames}
+   * @throws NullPointerException if {@code node} or {@code stateNames} is {@code null}
+   */
+  static List<NodeState> createStates(Node node, String... stateNames) {
+    return createStates(node, Arrays.stream(stateNames).toList());
   }
 
   /**
-   * Returns the parent {@link Node} associated with this state.
+   * Creates a state for each of the specified names, for the specified node.
    *
-   * @return the {@link Node} instance that exhibits this state
-   */
-  public Node getNode() {
-    return this.node;
-  }
-
-  /**
-   * Returns the index of this {@code NodeState} in its parent {@link Node}'s state list.
+   * <p>The state at index {@code i} of the returned list is a {@link DefaultNodeState} with
+   * position {@code i}, the name at index {@code i} of {@code stateNames}, and a randomly generated
+   * {@link UUID} as its identifier.
    *
-   * @return the position of this {@code NodeState}
-   */
-  public int getPosition() {
-    return this.position;
-  }
-
-  /**
-   * Package-private setter for the index position of this {@code NodeState} in its parent {@link
-   * Node}'s state list.
+   * <p>The hash code of each state is computed immediately from the identifier and name of {@code
+   * node}, so both should be set on {@code node} before this method is called. The created states
+   * are not added to {@code node}; the caller must assign them.
    *
-   * @param position the index of this state.
+   * @param node the node to which the created states belong
+   * @param stateNames the names of the states, in the order of their positions
+   * @return an unmodifiable list of the new states, in the order of {@code stateNames}
+   * @throws NullPointerException if {@code node} or {@code stateNames} is {@code null}
    */
-  void setPosition(int position) {
-    this.position = position;
+  static List<NodeState> createStates(Node node, List<String> stateNames) {
+    List<NodeState> states = new ArrayList<>();
+    int position = 0;
+    for (String name : stateNames) {
+      states.add(new DefaultNodeState(node, position++, name, UUID.randomUUID()));
+    }
+    return Collections.unmodifiableList(states);
   }
 }

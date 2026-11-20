@@ -11,6 +11,7 @@ import io.github.alecredmond.internal.method.utils.CollectionToString;
 import java.util.Collection;
 import java.util.List;
 import java.util.function.Function;
+import java.util.function.IntFunction;
 import java.util.stream.IntStream;
 
 public class SafeIndexFinder<N extends CartesianVariable, S extends CartesianState>
@@ -24,8 +25,9 @@ public class SafeIndexFinder<N extends CartesianVariable, S extends CartesianSta
       CartesianVector<N, S> vector,
       Function<S, N> getNodeFn,
       Function<S, Integer> statePositionFinder,
-      Function<N, Integer> nodeIndexFinder) {
-    super(vector, getNodeFn, statePositionFinder, nodeIndexFinder);
+      Function<N, Integer> nodeIndexFinder,
+      IntFunction<S[]> stateArrayBuilder) {
+    super(vector, getNodeFn, statePositionFinder, nodeIndexFinder, stateArrayBuilder);
   }
 
   @Override

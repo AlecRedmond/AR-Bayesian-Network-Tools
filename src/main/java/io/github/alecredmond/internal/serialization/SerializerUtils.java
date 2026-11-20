@@ -1,6 +1,5 @@
 package io.github.alecredmond.internal.serialization;
 
-import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
 import java.io.Serializable;
 import java.util.*;
@@ -11,9 +10,9 @@ import java.util.stream.Collectors;
 public class SerializerUtils {
   private SerializerUtils() {}
 
-  public static <T extends Collection<Node>, R extends T> T deSerializeNodes(
-      Collection<Serializable> nodeIds, Supplier<R> collectionSupplier, SerializationData data) {
-    return deSerializeCollection(nodeIds, data.getNodeIdMap()::get, collectionSupplier);
+  public static <T extends Collection<NodeState>, R extends T> T deSerializeNodeStates(
+      Collection<Serializable> stateIds, Supplier<R> collectionSupplier, SerializationData data) {
+    return deSerializeCollection(stateIds, data.getNodeStateIdMap()::get, collectionSupplier);
   }
 
   public static <T extends Collection<S>, R extends T, S> T deSerializeCollection(
@@ -23,15 +22,6 @@ public class SerializerUtils {
     return toDeserialize.stream()
         .map(deSerializationFunction)
         .collect(Collectors.toCollection(collectionSupplier));
-  }
-
-  public static <T extends Collection<NodeState>, R extends T> T deSerializeNodeStates(
-      Collection<Serializable> stateIds, Supplier<R> collectionSupplier, SerializationData data) {
-    return deSerializeCollection(stateIds, data.getNodeStateIdMap()::get, collectionSupplier);
-  }
-
-  public static List<Serializable> serializeNodes(Collection<Node> nodes) {
-    return nodes.stream().map(Node::getId).toList();
   }
 
   public static List<Serializable> serializeNodeStates(Collection<NodeState> states) {

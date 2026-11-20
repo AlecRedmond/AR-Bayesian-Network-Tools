@@ -1,7 +1,7 @@
 package io.github.alecredmond.internal.application.solver;
 
-import io.github.alecredmond.export.constraints.ProbabilityConstraint;
 import io.github.alecredmond.export.probabilitytables.NetworkTable;
+import io.github.alecredmond.export.solver.constraint.ProbabilityConstraint;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.Data;

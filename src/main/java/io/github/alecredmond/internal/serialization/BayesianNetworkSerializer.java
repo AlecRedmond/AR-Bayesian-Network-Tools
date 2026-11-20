@@ -1,57 +1,61 @@
 package io.github.alecredmond.internal.serialization;
 
 import io.github.alecredmond.export.network.BayesianNetwork;
-import io.github.alecredmond.export.network.BayesianNetworkData;
 import io.github.alecredmond.export.network.serialized.SerializedBayesianNetwork;
 import io.github.alecredmond.export.node.Node;
-import io.github.alecredmond.internal.method.network.BayesianNetworkImpl;
-import io.github.alecredmond.internal.serialization.structure.NetworkTableSerializer;
-import io.github.alecredmond.internal.serialization.structure.NodeSerializer;
-import io.github.alecredmond.internal.serialization.structure.ProbabilityConstraintSerializer;
-import lombok.NoArgsConstructor;
+import io.github.alecredmond.export.node.NodeState;
+import io.github.alecredmond.export.node.serialization.SerializedNode;
+import io.github.alecredmond.export.probabilitytables.NetworkTable;
+import java.io.Serializable;
+import java.util.*;
 
-@NoArgsConstructor
 public class BayesianNetworkSerializer {
+  private final ProbabilityConstraintSerializer constraintSerializer;
+  private final NodeSerializers serializers;
 
-  public SerializedBayesianNetwork serialize(BayesianNetwork network) {
-    if (!network.isSolved()) network.solveNetwork();
-    BayesianNetworkData networkData = network.getNetworkData();
+  public BayesianNetworkSerializer() {
+    constraintSerializer = new ProbabilityConstraintSerializer();
+    serializers = NodeSerializers.getInstance();
+  }
+
+  public SerializedBayesianNetwork serializeNetwork(BayesianNetwork network) {
     return new SerializedBayesianNetwork(
-        networkData.getNetworkName(),
-        new NodeSerializer().serializeAllNodes(networkData),
-        new NetworkTableSerializer().serializeAllTables(networkData),
-        new ProbabilityConstraintSerializer().serializeAll(networkData),
-        networkData.isSolved());
+        network.getNetworkName(),
+        serializeAllNodes(network.getNetworkTables()),
+        constraintSerializer.serialize(network.getConstraints()));
   }
 
-  public BayesianNetwork deSerialize(SerializedBayesianNetwork serializedBayesianNetwork) {
+  private SerializedNode[] serializeAllNodes(NetworkTable[] networkTables) {
+    return Arrays.stream(networkTables)
+        .map(serializers::serializeFromTable)
+        .toArray(SerializedNode[]::new);
+  }
+
+  public BayesianNetwork deSerializeNetwork(SerializedBayesianNetwork sbn) {
     SerializationData serializationData = new SerializationData();
-    createNodes(serializedBayesianNetwork, serializationData);
-    return new BayesianNetworkImpl(
-        deSerializeNetworkData(serializedBayesianNetwork, serializationData));
+    return BayesianNetwork.builder()
+        .setNetworkName(sbn.networkName())
+        .setNodes(createNodes(sbn, serializationData))
+        .addConstraints(constraintSerializer.deserialize(sbn, serializationData))
+        .build(new DeserializerSolver(sbn))
+        .orElseThrow();
   }
 
-  private void createNodes(SerializedBayesianNetwork sbn, SerializationData serializationData) {
-    NodeSerializer serializer = new NodeSerializer();
-    sbn.serializedNodes()
-        .forEach(
-            serializedNode -> {
-              Node node = serializer.createNewBase(serializedNode);
-              serializationData.getNodeIdMap().put(node.getId(), node);
-              node.getStates()
-                  .forEach(
-                      state -> serializationData.getNodeStateIdMap().put(state.getId(), state));
-            });
-  }
-
-  private BayesianNetworkData deSerializeNetworkData(
-      SerializedBayesianNetwork sbn, SerializationData serializationData) {
-    BayesianNetworkData networkData = serializationData.getNetworkData();
-    networkData.setNetworkName(sbn.networkName());
-    networkData.setSolved(sbn.solved());
-    new NodeSerializer().deSerializeNodes(sbn, serializationData);
-    new NetworkTableSerializer().deSerializeNetworkTables(sbn, serializationData);
-    new ProbabilityConstraintSerializer().deserialize(sbn, serializationData);
-    return networkData;
+  private Node[] createNodes(SerializedBayesianNetwork sbn, SerializationData serializationData) {
+    Set<Node> nodeSet = serializationData.getNodeSet();
+    Map<Serializable, Node> nodeIdMap = serializationData.getNodeIdMap();
+    Map<Serializable, NodeState> stateIdMap = serializationData.getNodeStateIdMap();
+    SerializedNode[] serializedNodes = sbn.serializedNodes();
+    Node[] nodes = new Node[serializedNodes.length];
+    for (int i = 0; i < serializedNodes.length; i++) {
+      SerializedNode serializedNode = serializedNodes[i];
+      List<Node> parents = Arrays.stream(serializedNode.parentIds()).map(nodeIdMap::get).toList();
+      Node node = serializers.deserialize(serializedNode, parents);
+      nodeIdMap.put(node.getId(), node);
+      node.getStates().forEach(state -> stateIdMap.put(state.getId(), state));
+      nodes[i] = node;
+      nodeSet.add(node);
+    }
+    return nodes;
   }
 }

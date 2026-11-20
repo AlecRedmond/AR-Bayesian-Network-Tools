@@ -1,23 +1,27 @@
 package io.github.alecredmond.internal.method.vectoriterator.misciterators;
 
+import static io.github.alecredmond.export.inference.ObservationStatus.*;
+
+import io.github.alecredmond.export.inference.NodeObservation;
+import io.github.alecredmond.export.inference.ObservationStatus;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
 import io.github.alecredmond.export.probabilitytables.ProbabilityVector;
-import io.github.alecredmond.internal.application.vectoriterator.CartesianOdometer;
-import io.github.alecredmond.internal.method.node.NodeUtils;
 import io.github.alecredmond.internal.method.probabilitytables.JunctionTreeTable;
-import io.github.alecredmond.internal.method.vectoriterator.standardtemplate.*;
-import java.util.*;
+import io.github.alecredmond.internal.method.vectoriterator.standardtemplate.ProbabilityIteratorTemplate;
+import io.github.alecredmond.internal.method.vectoriterator.standardtemplate.StandardCartesianIterator;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import lombok.Getter;
 
 public class ObservationCopier implements ProbabilityIteratorTemplate {
   private final ProbabilityVector mainVector;
   private final ProbabilityVector backupVector;
   private final StandardCartesianIterator iterator;
-  @Getter private final CartesianOdometer odometer;
   private final Set<NodeState> requestStates;
   private final Set<Node> requestNodes;
 
@@ -27,22 +31,34 @@ public class ObservationCopier implements ProbabilityIteratorTemplate {
     this.requestNodes = new HashSet<>();
     this.requestStates = new HashSet<>();
     this.iterator = StandardCartesianIterator.create(this, mainVector);
-    this.odometer = iterator.getOdometer();
   }
 
-  public void observeStates(Collection<NodeState> observedStates) {
+  public void observeStates(List<NodeObservation> observations) {
     this.requestStates.clear();
     this.requestNodes.clear();
-    this.requestStates.addAll(observedStates);
-    this.requestNodes.addAll(NodeUtils.getNodes(requestStates));
-    if (observedStates.isEmpty()) writeFromBackupVector();
-    else resetAndRunIterator();
+    switch (addObservationsAndCheckStatus(observations)) {
+      case UNOBSERVED -> resetObservations();
+      case OBSERVED, PARTIALLY_OBSERVED -> resetAndRunIterator();
+      case NEGATED -> negateTable();
+    }
   }
 
-  private void writeFromBackupVector() {
-    double[] backup = backupVector.getProbabilities();
-    double[] observed = mainVector.getProbabilities();
-    System.arraycopy(backup, 0, observed, 0, backup.length);
+  private ObservationStatus addObservationsAndCheckStatus(List<NodeObservation> observations) {
+    for (NodeObservation observation : observations) {
+      ObservationStatus current = observation.status();
+      if (current.equals(NEGATED)) return NEGATED;
+      if (current.equals(UNOBSERVED)) continue;
+      requestNodes.add(observation.node());
+      requestStates.addAll(observation.observedStates());
+    }
+    if (requestNodes.isEmpty()) return UNOBSERVED;
+    return requestNodes.size() == requestStates.size() ? OBSERVED : PARTIALLY_OBSERVED;
+  }
+
+  public void resetObservations() {
+    this.requestStates.clear();
+    this.requestNodes.clear();
+    writeFromBackupVector();
   }
 
   private void resetAndRunIterator() {
@@ -60,15 +76,14 @@ public class ObservationCopier implements ProbabilityIteratorTemplate {
         });
   }
 
-  public void eliminateStates(Collection<NodeState> toEliminate) {
-    for (NodeState nodeState : toEliminate) {
-      Node node = nodeState.getNode();
-      if (requestNodes.add(node)) {
-        requestStates.addAll(node.getStates());
-      }
-      requestStates.remove(nodeState);
-    }
-    resetAndRunIterator();
+  private void negateTable() {
+    Arrays.fill(mainVector.getProbabilities(), 0);
+  }
+
+  private void writeFromBackupVector() {
+    double[] backup = backupVector.getProbabilities();
+    double[] observed = mainVector.getProbabilities();
+    System.arraycopy(backup, 0, observed, 0, backup.length);
   }
 
   @Override

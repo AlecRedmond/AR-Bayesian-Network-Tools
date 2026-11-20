@@ -9,7 +9,6 @@ import io.github.alecredmond.internal.method.utils.CollectionToString;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.lang3.SerializationUtils;
 
 public class ObservedTableFactory extends BaseTableFactory<ObservedTable> {
 
@@ -25,7 +24,7 @@ public class ObservedTableFactory extends BaseTableFactory<ObservedTable> {
           "ObservedTable %s did not have the correct implementation %s"
               .formatted(table, ObservedTableImpl.class));
     }
-    copiedImpl.setTableName(SerializationUtils.clone(table.getTableName()));
+    copiedImpl.setTableName(table.getTableName());
     copiedImpl.setObservations(Map.copyOf(table.getObservations()));
     return copiedImpl;
   }

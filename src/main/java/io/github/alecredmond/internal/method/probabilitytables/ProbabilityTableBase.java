@@ -1,52 +1,61 @@
 package io.github.alecredmond.internal.method.probabilitytables;
 
-import io.github.alecredmond.exceptions.NodeStateConflictException;
 import io.github.alecredmond.exceptions.ProbabilityTableRequestException;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
+import io.github.alecredmond.export.probabilitytables.ProbabilityTable;
 import io.github.alecredmond.export.probabilitytables.ProbabilityVector;
+import io.github.alecredmond.export.probabilitytables.tableentry.TableEntry;
 import io.github.alecredmond.internal.application.printer.PrinterPropertyConfigs;
-import io.github.alecredmond.internal.application.printer.PrinterStringMatrix;
+import io.github.alecredmond.internal.application.printer.TableCellMatrix;
 import io.github.alecredmond.internal.application.probabilitytables.base.ProbabilityTableData;
 import io.github.alecredmond.internal.method.cartesianvector.indexfinder.FastIndexFinder;
 import io.github.alecredmond.internal.method.cartesianvector.indexfinder.SafeIndexFinder;
 import io.github.alecredmond.internal.method.cartesianvector.indexfinder.VectorIndexFinder;
-import io.github.alecredmond.internal.method.probabilitytables.printerformat.PrinterMatrixGeneratorBase;
-import java.io.Serializable;
+import io.github.alecredmond.internal.method.printer.LineGenerator;
+import io.github.alecredmond.internal.method.printer.PrintableTable;
+import io.github.alecredmond.internal.method.printer.TableMatrixFactory;
+import io.github.alecredmond.internal.method.vectoriterator.misciterators.TableEntryGenerator;
 import java.util.*;
+import java.util.function.Supplier;
 import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-public abstract class ProbabilityTableBase<D extends ProbabilityTableData> {
-  @EqualsAndHashCode.Include protected D tableData;
+public abstract class ProbabilityTableBase<D extends ProbabilityTableData>
+    implements ProbabilityTable, PrintableTable {
+  @EqualsAndHashCode.Include protected final D tableData;
   protected VectorIndexFinder<NodeState> indexFinder;
   protected boolean safeMode = true;
 
-  protected ProbabilityTableBase(D table) {
-    this.tableData = table;
+  protected ProbabilityTableBase(D tableData) {
+    this.tableData = tableData;
     setSafeMode(true);
   }
 
   public void setSafeMode(boolean safeMode) {
     this.safeMode = safeMode;
     this.indexFinder =
-        safeMode
-            ? SafeIndexFinder.create(tableData.getVector())
-            : FastIndexFinder.create(tableData.getVector());
+        safeMode ? SafeIndexFinder.create(tableData) : FastIndexFinder.create(tableData);
   }
 
-  public Map<Serializable, NodeState> getNodeStateIDMap() {
-    return tableData.getNodeStateIDMap();
+  public TableEntry[] getEntries() {
+    return new TableEntryGenerator(tableData).buildEntries();
   }
 
-  public Map<Serializable, Node> getNodeIDMap() {
-    return tableData.getNodeIDMap();
+  @Override
+  public List<String> generateLines(PrinterPropertyConfigs configs) {
+    return new LineGenerator<>(this, configs).generateLines(buildCellMatrix(configs));
+  }
+
+  @Override
+  public TableCellMatrix buildCellMatrix(PrinterPropertyConfigs configs) {
+    return new TableMatrixFactory(this, configs).buildMatrix();
   }
 
   public ProbabilityVector getVector() {
-    return tableData.getVector();
+    return tableData;
   }
 
   public Set<Node> getNodes() {
@@ -61,54 +70,44 @@ public abstract class ProbabilityTableBase<D extends ProbabilityTableData> {
     return tableData.getConditions();
   }
 
-  public Serializable getTableName() {
+  public String getTableName() {
     return tableData.getTableName();
-  }
-
-  public void setTableName(Serializable tableName) {
-    tableData.setTableName(tableName);
   }
 
   public double[] getProbabilities() {
     return tableData.getProbabilities();
   }
 
-  public <S extends Serializable> Double getProbabilityFromIDs(Collection<S> stateIds) {
-    try {
-      return getProbability(getStates(stateIds));
-    } catch (NodeStateConflictException | ProbabilityTableRequestException e) {
-      log.error(e.getMessage());
-      return null;
-    }
-  }
-
   public Double getProbability(Collection<NodeState> states) {
     try {
       int idx = indexFinder.getIndexFromStates(states);
-      return tableData.getVector().getProbabilities()[idx];
+      return tableData.getProbabilities()[idx];
     } catch (ProbabilityTableRequestException e) {
       log.error(e.getMessage());
       return null;
     }
   }
 
-  protected final <S extends Serializable> Collection<NodeState> getStates(Collection<S> stateIds) {
-    Map<Serializable, NodeState> stateIdMap = tableData.getNodeStateIDMap();
-    return stateIds.stream().filter(stateIdMap::containsKey).map(stateIdMap::get).toList();
-  }
-
-  public Set<NodeState> getStatesFromIndex(int index) {
+  public NodeState[] getStatesFromIndex(int index) {
     try {
       return indexFinder.getStatesFromIndex(index);
     } catch (IndexOutOfBoundsException e) {
       log.error(e.getMessage());
-      return new HashSet<>();
+      return new NodeState[0];
     }
   }
 
-  public PrinterStringMatrix generatePrinterMatrix(PrinterPropertyConfigs configs) {
-    return Optional.ofNullable(buildMatrixGenerator()).map(g -> g.generate(configs)).orElse(null);
+  public <T extends Collection<NodeState>, U extends T> T getStatesFromIndex(
+      int index, Supplier<U> collectionSupplier) {
+    try {
+      return indexFinder.getStatesFromIndex(index, collectionSupplier);
+    } catch (IndexOutOfBoundsException e) {
+      log.error(e.getMessage());
+      return collectionSupplier.get();
+    }
   }
 
-  protected abstract PrinterMatrixGeneratorBase buildMatrixGenerator();
+  public void setTableName(String tableName) {
+    tableData.setTableName(tableName);
+  }
 }

@@ -1,10 +1,9 @@
 package io.github.alecredmond.export.probabilitytables;
 
-import io.github.alecredmond.export.inference.InferenceEngine;
 import io.github.alecredmond.export.inference.NodeObservation;
+import io.github.alecredmond.export.inference.direct.InferenceEngine;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
-import java.io.Serializable;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -23,13 +22,13 @@ import java.util.Map;
  * @see ProbabilityTable
  * @see InferenceEngine
  */
-public interface ObservedTable extends ProbabilityTable {
+public interface ObservedTable extends CloneableTable<ObservedTable> {
 
   /**
    * Returns the single {@link Node} whose prior or posterior probabilities are measured by this
    * table.
    *
-   * @return the {@link Node} this table measures.
+   * @return the {@code Node} that this table measures
    */
   Node getMeasuredNode();
 
@@ -38,7 +37,7 @@ public interface ObservedTable extends ProbabilityTable {
    * posterior probabilities in this table are explicitly conditioned on these observations.
    *
    * @return an unmodifiable {@link LinkedHashMap} mapping each observed node to its active states,
-   *     or an empty map if no observations are present.
+   *     or an empty map if no observations are present
    */
   Map<Node, NodeObservation> getObservations();
 
@@ -46,50 +45,30 @@ public interface ObservedTable extends ProbabilityTable {
    * Builds a copy of this {@code ObservedTable}. This deep-copies everything except the {@link
    * Node} and {@link NodeState} values, which maintain the original references.
    *
-   * @return a copy of the current table.
+   * @return a copy of the current table
    */
   ObservedTable copyTable();
 
   /**
-   * Returns the probability associated with a state within {@link #getMeasuredNode()} in the form
+   * Returns the probability associated with a state of {@link #getMeasuredNode()} in the form
    * {@code P(X=x|Obs)}, where {@code X} is the measured node, {@code x} is one of its possible
    * states, and {@code Obs} is the set of observations currently active on the {@link
    * InferenceEngine}.
    *
-   * <p><b>This method is affected by Safe Mode.</b> When Safe Mode is enabled, this will require
-   * the given {@link NodeState} to be in the measured node's state list, otherwise {@code null}
-   * will be returned.
+   * <p><b>This method is affected by Safe Mode.</b> When Safe Mode is enabled, the given {@link
+   * NodeState} must be in the state list of the measured node, otherwise {@code null} is returned.
    *
-   * @param state the state within the {@code ObservedTable}'s measured node to be queried.
-   * @return the probability table entry associated with the input state, or {@code null} if safe
-   *     mode validation fails.
+   * @param state the state of the measured node to be queried
+   * @return the probability of the specified state, or {@code null} if Safe Mode validation fails
    */
   Double getProbability(NodeState state);
 
   /**
-   * Returns the probability associated with a state within {@link #getMeasuredNode()} in the form
-   * {@code P(X=x|Obs)}, where {@code X} is the measured node, {@code x} is one of its possible
-   * states, and {@code Obs} is the set of observations currently active on the {@link
-   * InferenceEngine}.
+   * Returns a map of each {@link NodeState} of the measured {@link Node}, paired to its associated
+   * probability value {@code P(X=x|Obs)}. The map is a {@link LinkedHashMap} that maintains the
+   * same order as the {@code NodeState} list of the measured node.
    *
-   * <p><b>This method is affected by Safe Mode.</b> When Safe Mode is enabled, this will require
-   * the given {@link NodeState} to be in the measured node's state list, otherwise {@code null}
-   * will be returned.
-   *
-   * @param stateId the identifier of a state within the {@code ObservedTable}'s measured node to be
-   *     queried.
-   * @return the probability table entry associated with the input state, or {@code null} if safe
-   *     mode validation fails.
-   */
-  Double getProbabilityById(Serializable stateId);
-
-  /**
-   * Returns a map of each {@link NodeState} within the table's measured {@link Node}, paired to its
-   * associated probability value {@code P(X=x|Obs)}. The map is a {@link LinkedHashMap} which
-   * maintains the same order as the {@link NodeState} list within the measured {@link Node}.
-   *
-   * @return a new {@link LinkedHashMap} linking each {@link NodeState} in the measured node to its
-   *     probability table entry.
+   * @return a new {@code LinkedHashMap} linking each state of the measured node to its probability
    */
   Map<NodeState, Double> buildProbabilityMap();
 }
