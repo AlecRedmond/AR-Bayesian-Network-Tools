@@ -39,5 +39,4 @@ public class RootNodeTableImpl extends NetworkTableBase<RootNodeTableData>
   public Double getProbability(NodeState state) {
     return super.getProbability(List.of(state));
   }
-
 }

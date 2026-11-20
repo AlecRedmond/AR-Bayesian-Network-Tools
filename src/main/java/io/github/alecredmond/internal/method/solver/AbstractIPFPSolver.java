@@ -17,6 +17,7 @@ import java.util.*;
 import java.util.function.Consumer;
 import lombok.extern.slf4j.Slf4j;
 
+/** Abstract base for an {@link IPFPSolver}. */
 @Slf4j
 public abstract class AbstractIPFPSolver implements IPFPSolver {
   private final SolverConfigs configs;

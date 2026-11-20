@@ -5,16 +5,25 @@ import io.github.alecredmond.export.solver.constraint.ProbabilityConstraint;
 import java.util.Optional;
 
 /**
- * Finds the best distribution of a {@link BayesianNetwork} from its given {@link
- * ProbabilityConstraint}s.
+ * Fits the conditional probability tables (CPTs) of a {@link BayesianNetwork} to the {@link
+ * ProbabilityConstraint}s assigned to it, finding the distribution that best satisfies them.
+ *
+ * <p>Implementations include {@link DirectCptWriter}, which writes CPT entries straight from the
+ * constraints, {@link IPFPSolver}, which fits the tables iteratively, and {@link MultiStageSolver},
+ * which combines the two.
+ *
+ * @author Alec Redmond
+ * @see DirectCptWriter
+ * @see IPFPSolver
+ * @see MultiStageSolver
  */
 public interface ConstraintFitter {
 
   /**
-   * Attempts to fit the CPTs in a {@link BayesianNetwork} from its given constraints.
+   * Attempts to fit the CPTs of a {@link BayesianNetwork} to the constraints assigned to it.
    *
    * @param bayesianNetwork the network to be solved
-   * @return An {@link Optional} containing the new {@link BayesianNetwork}, or an empty {@code
+   * @return an {@link Optional} containing the solved {@code BayesianNetwork}, or an empty {@code
    *     Optional} if the network could not be built
    */
   Optional<BayesianNetwork> solveNetwork(BayesianNetwork bayesianNetwork);

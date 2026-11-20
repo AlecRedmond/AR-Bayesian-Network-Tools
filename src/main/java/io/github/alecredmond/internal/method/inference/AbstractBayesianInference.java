@@ -10,12 +10,22 @@ import io.github.alecredmond.internal.method.utils.CollectionToString;
 import java.io.Serializable;
 import java.util.*;
 
+/**
+ * Abstract base for a {@link BayesianInference} type.
+ *
+ * @param <T> the type of the {@code BayesianInference}
+ */
 public abstract class AbstractBayesianInference<T extends BayesianInference<T>>
     implements BayesianInference<T> {
   protected final BayesianNetwork network;
   protected final Map<Node, NodeObservation> observations;
   private final NodeObservationFactory factory;
 
+  /**
+   * Constructs a new {@code AbstractBayesianInference}.
+   *
+   * @param network the network to run inference on.
+   */
   protected AbstractBayesianInference(BayesianNetwork network) {
     this.network = network;
     this.factory = new NodeObservationFactory();

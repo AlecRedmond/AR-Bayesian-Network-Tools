@@ -16,12 +16,14 @@ import io.github.alecredmond.internal.method.network.BayesNetIdConverter;
 import io.github.alecredmond.internal.method.node.NodeUtils;
 import io.github.alecredmond.internal.method.printer.NetworkPrinter;
 import java.io.Serializable;
-import java.util.*;
-import lombok.Getter;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 
+/** Abstract base for an {@link InferenceEngine}. */
 @Slf4j
-@Getter
 public abstract class AbstractInferenceEngine extends AbstractBayesianInference<InferenceEngine>
     implements InferenceEngine {
   private final BayesNetIdConverter converter;

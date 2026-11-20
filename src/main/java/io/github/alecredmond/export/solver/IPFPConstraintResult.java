@@ -5,26 +5,28 @@ import java.util.Arrays;
 import java.util.Objects;
 
 /**
- * Holds the per-cycle error and loss data for a single {@link ProbabilityConstraint} from a {@link
- * ConstraintFitter} run.
+ * Holds the per-cycle error and loss data for a single {@link ProbabilityConstraint} from an {@link
+ * IPFPSolver} run.
  *
- * @see IPFPResults
+ * <p>The loss of a cycle is the change in R-squared error since the previous cycle. A negative loss
+ * indicates that the fit is improving, and a positive loss indicates divergence.
+ *
  * @author Alec Redmond
- * @param constraint The constraint whose fitting results are recorded in this object.
- * @param lastError The R-squared error between the constraint's target probability and the fitted
- *     value on the final solver cycle.
- * @param errors The R-squared error between the constraint's target probability and the fitted
- *     value at each solver cycle. Index {@code i} corresponds to cycle {@code i}.
- * @param losses The change in R-squared error between consecutive solver cycles. Index {@code i}
- *     corresponds to cycle {@code i}.
- *     <p>A negative value indicates the fit is improving; a positive value indicates divergence.
+ * @param constraint the constraint whose fitting results are recorded in this object
+ * @param lastError the R-squared error between the target probability of the constraint and the
+ *     fitted value on the final solver cycle
+ * @param errors the R-squared error between the target probability of the constraint and the fitted
+ *     value at each solver cycle, where index {@code i} corresponds to cycle {@code i}
+ * @param losses the change in R-squared error between consecutive solver cycles, where index {@code
+ *     i} corresponds to cycle {@code i}
+ * @see IPFPResults
  */
 public record IPFPConstraintResult(
     ProbabilityConstraint constraint, double lastError, double[] errors, double[] losses) {
   /**
    * Returns the probability constraint associated with these solver results.
    *
-   * @return the {@link ProbabilityConstraint} instance.
+   * @return the {@link ProbabilityConstraint} instance
    */
   @Override
   public ProbabilityConstraint constraint() {
@@ -34,7 +36,7 @@ public record IPFPConstraintResult(
   /**
    * Returns the R-squared error recorded on the final cycle of the solver run.
    *
-   * @return the final cycle's R-squared error as a double.
+   * @return the R-squared error of the final cycle
    */
   @Override
   public double lastError() {
@@ -42,10 +44,9 @@ public record IPFPConstraintResult(
   }
 
   /**
-   * Returns the historical array of R-squared errors across all completed solver cycles.
+   * Returns the R-squared errors recorded on all completed solver cycles.
    *
-   * @return an array of doubles representing per-cycle errors, where index {@code i} maps to cycle
-   *     {@code i}.
+   * @return an array of the per-cycle errors, where index {@code i} maps to cycle {@code i}
    */
   @Override
   public double[] errors() {
@@ -53,10 +54,10 @@ public record IPFPConstraintResult(
   }
 
   /**
-   * Returns the historical array of loss rates (error deltas) across all completed solver cycles.
+   * Returns the losses recorded on all completed solver cycles. The loss of a cycle is the change
+   * in error since the previous cycle.
    *
-   * @return an array of doubles representing consecutive cycle error changes, where index {@code i}
-   *     maps to cycle {@code i}.
+   * @return an array of the per-cycle error changes, where index {@code i} maps to cycle {@code i}
    */
   @Override
   public double[] losses() {

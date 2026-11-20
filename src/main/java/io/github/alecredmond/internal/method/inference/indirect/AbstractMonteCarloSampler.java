@@ -13,10 +13,16 @@ import io.github.alecredmond.internal.method.utils.CollectionToString;
 import java.util.*;
 import lombok.extern.slf4j.Slf4j;
 
+/** Abstract base for a {@link MonteCarloSampler}. */
 @Slf4j
 public abstract class AbstractMonteCarloSampler extends AbstractBayesianInference<MonteCarloSampler>
     implements MonteCarloSampler {
 
+  /**
+   * Constructs a new {@code AbstractMonteCarloSampler} for sampling.
+   *
+   * @param network – the BayesianNetwork to sample.
+   */
   protected AbstractMonteCarloSampler(BayesianNetwork network) {
     super(network);
     resetObservations();
@@ -49,6 +55,12 @@ public abstract class AbstractMonteCarloSampler extends AbstractBayesianInferenc
     return true;
   }
 
+  /**
+   * Internal method for sampling {@link NodeState} permutations.
+   *
+   * @param numberOfSamples the requested number of samples
+   * @return a map of each sampled permutation and the number of times it was sampled
+   */
   protected abstract Map<NodeState[], Integer> generateSampledStates(int numberOfSamples);
 
   private List<Sample> convertArraysToSamples(Map<NodeState[], Integer> sampledStates) {

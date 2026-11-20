@@ -2,21 +2,16 @@ package io.github.alecredmond.export.solver;
 
 import io.github.alecredmond.export.solver.constraint.ProbabilityConstraint;
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
- * Contains the results of a {@link ConstraintFitter} Iterative Proportional Fitting Procedure
- * (IPFP).
+ * Contains the results of an Iterative Proportional Fitting Procedure (IPFP) run by an {@link
+ * IPFPSolver}.
  *
  * <p>This includes the total number of cycles completed, the aggregate R-squared error calculated
  * on the final cycle, and a per-constraint breakdown linking each active {@link
  * ProbabilityConstraint} to its respective {@link IPFPConstraintResult}.
  *
- * @see IPFPConstraintResult
- * @see ConstraintFitter
  * @author Alec Redmond
  * @param cycles The total number of cycles completed by the solver.
  * @param constraintResults A map that connects each constraint to its specific result, including
@@ -76,9 +71,9 @@ public record IPFPResults(
   }
 
   /**
-   * Returns the total count of execution cycles completed during the IPFP operation.
+   * Returns the total number of cycles completed during the IPFP run.
    *
-   * @return the total number of integer cycles.
+   * @return the number of completed cycles
    */
   @Override
   public int cycles() {
@@ -88,17 +83,17 @@ public record IPFPResults(
   /**
    * Returns the complete sorted mapping of active constraints to their IPFP metrics.
    *
-   * @return a new {@link Map} sorted in descending order of final cycle R-squared error.
+   * @return an unmodifiable {@link Map} sorted in descending order of final cycle R-squared error.
    */
   @Override
   public Map<ProbabilityConstraint, IPFPConstraintResult> constraintResults() {
-    return Map.copyOf(this.constraintResults);
+    return Collections.unmodifiableMap(this.constraintResults);
   }
 
   /**
-   * Returns the aggregate final-cycle R-squared error evaluated across all constraints.
+   * Returns the aggregate final-cycle R-squared error, evaluated across all constraints.
    *
-   * @return the final aggregate error value as a double.
+   * @return the final aggregate error
    */
   @Override
   public double finalError() {
@@ -106,13 +101,13 @@ public record IPFPResults(
   }
 
   /**
-   * Returns the total duration of the solver's IPFP execution. The timer starts immediately before
-   * the construction of the joint probability table(s) and finishes immediately after the final
+   * Returns the total duration of the IPFP execution of the solver. The timer starts immediately
+   * after the construction of the cliques and separators, and finishes immediately after the final
    * IPFP cycle completes. This represents the total processing time once control is given to the
    * specific solver algorithm, and may be used to compare different IPFP variants under the same
    * conditions.
    *
-   * @return a {@link Duration} representing solver execution time.
+   * @return a {@link Duration} representing the execution time of the solver
    */
   @Override
   public Duration solverRunDuration() {
