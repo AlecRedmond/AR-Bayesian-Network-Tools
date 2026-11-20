@@ -3,7 +3,6 @@ package io.github.alecredmond.export.node;
 import java.io.Serializable;
 import java.util.List;
 import java.util.UUID;
-import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
@@ -23,9 +22,8 @@ import lombok.ToString;
  */
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
-@Data
 @NoArgsConstructor
-public class DefaultNode extends AbstractBayesNode {
+public final class DefaultNode extends AbstractBayesNode {
 
   /**
    * Constructs a node with a randomly generated identifier and a new state for each specified name.
