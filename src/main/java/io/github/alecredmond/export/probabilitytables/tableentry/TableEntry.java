@@ -7,11 +7,11 @@ import lombok.ToString;
 
 /**
  * An individual entry in a {@link ProbabilityTable}. A {@code TableEntry} contains the measured
- * {@link NodeState} values, index, and probability value measured.
+ * {@link NodeState} values, the index of the entry, and the probability value measured.
  *
+ * @author Alec Redmond
  * @see CptEntry
  * @see ProbabilityTable
- * @author Alec Redmond
  */
 @EqualsAndHashCode
 @ToString
@@ -21,13 +21,12 @@ public class TableEntry {
   private final double probability;
 
   /**
-   * All-args constructor for a {@code TableEntry}.
+   * Constructs an entry from its measured states, index, and probability.
    *
-   * @param states the measured states for this entry.
+   * @param states the measured states for this entry
    * @param index the index of the entry in the probability {@code double[]} array of the associated
-   *     {@link ProbabilityTable}.
-   * @param probability the probability of {@code eventState}, conditional on {@code
-   *     conditionStates}.
+   *     {@link ProbabilityTable}
+   * @param probability the probability of the measured states
    */
   public TableEntry(NodeState[] states, int index, double probability) {
     this.states = states;
@@ -38,7 +37,7 @@ public class TableEntry {
   /**
    * Returns the measured {@link NodeState}s for this entry.
    *
-   * @return the {@link NodeState}s measured in this entry.
+   * @return the {@code NodeState}s measured in this entry
    */
   public NodeState[] states() {
     return states;
@@ -46,18 +45,18 @@ public class TableEntry {
 
   /**
    * Returns the index of this {@code TableEntry}. This is equal to the index of the probability in
-   * the measured {@link ProbabilityTable}.
+   * the probability array of the measured {@link ProbabilityTable}.
    *
-   * @return the index of this entry.
+   * @return the index of this entry
    */
   public int index() {
     return index;
   }
 
   /**
-   * The probability of the measured {@link NodeState}s.
+   * Returns the probability of the measured {@link NodeState}s.
    *
-   * @return the probability of this {@code TableEntry}.
+   * @return the probability of this {@code TableEntry}
    */
   public double probability() {
     return probability;
