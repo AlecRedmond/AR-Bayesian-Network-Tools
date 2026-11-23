@@ -12,9 +12,9 @@
 
 AR Bayesian Network Tools is a Java library providing a high-level, easy-use toolset for working with discrete Bayesian
 Networks.
-Bayesian Networks can be constructed from either full or partial domain knowledge of the network's Conditional 
-Probability Tables (CPTs), and queried using direct inference or Monte Carlo sampling. Networks with only partial domain 
-knowledge are solved using an Iterative Proportional Fitting Procedure (IPFP). The solving and inference processes are 
+Bayesian Networks can be constructed from either full or partial domain knowledge of the network's Conditional
+Probability Tables (CPTs), and queried using direct inference or Monte Carlo sampling. Networks with only partial domain
+knowledge are solved using an Iterative Proportional Fitting Procedure (IPFP). The solving and inference processes are
 accelerated using the Junction Tree Algorithm by default, and high performance can be expected for networks into
 the hundreds of nodes.
 
@@ -34,6 +34,7 @@ the hundreds of nodes.
 Add the latest release as a dependency in your pom.xml:
 
 ```xml
+
 <dependencies>
     <dependency>
         <groupId>io.github.alecredmond</groupId>
@@ -50,7 +51,6 @@ module MyNewProject {
     requires BayesSolver;
 }
 ```
-
 
 # Quick Start
 
@@ -70,9 +70,7 @@ network, define its structure, add partial constraints, and then perform inferen
 Use `BayesianNetwork.builder()` to begin structuring the network.
 
 ```Java
-BayesianNetworkBuilder builder =
-        BayesianNetwork.builder()
-                .setNetworkName("RAIN, SPRINKLER, WET GRASS");
+BayesianNetworkBuilder builder = BayesianNetwork.builder().setNetworkName("RAIN, SPRINKLER, WET GRASS");
 ```
 
 ### 2. Adding Nodes
@@ -88,62 +86,28 @@ BinaryNode sprinkler = new DefaultBinaryNode("SPRINKLER", List.of(rain), stateOr
 // Wet grass is conditional on rain and sprinkler
 BinaryNode wetGrass = new DefaultBinaryNode("WET GRASS", List.of(rain, sprinkler), stateOrder);
 // Set the nodes in the builder
-builder.
-
-setNodes(rain, sprinkler, wetGrass);
+builder.setNodes(rain, sprinkler, wetGrass);
 ```
 
 ### 3. Adding Constraints
 
 Constraints are built from the states of each node. **Constraints do not have to be aligned with the
 network structure**; for example, a marginal constraint can be defined on a node with parents, or an ancestor node's
-state can be conditional on a descendant node's state. 
+state can be conditional on a descendant node's state.
 
-For this demo, we will define CPT entries within the graph, but we will provide only the CPT entries from Fig.1. where 
-the node's measured state is `true`. The complementary constraints (e.g., `P(RAIN:FALSE) = 0.8`) are inferred 
+For this demo, we will define CPT entries within the graph, but we will provide only the CPT entries from Fig.1. where
+the node's measured state is `true`. The complementary constraints (e.g., `P(RAIN:FALSE) = 0.8`) are inferred
 automatically and do not need to be defined.
 
 ```Java
 builder
-        .addConstraint(rain.trueState(), 0.2)
-        .
-
-addConstraint(sprinkler.trueState(),rain.
-
-trueState(), 0.01)
-        .
-
-addConstraint(sprinkler.trueState(),rain.
-
-falseState(), 0.4)
-        .
-
-addConstraint(wetGrass.trueState(),List.
-
-of(rain.trueState(),sprinkler.
-
-trueState()),0.99)
-        .
-
-addConstraint(wetGrass.trueState(),List.
-
-of(rain.trueState(),sprinkler.
-
-falseState()),0.8)
-        .
-
-addConstraint(wetGrass.trueState(),List.
-
-of(rain.falseState(),sprinkler.
-
-trueState()),0.9)
-        .
-
-addConstraint(wetGrass.trueState(),List.
-
-of(rain.falseState(),sprinkler.
-
-falseState()),0);
+    .addConstraint(rain.trueState(), 0.2)
+    .addConstraint(sprinkler.trueState(), rain.trueState(), 0.01)
+    .addConstraint(sprinkler.trueState(), rain.falseState(), 0.4)
+    .addConstraint(wetGrass.trueState(), List.of(rain.trueState(), sprinkler.trueState()), 0.99)
+    .addConstraint(wetGrass.trueState(), List.of(rain.trueState(), sprinkler.falseState()), 0.8)
+    .addConstraint(wetGrass.trueState(), List.of(rain.falseState(), sprinkler.trueState()), 0.9)
+    .addConstraint(wetGrass.trueState(), List.of(rain.falseState(), sprinkler.falseState()), 0);
 ```
 
 ### 4. Defining CPTs manually
@@ -155,15 +119,9 @@ double[] rainCpt = new double[]{0.2, 0.8};
 double[] sprinklerCpt = new double[]{0.01, 0.99, 0.4, 0.6};
 double[] wetGrassCpt = new double[]{0.99, 0.01, 0.8, 0.2, 0.9, 0.1, 0.0, 1.0};
 builder
-        .
-
-defineCPT(new OrderedCptDefinition(rainCpt, rain))
-        .
-
-defineCPT(new OrderedCptDefinition(sprinklerCpt, rain, sprinkler))
-        .
-
-defineCPT(new OrderedCptDefinition(wetGrassCpt, rain, sprinkler, wetGrass));
+    .defineCPT(new OrderedCptDefinition(rainCpt, rain))
+    .defineCPT(new OrderedCptDefinition(sprinklerCpt, rain, sprinkler))
+    .defineCPT(new OrderedCptDefinition(wetGrassCpt, rain, sprinkler, wetGrass));
 ```
 
 The nodes are ordered in the constructor by descending stride length between node states.
@@ -218,9 +176,7 @@ Once the CPTs are fitted, we can read data from them:
 BayesianNetwork network = optNetwork.get();
 NetworkTable sprinklerCPT = network.getNetworkTableByNodeName("SPRINKLER");
 double pSprinklerFalseGivenRain = sprinklerCPT.getProbability(sprinkler.falseState(), rain.trueState());
-System.out.
-
-printf("P(!S|R) = %.2f%n",pSprinklerFalseGivenRain);
+System.out.printf("P(!S|R) = %.2f%n",pSprinklerFalseGivenRain);
 ```
 
 ```
@@ -274,9 +230,7 @@ find the posterior probility of `RAIN = TRUE`:
 ```java
 engine.setObserved(wetGrass.trueState());
 double posteriorRainTrue = engine.getPosteriorProbability(rain.trueState());
-System.out.
-
-printf("P(R|W) = %.3f%n",posteriorRainTrue);
+System.out.printf("P(R|W) = %.3f%n",posteriorRainTrue);
 ```
 
 ```
@@ -326,11 +280,7 @@ SampleCollection samples = sampler
 
 int samplesWithRainTrue = samples.countSamplesIncludingStates(rain.trueState());
     
-System.out.
-
-println(samplesWithRainTrue);
-
-
+System.out.println(samplesWithRainTrue);
 ```
 
 ```
