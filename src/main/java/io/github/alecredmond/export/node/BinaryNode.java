@@ -7,8 +7,8 @@ package io.github.alecredmond.export.node;
  * directly from a {@code boolean} value through {@link #getState(boolean)}, or through {@link
  * #trueState()} and {@link #falseState()}.
  *
- * <p>Every {@code BinaryNode} declares its {@link StateOrder}, which specifies whether the {@code
- * "TRUE"} state or the {@code "FALSE"} state comes first in the list returned by {@link
+ * <p>Every {@code BinaryNode} declares its {@link BinaryStateOrder}, which specifies whether the
+ * {@code "TRUE"} state or the {@code "FALSE"} state comes first in the list returned by {@link
  * #getStates()}.
  *
  * @author Alec Redmond
@@ -43,13 +43,4 @@ public interface BinaryNode extends Node {
    */
   NodeState falseState();
 
-  /**
-   * Specifies which of the two states of a {@link BinaryNode} comes first in its list of states.
-   */
-  enum StateOrder {
-    /** The {@code "FALSE"} state is at position 0 and the {@code "TRUE"} state is at position 1. */
-    FALSE_FIRST,
-    /** The {@code "TRUE"} state is at position 0 and the {@code "FALSE"} state is at position 1. */
-    TRUE_FIRST
-  }
 }

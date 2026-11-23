@@ -1,6 +1,7 @@
 package io.github.alecredmond.networkscenario.scenarios;
 
 import io.github.alecredmond.export.node.BinaryNode;
+import io.github.alecredmond.export.node.BinaryStateOrder;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.networkscenario.ObservationPackage;
 import io.github.alecredmond.networkscenario.templates.BinaryNodeScenario;
@@ -38,8 +39,8 @@ public class LopsidedNetwork extends CptDefinedScenario implements BinaryNodeSce
   }
 
   @Override
-  public BinaryNode.StateOrder getBinaryNodeOrder() {
-    return BinaryNode.StateOrder.FALSE_FIRST;
+  public BinaryStateOrder getBinaryNodeOrder() {
+    return BinaryStateOrder.FALSE_FIRST;
   }
 
   @Override

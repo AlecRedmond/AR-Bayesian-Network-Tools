@@ -3,6 +3,7 @@ package io.github.alecredmond.export.probabilitytables;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
 import io.github.alecredmond.export.probabilitytables.tableentry.TableEntry;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Set;
 import java.util.function.Supplier;
@@ -74,6 +75,23 @@ public interface ProbabilityTable {
    * @return the underlying {@code double} array that contains the raw probabilities
    */
   double[] getProbabilities();
+
+  /**
+   * Returns the probability associated with all the given states in the form {@code
+   * P(e1,...,en|c1,...,cm)}, where {@code e1,...,en} are the event states and {@code c1,...,cm} are
+   * the condition states. The input collection {@code {e1,...,en,c1,...,cm}} is not required to be
+   * ordered.
+   *
+   * <p><b>This method is affected by Safe Mode.</b> When Safe Mode is enabled, this requires one
+   * {@link NodeState} for every {@link Node} within the table, otherwise {@code null} is returned.
+   *
+   * @param states all states to be queried
+   * @return the probability associated with the input states, or {@code null} if Safe Mode
+   *     validation fails
+   */
+  default Double getProbability(NodeState... states) {
+    return getProbability(Arrays.asList(states));
+  }
 
   /**
    * Returns the probability associated with all the given states in the form {@code

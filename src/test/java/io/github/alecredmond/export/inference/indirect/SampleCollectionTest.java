@@ -1,7 +1,7 @@
 package io.github.alecredmond.export.inference.indirect;
 
 import static io.github.alecredmond.TestConfigs.*;
-import static io.github.alecredmond.export.node.BinaryNode.StateOrder.TRUE_FIRST;
+import static io.github.alecredmond.export.node.BinaryStateOrder.TRUE_FIRST;
 import static io.github.alecredmond.networkscenario.NetworkScenarioType.*;
 import static org.junit.jupiter.api.Assertions.*;
 

@@ -33,15 +33,15 @@ public abstract class CptDefinedScenario extends AbstractNetworkScenario {
 
   protected CptDefinition commonCptDef(Node node) {
     return new OrderedCptDefinition(
-        node, probabilitiesMap.get(node.getId()), getCptNodeOrder(), getCptStrideOrder());
-  }
-
-  protected CptNodeOrder getCptNodeOrder() {
-    return CptNodeOrder.CONDITIONS_BEFORE_EVENT;
+        probabilitiesMap.get(node.getId()), getCptStrideOrder(), node, getCptNodeOrder());
   }
 
   protected CptStrideOrder getCptStrideOrder() {
     return CptStrideOrder.DESCENDING_STRIDE_LENGTH;
+  }
+
+  protected CptNodeOrder getCptNodeOrder() {
+    return CptNodeOrder.CONDITIONS_BEFORE_EVENT;
   }
 
   protected void addHalfCpt(BinaryNode node, double... probabilities) {
@@ -51,9 +51,9 @@ public abstract class CptDefinedScenario extends AbstractNetworkScenario {
 
   protected CptDefinition halfCptDef(BinaryNode binaryNode) {
     return new HalfCptDefinition(
-        binaryNode,
         probabilitiesMap.get(binaryNode.getId()),
-        getCptNodeOrder(),
-        getCptStrideOrder());
+        getCptStrideOrder(),
+        binaryNode,
+        getCptNodeOrder());
   }
 }

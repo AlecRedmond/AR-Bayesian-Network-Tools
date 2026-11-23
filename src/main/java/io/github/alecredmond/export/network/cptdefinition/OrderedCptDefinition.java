@@ -3,8 +3,8 @@ package io.github.alecredmond.export.network.cptdefinition;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.probabilitytables.ProbabilityVector;
 import io.github.alecredmond.internal.method.probabilitytables.probabilityvector.ProbabilityVectorFactory;
-import java.util.ArrayList;
-import java.util.List;
+import io.github.alecredmond.internal.method.utils.CollectionToString;
+import java.util.*;
 import lombok.NonNull;
 
 /**
@@ -27,35 +27,25 @@ public class OrderedCptDefinition implements CptDefinition {
   /**
    * Constructs a definition from a flat array of probabilities.
    *
-   * @param node the measured node of the CPT
    * @param probabilities the probabilities of the CPT, with one entry for each combination of the
    *     states of {@code node} and its parents
-   * @param cptNodeOrder the position of the measured node in the ordering of the array
    * @param cptStrideOrder the way that the stride length changes along the ordering of the array
+   * @param node the measured node of the CPT
+   * @param cptNodeOrder the position of the measured node in the ordering of the array
    * @throws NullPointerException if any argument is {@code null}.
    */
   @NonNull
   public OrderedCptDefinition(
-      @NonNull Node node,
       @NonNull double[] probabilities,
-      @NonNull CptNodeOrder cptNodeOrder,
-      @NonNull CptStrideOrder cptStrideOrder) {
+      @NonNull CptStrideOrder cptStrideOrder,
+      @NonNull Node node,
+      @NonNull CptNodeOrder cptNodeOrder) {
     List<Node> combinationOrder = buildCombinationOder(node, cptNodeOrder);
-    this.vector = buildVector(combinationOrder, cptStrideOrder, probabilities);
+    this.vector = buildVector(combinationOrder, probabilities, cptStrideOrder);
     this.measuredNode = node;
   }
 
-  /**
-   * Returns the measured node and its parents as a single list, ordered by the specified {@link
-   * CptNodeOrder}. The parents keep the order returned by {@link Node#getParents()}.
-   *
-   * @param node the measured node
-   * @param cptNodeOrder the position of the measured node in the list
-   * @return a new list containing the measured node and its parents
-   * @throws NullPointerException if {@code node} or {@code cptNodeOrder} is {@code null}
-   * @throws IllegalStateException if {@code cptNodeOrder} is not handled by this method
-   */
-  protected List<Node> buildCombinationOder(Node node, CptNodeOrder cptNodeOrder) {
+  private static List<Node> buildCombinationOder(Node node, CptNodeOrder cptNodeOrder) {
     List<Node> combined = new ArrayList<>();
     switch (cptNodeOrder) {
       case CONDITIONS_BEFORE_EVENT -> {
@@ -71,27 +61,85 @@ public class OrderedCptDefinition implements CptDefinition {
     return combined;
   }
 
-  /**
-   * Builds the {@link ProbabilityVector} for the specified nodes and probabilities.
-   *
-   * <p>For {@link CptStrideOrder#DESCENDING_STRIDE_LENGTH}, the first node in the list has the
-   * longest stride length. For {@link CptStrideOrder#ASCENDING_STRIDE_LENGTH}, the list is reversed
-   * first, so the first node in the list has the shortest stride length.
-   *
-   * @param nodeCombination the nodes that index the vector, in the order produced by {@link
-   *     #buildCombinationOder(Node, CptNodeOrder)}
-   * @param cptStrideOrder the way that the stride length changes along {@code nodeCombination}
-   * @param probabilities the probabilities of the CPT
-   * @return a new vector indexed by the nodes and holding the probabilities
-   * @throws NullPointerException if {@code cptStrideOrder} is {@code null}
-   */
-  protected ProbabilityVector buildVector(
-      List<Node> nodeCombination, CptStrideOrder cptStrideOrder, double[] probabilities) {
+  private static ProbabilityVector buildVector(
+      List<Node> nodeCombination, double[] probabilities, CptStrideOrder cptStrideOrder) {
     ProbabilityVectorFactory factory = new ProbabilityVectorFactory();
     return switch (cptStrideOrder) {
       case DESCENDING_STRIDE_LENGTH -> factory.build(nodeCombination, probabilities);
       case ASCENDING_STRIDE_LENGTH -> factory.build(nodeCombination.reversed(), probabilities);
     };
+  }
+
+  /**
+   * Constructs a CPT definition. This constructor determines the measured node from the list -
+   * which must include the node itself and its parents - and indexes the flat probability array
+   * assuming a stride order of {@link CptStrideOrder#DESCENDING_STRIDE_LENGTH}.
+   *
+   * @param probabilities the probabilities of the CPT
+   * @param nodes the nodes that index the vector, which must include the measured node.
+   * @throws IllegalArgumentException if the measured node can't be determined.
+   */
+  public OrderedCptDefinition(double[] probabilities, Node... nodes) {
+    this(probabilities, CptStrideOrder.DESCENDING_STRIDE_LENGTH, Arrays.asList(nodes));
+  }
+
+  /**
+   * Constructs a CPT definition. This constructor determines the measured node from the list -
+   * which must include the node itself and its parents - and indexes the flat probability array
+   * from the stride order.
+   *
+   * @param probabilities the probabilities of the CPT
+   * @param strideOrder the way that the stride length changes along {@code nodes}
+   * @param nodes the nodes that index the vector, which must include the measured node.
+   * @throws IllegalArgumentException if the measured node can't be determined.
+   */
+  public OrderedCptDefinition(
+      double[] probabilities, CptStrideOrder strideOrder, List<Node> nodes) {
+    this.measuredNode = determineMeasuredNode(nodes);
+    this.vector = buildVector(nodes, probabilities, strideOrder);
+  }
+
+  private static Node determineMeasuredNode(List<Node> nodes) {
+    List<Node> candidates = new ArrayList<>();
+    Set<Node> allNodes = new HashSet<>(nodes);
+    for (Node node : nodes) {
+      Set<Node> current = new HashSet<>();
+      current.add(node);
+      current.addAll(node.getParents());
+      if (current.equals(allNodes)) candidates.add(node);
+    }
+    if (candidates.size() == 1) {
+      return candidates.getFirst();
+    }
+    throw new IllegalArgumentException(
+        "Could not determine the measured node from list : " + CollectionToString.apply(nodes));
+  }
+
+  /**
+   * Constructs a CPT definition. This constructor determines the measured node from the list -
+   * which must include the node itself and its parents - and indexes the flat probability array
+   * from the stride order.
+   *
+   * @param probabilities the probabilities of the CPT
+   * @param strideOrder the way that the stride length changes along {@code nodes}
+   * @param nodes the nodes that index the vector, which must include the measured node.
+   * @throws IllegalArgumentException if the measured node can't be determined.
+   */
+  public OrderedCptDefinition(double[] probabilities, CptStrideOrder strideOrder, Node... nodes) {
+    this(probabilities, strideOrder, Arrays.asList(nodes));
+  }
+
+  /**
+   * Constructs a CPT definition. This constructor determines the measured node from the list -
+   * which must include the node itself and its parents - and indexes the flat probability array
+   * assuming a stride order of {@link CptStrideOrder#DESCENDING_STRIDE_LENGTH}.
+   *
+   * @param probabilities the probabilities of the CPT
+   * @param nodes the nodes that index the vector, which must include the measured node.
+   * @throws IllegalArgumentException if the measured node can't be determined.
+   */
+  public OrderedCptDefinition(double[] probabilities, List<Node> nodes) {
+    this(probabilities, CptStrideOrder.DESCENDING_STRIDE_LENGTH, nodes);
   }
 
   @Override

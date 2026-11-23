@@ -1,8 +1,7 @@
 package io.github.alecredmond.networkscenario.scenarios;
 
-import static io.github.alecredmond.export.node.BinaryNode.*;
-
 import io.github.alecredmond.export.node.BinaryNode;
+import io.github.alecredmond.export.node.BinaryStateOrder;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.networkscenario.ObservationPackage;
 import io.github.alecredmond.networkscenario.templates.BinaryNodeScenario;
@@ -27,8 +26,8 @@ public class RainNetwork extends CptDefinedScenario implements BinaryNodeScenari
   }
 
   @Override
-  public StateOrder getBinaryNodeOrder() {
-    return StateOrder.TRUE_FIRST;
+  public BinaryStateOrder getBinaryNodeOrder() {
+    return BinaryStateOrder.TRUE_FIRST;
   }
 
   @Override
