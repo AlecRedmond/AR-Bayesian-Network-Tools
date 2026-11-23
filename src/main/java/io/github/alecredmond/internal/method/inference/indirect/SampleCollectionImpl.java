@@ -12,7 +12,7 @@ import io.github.alecredmond.internal.application.inference.indirect.SampleColle
 import io.github.alecredmond.internal.method.node.NodeUtils;
 import java.io.Serializable;
 import java.util.*;
-import java.util.stream.Collectors;
+import lombok.experimental.Delegate;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -33,26 +33,13 @@ public class SampleCollectionImpl implements SampleCollection {
     return collectionData.getNodes();
   }
 
-  public boolean isEmpty() {
-    return countSamples() == 0;
+  @Delegate
+  private List<Sample> getSamples() {
+    return collectionData.getSamples();
   }
 
   public int countSamples() {
     return collectionData.getTotalSamples();
-  }
-
-  @Override
-  public String toString() {
-    return getSamples().stream().map(Sample::toString).collect(Collectors.joining("\n"));
-  }
-
-  public List<Sample> getSamples() {
-    return collectionData.getSamples();
-  }
-
-  @Override
-  public Iterator<Sample> iterator() {
-    return collectionData.getSamples().iterator();
   }
 
   public <T extends Serializable> void setDisplayedNodesById(Collection<T> nodeIds) {
@@ -97,7 +84,7 @@ public class SampleCollectionImpl implements SampleCollection {
   }
 
   public List<Sample> getSamplesIncludingStates(Collection<NodeState> includedStates) {
-    if (includedStates.isEmpty()) return new ArrayList<>(collectionData.getSamples());
+    if (includedStates.isEmpty()) return new ArrayList<>(this);
     List<Sample> samples = new ArrayList<>();
     IntObjectMap<Set<NodeState>> idxRequest =
         NodeUtils.generateIndexMap(includedStates, collectionData.getNodeIndexMap());
