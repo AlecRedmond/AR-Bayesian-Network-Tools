@@ -41,7 +41,10 @@ public class SampleImpl implements Sample {
   @Override
   public String toString() {
     return "%s : %d"
-        .formatted(CollectionToString.apply(sampleData.getRawStateSet()), sampleData.getCount());
+        .formatted(
+            CollectionToString.apply(
+                sampleData.getRawStateSet(), ns -> ns.getNode().getName() + ":" + ns.getName()),
+            sampleData.getCount());
   }
 
   public void displayAllNodes() {

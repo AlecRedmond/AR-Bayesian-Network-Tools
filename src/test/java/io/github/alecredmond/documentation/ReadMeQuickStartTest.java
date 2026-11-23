@@ -87,12 +87,19 @@ class ReadMeQuickStartTest {
 
     // ----- Create random samples
     MonteCarloSampler sampler = new LikelihoodWeightingSampler(network);
-    sampler.setObserved(engine.getCurrentObservations());
-    SampleCollection sc = sampler.generateSamples(1000);
-    int samplesWithRainTrue = sc.countSamplesIncludingStates(rain.trueState());
+
+    int numberOfSamples = 1000;
+
+    SampleCollection samples =
+        sampler.setObserved(engine.getCurrentObservations()).generateSamples(numberOfSamples);
+
+    int samplesWithRainTrue = samples.countSamplesIncludingStates(rain.trueState());
+
     System.out.println(samplesWithRainTrue);
 
-    assertEquals(0.358, samplesWithRainTrue / 1000.0, 1e-1);
+    assertEquals(0.358, (double) samplesWithRainTrue / numberOfSamples, 1e-1);
+
+    System.out.println(samples.getFirst());
   }
 
   @Test
