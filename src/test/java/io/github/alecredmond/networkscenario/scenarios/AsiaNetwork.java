@@ -1,8 +1,9 @@
 package io.github.alecredmond.networkscenario.scenarios;
 
-import static io.github.alecredmond.export.node.BinaryNode.StateOrder.*;
+import static io.github.alecredmond.export.node.BinaryStateOrder.*;
 
 import io.github.alecredmond.export.node.BinaryNode;
+import io.github.alecredmond.export.node.BinaryStateOrder;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
 import io.github.alecredmond.networkscenario.ObservationPackage;
@@ -53,7 +54,7 @@ public class AsiaNetwork extends CptDefinedScenario implements BinaryNodeScenari
   }
 
   @Override
-  public BinaryNode.StateOrder getBinaryNodeOrder() {
+  public BinaryStateOrder getBinaryNodeOrder() {
     return FALSE_FIRST;
   }
 

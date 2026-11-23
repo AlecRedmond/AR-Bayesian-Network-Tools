@@ -1,7 +1,7 @@
 package io.github.alecredmond.export.inference.indirect;
 
 import static io.github.alecredmond.TestConfigs.*;
-import static io.github.alecredmond.export.node.BinaryNode.StateOrder.TRUE_FIRST;
+import static io.github.alecredmond.export.node.BinaryStateOrder.TRUE_FIRST;
 import static io.github.alecredmond.networkscenario.NetworkScenarioType.*;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -15,9 +15,11 @@ import io.github.alecredmond.export.node.DefaultBinaryNode;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
 import io.github.alecredmond.export.solver.IPFPJunctionTreeSolver;
+import io.github.alecredmond.internal.method.inference.indirect.SampleImpl;
 import io.github.alecredmond.internal.method.node.NodeUtils;
 import io.github.alecredmond.networkscenario.NetworkScenario;
 import io.github.alecredmond.networkscenario.NetworkScenarioType;
+import io.github.alecredmond.networkscenario.scenarios.RainNetwork;
 import java.io.Serializable;
 import java.util.*;
 import java.util.function.*;
@@ -27,6 +29,7 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -233,7 +236,7 @@ class SampleCollectionTest {
               .setObserved(x.falseState(), y.trueState())
               .generateSamples(100);
       assertEquals(0, collection.countSamples());
-      assertTrue(collection.getSamples().isEmpty());
+      assertTrue(collection.isEmpty());
     }
   }
 
@@ -313,12 +316,10 @@ class SampleCollectionTest {
         Set<Node> expectedDisplay) {
       SampleCollection test = samplePackage.getTest();
       setDisplayFunc.accept(test);
-      test.getSamples()
-          .forEach(
-              sample ->
-                  assertEquals(
-                      NodeUtils.getNodes(sample.getDisplayedStates(HashSet::new)),
-                      expectedDisplay));
+      test.forEach(
+          sample ->
+              assertEquals(
+                  NodeUtils.getNodes(sample.getDisplayedStates(HashSet::new)), expectedDisplay));
       test.displayAllNodes();
     }
 
@@ -364,8 +365,31 @@ class SampleCollectionTest {
     void countAll(SamplePackage samplePackage) {
       SampleCollection test = samplePackage.getTest();
       int countExpected = test.countSamples();
-      int countActual = Sample.countAll(test.getSamples());
+      int countActual = Sample.countAll(test);
       assertEquals(countExpected, countActual);
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideSamplePackages")
+    void testListMethods_shouldThrowUnsupported(SamplePackage samplePackage) {
+      SampleCollection test = samplePackage.getTest();
+      RainNetwork network = new RainNetwork();
+      Sample addAndFail =
+          new SampleImpl(
+              new NodeState[] {
+                network.rain.trueState(),
+                network.sprinkler.falseState(),
+                network.wetGrass.trueState()
+              },
+              50);
+      assertThrowsUnsupported(() -> test.add(addAndFail));
+      assertThrowsUnsupported(() -> test.remove(test.getFirst()));
+      assertThrowsUnsupported(() -> test.add(test.size() / 2, test.getFirst()));
+      assertThrowsUnsupported(() -> test.sort(Comparator.comparingInt(Sample::count)));
+    }
+
+    static void assertThrowsUnsupported(Executable executable) {
+      assertThrows(UnsupportedOperationException.class, executable);
     }
 
     @ParameterizedTest
@@ -376,19 +400,18 @@ class SampleCollectionTest {
       test.setDisplayedNodes(exportNodes);
       Set<NodeState> observedStates = samplePackage.getObservedStates();
       Map<Node, Set<NodeState>> multi = NodeUtils.generateMultiRequest(observedStates);
-      test.getSamples()
-          .forEach(
-              sample -> {
-                Map<Node, NodeState> sampled =
-                    NodeUtils.generateRequest(Arrays.asList(sample.getAllStates()));
+      test.forEach(
+          sample -> {
+            Map<Node, NodeState> sampled =
+                NodeUtils.generateRequest(Arrays.asList(sample.getAllStates()));
 
-                assertTrue(
-                    Arrays.stream(sample.getDisplayedStates())
-                        .map(NodeState::getNode)
-                        .allMatch(exportNodes::contains));
+            assertTrue(
+                Arrays.stream(sample.getDisplayedStates())
+                    .map(NodeState::getNode)
+                    .allMatch(exportNodes::contains));
 
-                multi.forEach((node, evidence) -> assertTrue(evidence.contains(sampled.get(node))));
-              });
+            multi.forEach((node, evidence) -> assertTrue(evidence.contains(sampled.get(node))));
+          });
     }
   }
 }

@@ -5,16 +5,13 @@ import io.github.alecredmond.export.network.BayesianNetwork;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.export.node.NodeState;
 import java.io.Serializable;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
- * An {@link Iterable} container for {@link Sample} objects generated during a {@link
- * MonteCarloSampler} run. A {@code SampleCollection} holds the complete set of distinct samples
- * produced by the run, along with the observations that were applied, and provides methods for
- * querying sample frequencies and filtering results by {@link NodeState}.
+ * A container for {@link Sample} objects generated during a {@link MonteCarloSampler} run. A {@code
+ * SampleCollection} holds the complete set of distinct samples produced by the run, along with the
+ * observations that were applied, and provides methods for querying sample frequencies and
+ * filtering results by {@link NodeState}.
  *
  * <p>Instances of this interface are created by the {@code generateSamples} methods on {@link
  * MonteCarloSampler}.
@@ -23,7 +20,7 @@ import java.util.Map;
  * @see Sample
  * @author Alec Redmond
  */
-public interface SampleCollection extends Iterable<Sample> {
+public interface SampleCollection extends List<Sample> {
   /**
    * Returns a map of each {@link Node} to its {@link NodeObservation} record.
    *
@@ -39,15 +36,6 @@ public interface SampleCollection extends Iterable<Sample> {
    * @return the {@link Node} array from this {@code SampleCollection}.
    */
   Node[] getNodes();
-
-  /**
-   * Returns {@code true} if this {@code SampleCollection} contains no samples. This can occur when
-   * the joint probability of the observed {@link NodeState} values is zero — i.e. {@code P(obs) =
-   * 0}.
-   *
-   * @return {@code true} if there are no samples in this collection; {@code false} otherwise.
-   */
-  boolean isEmpty();
 
   /**
    * Returns the total count of all {@link Sample} frequencies in this {@code SampleCollection}.
@@ -109,15 +97,6 @@ public interface SampleCollection extends Iterable<Sample> {
    * @return the combined frequency of all {@link Sample}s containing every specified state.
    */
   <T extends Serializable> int countSamplesIncludingStateIds(Collection<T> stateIds);
-
-  /**
-   * Returns a list of all distinct {@link Sample}s in this {@code SampleCollection}. A {@link
-   * Sample} contains a unique combination of {@link NodeState} values, with the frequency of their
-   * occurrence in the {@link MonteCarloSampler} run.
-   *
-   * @return an unmodifiable {@link List} of {@link Sample} objects.
-   */
-  List<Sample> getSamples();
 
   /**
    * Returns a list of all distinct {@link Sample}s in this {@code SampleCollection} that contain

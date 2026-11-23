@@ -1,6 +1,7 @@
 package io.github.alecredmond.networkscenario.scenarios;
 
 import io.github.alecredmond.export.node.BinaryNode;
+import io.github.alecredmond.export.node.BinaryStateOrder;
 import io.github.alecredmond.export.node.Node;
 import io.github.alecredmond.networkscenario.ObservationPackage;
 import io.github.alecredmond.networkscenario.templates.AbstractNetworkScenario;
@@ -37,8 +38,8 @@ public class PengAndDingDiamond extends AbstractNetworkScenario implements Binar
   }
 
   @Override
-  public BinaryNode.StateOrder getBinaryNodeOrder() {
-    return BinaryNode.StateOrder.TRUE_FIRST;
+  public BinaryStateOrder getBinaryNodeOrder() {
+    return BinaryStateOrder.TRUE_FIRST;
   }
 
   @Override

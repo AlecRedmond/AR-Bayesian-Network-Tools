@@ -1,7 +1,7 @@
 package io.github.alecredmond.export.network;
 
 import static io.github.alecredmond.TestConfigs.DOUBLE_EQUALITY;
-import static io.github.alecredmond.export.node.BinaryNode.StateOrder.TRUE_FIRST;
+import static io.github.alecredmond.export.node.BinaryStateOrder.TRUE_FIRST;
 import static org.junit.jupiter.api.Assertions.*;
 
 import io.github.alecredmond.exceptions.BayesNetIDException;

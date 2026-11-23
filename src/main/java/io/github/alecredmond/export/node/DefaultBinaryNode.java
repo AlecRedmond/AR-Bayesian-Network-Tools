@@ -10,7 +10,7 @@ import lombok.ToString;
  * A default implementation of {@link BinaryNode}.
  *
  * <p>The states of this node are named {@link #TRUE_STATE_NAME} and {@link #FALSE_STATE_NAME}.
- * Every constructor that takes a {@link StateOrder} creates both states immediately, in the
+ * Every constructor that takes a {@link BinaryStateOrder} creates both states immediately, in the
  * requested order, and gives each state a randomly generated {@link UUID} as its identifier.
  *
  * <p>In addition to the fields used by {@link AbstractBayesNode}, the {@code equals}, {@code
@@ -45,7 +45,7 @@ public final class DefaultBinaryNode extends AbstractBayesNode implements Binary
    * @param stateOrder the order in which the {@code "TRUE"} and {@code "FALSE"} states are listed
    * @throws NullPointerException if {@code parents} or {@code stateOrder} is {@code null}
    */
-  public DefaultBinaryNode(String name, List<Node> parents, StateOrder stateOrder) {
+  public DefaultBinaryNode(String name, List<Node> parents, BinaryStateOrder stateOrder) {
     this(UUID.randomUUID(), name, parents, stateOrder);
   }
 
@@ -59,7 +59,7 @@ public final class DefaultBinaryNode extends AbstractBayesNode implements Binary
    * @throws NullPointerException if {@code parents} or {@code stateOrder} is {@code null}
    */
   public DefaultBinaryNode(
-      Serializable id, String name, List<Node> parents, StateOrder stateOrder) {
+      Serializable id, String name, List<Node> parents, BinaryStateOrder stateOrder) {
     setId(id);
     setName(name);
     setParents(parents);
@@ -74,12 +74,12 @@ public final class DefaultBinaryNode extends AbstractBayesNode implements Binary
    * @param stateOrder the order in which the {@code "TRUE"} and {@code "FALSE"} states are listed
    * @throws NullPointerException if {@code stateOrder} is {@code null}
    */
-  public void setStatesByOrder(StateOrder stateOrder) {
-    if (Objects.requireNonNull(stateOrder) == StateOrder.FALSE_FIRST) {
+  public void setStatesByOrder(BinaryStateOrder stateOrder) {
+    if (Objects.requireNonNull(stateOrder) == BinaryStateOrder.FALSE_FIRST) {
       super.setStates(NodeState.createStates(this, FALSE_STATE_NAME, TRUE_STATE_NAME));
       this.falseState = getStates().getFirst();
       this.trueState = getStates().getLast();
-    } else if (stateOrder == StateOrder.TRUE_FIRST) {
+    } else if (stateOrder == BinaryStateOrder.TRUE_FIRST) {
       super.setStates(NodeState.createStates(this, TRUE_STATE_NAME, FALSE_STATE_NAME));
       this.falseState = getStates().getLast();
       this.trueState = getStates().getFirst();
@@ -109,7 +109,7 @@ public final class DefaultBinaryNode extends AbstractBayesNode implements Binary
    * @param stateOrder the order in which the {@code "TRUE"} and {@code "FALSE"} states are listed
    * @throws NullPointerException if {@code stateOrder} is {@code null}
    */
-  public DefaultBinaryNode(String name, StateOrder stateOrder) {
+  public DefaultBinaryNode(String name, BinaryStateOrder stateOrder) {
     setId(UUID.randomUUID());
     setName(name);
     setParents(List.of());
@@ -132,7 +132,7 @@ public final class DefaultBinaryNode extends AbstractBayesNode implements Binary
     if (states.size() != 2) {
       throw new IllegalArgumentException("Binary Node Must have exactly 2 states!");
     }
-    StateOrder order = findStateOrder(states);
+    BinaryStateOrder order = findStateOrder(states);
     super.setStates(states);
     switch (order) {
       case TRUE_FIRST -> {
@@ -147,18 +147,19 @@ public final class DefaultBinaryNode extends AbstractBayesNode implements Binary
     }
   }
 
-  private static StateOrder findStateOrder(List<NodeState> states) {
+  private static BinaryStateOrder findStateOrder(List<NodeState> states) {
     String first = states.getFirst().getName();
-    StateOrder order;
+    BinaryStateOrder order;
     switch (first) {
-      case TRUE_STATE_NAME -> order = StateOrder.TRUE_FIRST;
-      case FALSE_STATE_NAME -> order = StateOrder.FALSE_FIRST;
+      case TRUE_STATE_NAME -> order = BinaryStateOrder.TRUE_FIRST;
+      case FALSE_STATE_NAME -> order = BinaryStateOrder.FALSE_FIRST;
       default ->
           throw new IllegalArgumentException(
               "Binary states must have name matching either \"%s\" or \"%s\". Found name \"%s\" "
                   .formatted(TRUE_STATE_NAME, FALSE_STATE_NAME, first));
     }
-    String lastExpected = order.equals(StateOrder.TRUE_FIRST) ? FALSE_STATE_NAME : TRUE_STATE_NAME;
+    String lastExpected =
+        order.equals(BinaryStateOrder.TRUE_FIRST) ? FALSE_STATE_NAME : TRUE_STATE_NAME;
     String last = states.getLast().getName();
     if (!last.equals(lastExpected)) {
       throw new IllegalArgumentException(
