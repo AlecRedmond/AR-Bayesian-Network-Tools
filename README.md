@@ -10,7 +10,7 @@
 
 # Overview
 
-AR Bayesian Network Tools is a Java library providing a high-level, easy-use toolset for working with discrete Bayesian
+AR Bayesian Network Tools is a Java library providing a high-level, easy-use toolset for working with Bayesian
 Networks.
 Bayesian Networks can be constructed from either full or partial domain knowledge of the network's Conditional
 Probability Tables (CPTs), and queried using direct inference or Monte Carlo sampling. Networks with only partial domain
@@ -20,12 +20,13 @@ the hundreds of nodes.
 
 # Features
 
-- Framework for implementing user-defined discrete Bayesian Nodes.
-- Smart probability table imputation can directly infer missing entries.
+- Support for Discrete Bayesian Networks.
+- Framework for implementing user-defined Bayesian nodes and discrete states.
+- Smart probability table imputation can infer missing entries.
 - Fit network from local or non-local constraints using fast, parallelized Iterative Proportional Fitting.
 - Scalable direct inference using the Junction Tree Algorithm.
 - Monte Carlo Sampling for indirect inference.
-- Networks can be serialized, saved, and loaded from the disk.
+- Networks can be serialized, and saved to/loaded from the disk as binary files.
 
 # Installation
 
@@ -34,7 +35,6 @@ the hundreds of nodes.
 Add the latest release as a dependency in your pom.xml:
 
 ```xml
-
 <dependencies>
     <dependency>
         <groupId>io.github.alecredmond</groupId>
